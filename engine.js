@@ -1,6 +1,7 @@
 BGTEngine = function(){
 	this.locations = {};
 	this.connections = [];
+	this.userTimeouts = {};
 }
 
 BGTEngine.prototype.loadModule = function(request) {
@@ -9,8 +10,14 @@ BGTEngine.prototype.loadModule = function(request) {
 }
 
 BGTEngine.prototype.updateUserLocation = function(user, location) {
+	var me = this;
 	this.locations[user] = location;
 	this.sendLocationUpdates(user);
+	if (this.userTimeouts[user]) clearTimeout(this.userTimeouts[user]);
+	this.userTimeouts[user] = setTimeout(function(){
+		console.log('user ' + user + ': update timeout');
+		me.removeUser(user);
+	}, 30000);
 }
 
 BGTEngine.prototype.removeUser = function(user){
