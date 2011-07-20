@@ -31,6 +31,7 @@ BGTEngine.prototype.keepAliveUser = function(user) {
 
 BGTEngine.prototype.removeUser = function(user){
 	delete this.locations[user];
+	if (this.userTimeouts[user]) clearTimeout(this.userTimeouts[user]);
 	this.sendUpdates({
 		quit:'<user id="' + user + '"/>'
 	});
