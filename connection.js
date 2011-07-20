@@ -1,4 +1,5 @@
-BGTConnection = function(res) {
+BGTConnection = function(req, res) {
+	this.req = req;
 	this.res = res;
 }
 
@@ -14,4 +15,8 @@ BGTConnection.prototype.setTimeout = function() {
 		console.log('sending keepalive');
 		me.write('<?xml version="1.0" encoding="UTF-8" ?>\n<keepalive/>');
 	}, 30000);
+}
+
+BGTConnection.prototype.close = function() {
+	if (this.timeout) clearTimeout(this.timeout);
 }

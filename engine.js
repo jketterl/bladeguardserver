@@ -27,9 +27,20 @@ BGTEngine.prototype.removeUser = function(user){
 	});
 }
 
-BGTEngine.prototype.addMapConnection = function(res) {
-	this.connections.push(res);
-	this.sendCurrentLocations(res);
+BGTEngine.prototype.addMapConnection = function(conn) {
+	var me = this;
+	this.connections.push(conn);
+	conn.req.on('close', function() {
+		conn.close();
+		me.removeMapConnection(conn);
+	});
+	this.sendCurrentLocations(conn);
+}
+
+BGTEngine.prototype.removeMapConnection = function(conn) {
+	for (var i = 0; i < this.connections.length; i++) {
+		if (this.connections[i] == conn) this.connections.splice(i, 1);
+	}
 }
 
 BGTEngine.prototype.sendCurrentLocations = function(res) {

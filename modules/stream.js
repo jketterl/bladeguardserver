@@ -1,3 +1,3 @@
 this.process = function(request) {
-	engine.addMapConnection(new BGTConnection(request.res));
+	engine.addMapConnection(new BGTConnection(request.req, request.res));
 }
