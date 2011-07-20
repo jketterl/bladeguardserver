@@ -1,7 +1,7 @@
 var https = require('https');
 var fs = require('fs');
 require('./engine');
-var engine = new BGTEngine();
+engine = new BGTEngine();
 require('./router');
 var router = new BGTRouter();
 
@@ -12,7 +12,8 @@ var options = {
 
 https.createServer(options, function (req, res) {
   console.log('connect: ' + req.url);
-  console.log(router.getModule(req.url));
-  res.writeHead(200);
-  res.end();
+  var request = router.parse(req.url);
+  request.req = req; request.res = res;
+  var module = engine.loadModule(request);
+  module.process(request);
 }).listen(8000);
