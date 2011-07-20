@@ -17,7 +17,16 @@ BGTEngine.prototype.updateUserLocation = function(user, location) {
 	this.userTimeouts[user] = setTimeout(function(){
 		console.log('user ' + user + ': update timeout');
 		me.removeUser(user);
-	}, 30000);
+	}, 60000);
+}
+
+BGTEngine.prototype.keepAliveUser = function(user) {
+	var me = this;
+	if (this.userTimeouts[user]) clearTimeout(this.userTimeouts[user]);
+	this.userTimeouts[user] = setTimeout(function(){
+		console.log('user ' + user + ': update timeout');
+		me.removeUser(user);
+	}, 60000);
 }
 
 BGTEngine.prototype.removeUser = function(user){
