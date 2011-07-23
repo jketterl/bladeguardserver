@@ -5,7 +5,12 @@ BGTEngine = function(){
 }
 
 BGTEngine.prototype.loadModule = function(request) {
-	var module = require('./modules/' + request.module);
+	var module
+	try {
+		module = require('./modules/' + request.module);
+	} catch (e) {
+		module = require('./modules/error');
+	}
 	return module;
 }
 
