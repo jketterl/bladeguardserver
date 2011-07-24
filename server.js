@@ -5,6 +5,7 @@ engine = new BGTEngine();
 require('./router');
 var router = new BGTRouter();
 require('./connection');
+require('./location');
 
 var options = {
   key: fs.readFileSync('/usr/local/apache2/conf/server.key'),

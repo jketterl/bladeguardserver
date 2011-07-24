@@ -4,7 +4,7 @@ this.process = function(request) {
 	if (request.uid && request.lat && request.lon) {
 		request.res.writeHead(200);
 		request.res.end('log module successful');
-		engine.updateUserLocation(request.uid, {lat:request.lat, lon:request.lon});
+		engine.updateUserLocation(request.uid, new BGTLocation({lat:request.lat, lon:request.lon}));
 		return;
 	}
 	request.req.on('end', function() {
@@ -32,7 +32,7 @@ this.process = function(request) {
 			}
 			if (data.lat && data.lon) {
 				console.log('received update for uid ' + request.uid + ': ' + chunk);
-				engine.updateUserLocation(request.uid, data);
+				engine.updateUserLocation(request.uid, new BGTLocation(data));
 			}
 		}
 		request.res.write('ACK');
