@@ -15,8 +15,9 @@ this.process = function(request) {
 	});
 	request.req.on('data', function(chunk) {
 		chunk = chunk.toString();
-		if (chunk == 'quit') {
-			console.log('received quit for uid ' + request.uid);
+		if (request.timeout) clearTimeout(request.timeout);
+		if (chunk == 'quit' || chunk == 'gpsunavailable') {
+			console.log('received ' + chunk + ' for uid ' + request.uid);
 			engine.removeUser(request.uid);
 			request.res.end("connection closed");
 			return;
@@ -35,5 +36,8 @@ this.process = function(request) {
 			}
 		}
 		request.res.write('ACK');
+		request.timeout = setTimeout(function(){
+			console.info('no data received for 60s');
+		}, 60000);
 	});
 }
