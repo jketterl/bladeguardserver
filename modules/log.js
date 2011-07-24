@@ -19,6 +19,7 @@ this.process = function(request) {
 			console.log('received quit for uid ' + request.uid);
 			engine.removeUser(request.uid);
 			request.res.end("connection closed");
+			return;
 		} else if (chunk == 'keepalive') {
 			console.log('received keepalive for uid ' + request.uid);
 			engine.keepAliveUser(request.uid);
@@ -33,5 +34,6 @@ this.process = function(request) {
 				engine.updateUserLocation(request.uid, data);
 			}
 		}
+		request.res.write('ACK');
 	});
 }
