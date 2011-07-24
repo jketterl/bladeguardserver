@@ -19,10 +19,9 @@ this.process = function(request) {
 		if (chunk == 'quit' || chunk == 'gpsunavailable') {
 			console.log('received ' + chunk + ' for uid ' + request.uid);
 			engine.removeUser(request.uid);
-			request.res.end("connection closed");
+			request.res.end('connection closed');
 			return;
 		} else if (chunk == 'keepalive') {
-			console.log('received keepalive for uid ' + request.uid);
 			engine.keepAliveUser(request.uid);
 		} else {
 			var data = querystring.parse(chunk);
@@ -37,7 +36,8 @@ this.process = function(request) {
 		}
 		request.res.write('ACK');
 		request.timeout = setTimeout(function(){
-			console.info('no data received for 60s');
+			console.info('connection for uid ' + request.uid + ' timed out');
+			request.res.end();
 		}, 60000);
 	});
 }

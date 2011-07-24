@@ -12,7 +12,6 @@ BGTConnection.prototype.setTimeout = function() {
 	if (this.timeout) clearTimeout(this.timeout);
 	var me = this;
 	this.timeout = setTimeout(function(){
-		console.log('sending keepalive');
 		me.write('<?xml version="1.0" encoding="UTF-8" ?>\n<keepalive/>');
 	}, 30000);
 }
