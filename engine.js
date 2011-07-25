@@ -36,7 +36,7 @@ BGTEngine.prototype.updateUserLocation = function(user, location) {
 	if (this.userTimeouts[user.uid]) clearTimeout(this.userTimeouts[user.uid]);
 	this.userTimeouts[user.uid] = setTimeout(function(){
 		console.log('user ' + user.uid + ': update timeout');
-		me.removeUser(user.uid);
+		me.removeUser(user);
 	}, 60000);
 }
 

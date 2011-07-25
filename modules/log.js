@@ -4,7 +4,7 @@ this.process = function(request) {
 	if (request.uid && request.lat && request.lon) {
 		request.res.writeHead(200);
 		request.res.end('log module successful');
-		engine.updateUserLocation(request.uid, new BGTLocation({lat:request.lat, lon:request.lon}));
+		engine.updateUserLocation(engine.getUser(request.uid), new BGTLocation({lat:request.lat, lon:request.lon}));
 		return;
 	}
 	request.req.on('end', function() {
