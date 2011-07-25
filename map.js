@@ -32,3 +32,18 @@ BGTMap.prototype.getCandidatesForLocation = function(location) {
 	}
 	return candidates;
 }
+
+BGTMap.prototype.getIndex = function(index) {
+	return this.points[index];
+}
+
+BGTMap.prototype.getIndexDelta = function(i1, i2) {
+	var delta = i2 - i1;
+	var pointCount = this.points.length;
+	if (delta * -1 > pointCount / 2) {
+		delta += pointCount;
+	} else if (delta > pointCount / 2) {
+		delta -= pointCount;
+	}
+	return delta;
+}

@@ -1,10 +1,14 @@
 require('./map.js');
-var map = new BGTMap('/root/Strecke Ost lang.gpx');
 
 BGTEngine = function(){
 	this.locations = {};
 	this.connections = [];
 	this.userTimeouts = {};
+	this.map = map = new BGTMap('/root/Strecke Ost lang.gpx');
+}
+
+BGTEngine.prototype.getMap = function() {
+	return this.map;
 }
 
 BGTEngine.prototype.loadModule = function(request) {
@@ -26,8 +30,40 @@ BGTEngine.prototype.updateUserLocation = function(user, location) {
 		console.log('user ' + user + ': update timeout');
 		me.removeUser(user);
 	}, 60000);
-	var candidates = map.getCandidatesForLocation(location);
-	if (candidates.length > 0) console.log(candidates);
+	var candidates = this.getMap().getCandidatesForLocation(location);
+	if (candidates.length == 0) return;
+	
+	// split candidates into groups that are index-wise close to each other
+	var candidateGroups = [];
+	var currentGroup = [];
+	var lastCandidate;
+	for (var i = 0; i < candidates.length; i++) {
+		if (typeof(lastCandidate) != 'undefined') {
+			var delta = map.getIndexDelta(lastCandidate.index, candidates[i].index);
+			if (Math.abs(delta) >= 10) {
+				if (currentGroup.length > 0) {
+					candidateGroups.push(currentGroup);
+					currentGroup = [];
+				}
+			}
+		}
+		currentGroup.push(candidates[i]);
+		lastCandidate = candidates[i];
+	}
+	if (currentGroup.length > 0) candidateGroups.push(currentGroup);
+	for (var i = 0; i < candidateGroups.length; i++) {
+		var group = candidateGroups[i];
+		var selected = null;
+		for (var k = 0; k < group.length; k++) {
+			var candidate = group[k];
+			if (selected == null) {
+				selected = candidate;
+			} else {
+				if (candidate.distance < selected.distance) selected = candidate;
+			}
+		}
+		console.log('selected from group ' + i + ': ' + selected.index);
+	}
 }
 
 BGTEngine.prototype.keepAliveUser = function(user) {
