@@ -1,3 +1,6 @@
+require('./map.js');
+var map = new BGTMap('/root/Strecke Ost lang.gpx');
+
 BGTEngine = function(){
 	this.locations = {};
 	this.connections = [];
@@ -23,6 +26,8 @@ BGTEngine.prototype.updateUserLocation = function(user, location) {
 		console.log('user ' + user + ': update timeout');
 		me.removeUser(user);
 	}, 60000);
+	var candidates = map.getCandidatesForLocation(location);
+	if (candidates.length > 0) console.log(candidates);
 }
 
 BGTEngine.prototype.keepAliveUser = function(user) {
