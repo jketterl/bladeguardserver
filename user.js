@@ -9,6 +9,7 @@ BGTUser = function(uid) {
 }
 
 BGTUser.login = function(user, pass, callback) {
+	var me = this;
 	var hash = crypto.createHash('md5').update(pass).digest('hex');
 	db.query().
 		select('id as uid, name').
@@ -21,7 +22,13 @@ BGTUser.login = function(user, pass, callback) {
 			if (rows.length == 0) {
 				return callback(new Error('user or password incorrect'));
 			}
-			callback(null, new BGTUser(rows[0]));
+			if (engine.hasUser(rows[0].uid)) {
+				callback(null, engine.getUser(row[0].uid));
+			} else {
+				var user = new BGTUser(rows[0]);
+				engine.addUser(user);
+				callback(null, user);
+			}
 		});
 }
 

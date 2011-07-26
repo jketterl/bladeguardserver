@@ -23,7 +23,6 @@ this.process = function(request) {
 			request.res.end('connection closed');
 			return;
 		} else if (chunk == 'keepalive') {
-			if (!request.user) {  }
 			engine.keepAliveUser(request.user);
 		} else if (data.lat && data.lon) {
 			util.log('received update for ' + request.user + ': ' + chunk);
@@ -48,7 +47,6 @@ this.process = function(request) {
 					return;
 				}
 				util.log('user logged in: ' + user);
-				engine.addUser(user);
 				request.user = user;
 				if (!request.queue) return;
 				for (var i = 0; i < request.queue.length; i++) parseChunk(request.queue[i]);
