@@ -6,16 +6,30 @@ require('./router');
 var router = new BGTRouter();
 require('./connection');
 require('./location');
+var util = require('util');
+db = new (require('db-mysql').Database)({
+	hostname:'localhost',
+	database:'bladeguardtracker',
+	user:'bgt',
+	password:'bgtiscool'
+});
 
-var options = {
-  key: fs.readFileSync('/usr/local/apache2/conf/server.key'),
-  cert: fs.readFileSync('/usr/local/apache2/conf/server.crt')
-};
+db.connect(function(err){
+	if (err) {
+		util.log('could not connect to database; exiting.');
+		return;
+	}
 
-https.createServer(options, function (req, res) {
-  console.log('connect: ' + req.url);
-  var request = router.parse(req.url);
-  request.req = req; request.res = res;
-  var module = engine.loadModule(request);
-  module.process(request);
-}).listen(8000);
+	var options = {
+		key: fs.readFileSync('/usr/local/apache2/conf/server.key'),
+		cert: fs.readFileSync('/usr/local/apache2/conf/server.crt')
+	};
+
+	https.createServer(options, function (req, res) {
+  		util.log('connect: ' + req.url);
+		var request = router.parse(req.url);
+		request.req = req; request.res = res;
+		var module = engine.loadModule(request);
+		module.process(request);
+	}).listen(8000);
+});

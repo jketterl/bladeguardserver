@@ -1,11 +1,43 @@
+var sys = require('sys');
+var util = require('util');
+var crypto = require('crypto');
+
 BGTUser = function(uid) {
-	this.uid = uid;
+	if (typeof(uid) == 'object') for (var a in uid) {
+		this[a] = uid[a];
+	} else this.uid = uid;
+}
+
+BGTUser.login = function(user, pass, callback) {
+	var hash = crypto.createHash('md5').update(pass).digest('hex');
+	console.log(hash);
+	db.query().
+		select('id as uid, name').
+		from('users').
+		where('name = ? and pass = ?', [user, hash]).
+		execute(function(err, rows, cols) {
+			if (err) {
+				return callback(err);
+			}
+			if (rows.length == 0) {
+				return callback(new Error('user or password incorrect'));
+			}
+			callback(null, new BGTUser(rows[0]));
+		});
 }
 
 BGTUser.prototype.updateLocation = function(location) {
 	if (this.location) this.lastLocation = location;
 	this.location = location;
+	
+	try {
+		this.trackPosition(location);
+	} catch (e) {
+		sys.puts(e); sys.puts(e.stack);
+	}
+}
 
+BGTUser.prototype.trackPosition = function(location) {
 	// get a list of candidate route points from the map that the user is close to
         var candidates = engine.getMap().getCandidatesForLocation(location);
         if (candidates.length == 0) return;
@@ -55,7 +87,6 @@ BGTUser.prototype.updateLocation = function(location) {
 BGTUser.prototype.updatePosition = function (selectedCandidates) {
 	for (var i = 0; i < selectedCandidates.length; i++) {
 		var delta = engine.getMap().getIndexDelta(this.position.index, selectedCandidates[i].index);
-		console.info('delta to position: ' + delta);
 		if (delta >= 0 && delta < 10) {
 			this.setPosition(selectedCandidates[i]);
 			return;
@@ -70,7 +101,7 @@ BGTUser.prototype.updatePlausiblePositions = function(selectedCandidates) {
 		for (var k = 0; k < selectedCandidates.length; k++) {
 			var candidate = selectedCandidates[k];
 			var delta = engine.getMap().getIndexDelta(position.index, candidate.index);
-			console.info('delta between candidates: ' + delta);
+			util.log('delta between candidates: ' + delta);
 			if (Math.abs(delta) <= 10) {
 				candidate.score = (position.score ? position.score : 0) + 10 * delta;
 				this.plausiblePositions[i] = candidate;
@@ -80,23 +111,23 @@ BGTUser.prototype.updatePlausiblePositions = function(selectedCandidates) {
 		this.plausiblePositions = selectedCandidates;
 	}
 
-	for (var i = 0; i < this.plausiblePositions.length; i++) {
+	for (var i in this.plausiblePositions) {
 		var position = this.plausiblePositions[i];
-		console.info('score is ' + position.score);
+		util.log('score is ' + position.score);
 		if (position.score >= 30) {
 			delete(position.score);
 			this.setPosition(position);
 			delete this.plausiblePositions;
 			break;
 		} else if (position.score <= -30) {
-			console.info('purging plausible positions');
+			util.log('purging one plausible positions');
 			delete(this.plausiblePositions[i]);
 		}
 	}
 }
 
 BGTUser.prototype.setPosition = function(position) {
-	console.log('detected position for uid ' + this.uid + ': ' + position.index);
+	util.log('position fix for uid ' + this.uid + ': ' + position.index);
 	this.position = position;
 }
 
@@ -105,6 +136,11 @@ BGTUser.prototype.hasPosition = function() {
 }
 
 BGTUser.prototype.resetPosition = function() {
-	console.log('resetting position for uid ' + this.uid);
+	util.log('resetting position for uid ' + this.uid);
 	delete this.position;
+}
+
+BGTUser.prototype.toString = function() {
+	if (this.name) return this.name;
+	return 'uid ' + this.uid
 }

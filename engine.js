@@ -1,5 +1,6 @@
 require('./map');
 require('./user');
+var util = require('util');
 
 BGTEngine = function(){
 	this.users = [];
@@ -14,9 +15,13 @@ BGTEngine.prototype.getMap = function() {
 
 BGTEngine.prototype.getUser = function(uid) {
 	if (typeof(this.users[uid]) == 'undefined') {
-		this.users[uid] = new BGTUser(uid);
+		this.addUser(new BGTUser(uid));
 	}
 	return this.users[uid];
+}
+
+BGTEngine.prototype.addUser = function(user) {
+	this.users[user.uid] = user;
 }
 
 BGTEngine.prototype.loadModule = function(request) {
@@ -30,21 +35,16 @@ BGTEngine.prototype.loadModule = function(request) {
 }
 
 BGTEngine.prototype.updateUserLocation = function(user, location) {
-	var me = this;
 	user.updateLocation(location);
 	this.sendLocationUpdates(user);
-	if (this.userTimeouts[user.uid]) clearTimeout(this.userTimeouts[user.uid]);
-	this.userTimeouts[user.uid] = setTimeout(function(){
-		console.log('user ' + user.uid + ': update timeout');
-		me.removeUser(user);
-	}, 60000);
+	this.keepAliveUser(user);
 }
 
 BGTEngine.prototype.keepAliveUser = function(user) {
 	var me = this;
 	if (this.userTimeouts[user]) clearTimeout(this.userTimeouts[user]);
 	this.userTimeouts[user] = setTimeout(function(){
-		console.log('user ' + user.uid + ': update timeout');
+		util.log(user + ': update timeout');
 		me.removeUser(user);
 	}, 60000);
 }
@@ -100,7 +100,7 @@ BGTEngine.prototype.sendUpdates = function(updates) {
 
 BGTEngine.prototype.getLocationXML = function(users) {
 	output = '';
-	for (var i in users) {
+	for (var i in users) if (users[i].location) {
 		user = users[i];
 		output += '<user id="' + user.uid + '">';
 		output += '<location><lat>' + user.location.lat + '</lat>';
