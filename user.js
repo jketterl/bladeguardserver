@@ -23,7 +23,7 @@ BGTUser.login = function(user, pass, callback) {
 				return callback(new Error('user or password incorrect'));
 			}
 			if (engine.hasUser(rows[0].uid)) {
-				callback(null, engine.getUser(row[0].uid));
+				callback(null, engine.getUser(rows[0].uid));
 			} else {
 				var user = new BGTUser(rows[0]);
 				engine.addUser(user);
