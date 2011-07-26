@@ -40,6 +40,7 @@ this.process = function(request) {
 		var data = querystring.parse(chunk);
 		// authenticate user first
 		if (data.uid && data.pass) {
+			request.authenticating = true;
 			util.log('processing user identification: "' + data.uid + '"');
 			BGTUser.login(data.uid, data.pass, function(err, user){
 				if (err) {
@@ -56,11 +57,18 @@ this.process = function(request) {
 			});
 			return;
 		}
-		// no user given? queue up things
+		// no user given?
 		if (!request.user) {
-			request.queue = request.queue || [];
-			request.queue.push(chunk);
-			return;
+			if (request.authenticating) {
+				//authentication has been requested and is waiting to be finished; form a queue
+				request.queue = request.queue || [];
+				request.queue.push(chunk);
+				return;
+			} else {
+				// anonymous connection
+				request.user = engine.getAnonymousUser();
+				util.log('new anonymous user: ' + request.user);
+			}
 		}
 		parseChunk(chunk);
 	});

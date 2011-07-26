@@ -24,6 +24,13 @@ BGTEngine.prototype.addUser = function(user) {
 	this.users[user.uid] = user;
 }
 
+BGTEngine.prototype.getAnonymousUser = function() {
+	do {
+		random = 9000 + Math.floor(Math.random() * 1000);
+	} while (this.users[random]);
+	return this.getUser(random);
+}
+
 BGTEngine.prototype.loadModule = function(request) {
 	var module
 	try {
