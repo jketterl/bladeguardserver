@@ -41,7 +41,6 @@ this.process = function(request) {
 		// authenticate user first
 		if (data.uid && data.pass) {
 			request.authenticating = true;
-			util.log('processing user identification: "' + data.uid + '"');
 			BGTUser.login(data.uid, data.pass, function(err, user){
 				if (err) {
 					util.log(err);

@@ -10,7 +10,6 @@ BGTUser = function(uid) {
 
 BGTUser.login = function(user, pass, callback) {
 	var hash = crypto.createHash('md5').update(pass).digest('hex');
-	console.log(hash);
 	db.query().
 		select('id as uid, name').
 		from('users').
