@@ -8,6 +8,8 @@ BGTUser = function(uid) {
 	} else this.uid = uid;
 }
 
+BGTUser.users = []
+
 BGTUser.login = function(user, pass, callback) {
 	var me = this;
 	var hash = crypto.createHash('md5').update(pass).digest('hex');
@@ -22,14 +24,32 @@ BGTUser.login = function(user, pass, callback) {
 			if (rows.length == 0) {
 				return callback(new Error('user or password incorrect'));
 			}
-			if (engine.hasUser(rows[0].uid)) {
-				callback(null, engine.getUser(rows[0].uid));
+			if (BGTUser.hasUser(rows[0].uid)) {
+				callback(null, BGTUser.getUser(rows[0].uid));
 			} else {
-				var user = new BGTUser(rows[0]);
-				engine.addUser(user);
-				callback(null, user);
+				callback(null, BGTUser.addUser(new BGTUser(rows[0])));
 			}
 		});
+}
+
+BGTUser.getAnonymousUser = function() {
+        do {
+                random = 9000 + Math.floor(Math.random() * 1000);
+        } while (BGTUser.hasUser(random));
+        return BGTUser.addUser(new BGTUser(random));
+}
+
+BGTUser.hasUser = function(uid) {
+        return typeof(BGTUser.users[uid]) != 'undefined';
+}
+
+BGTUser.addUser = function(user) {
+        BGTUser.users[user.uid] = user;
+	return user;
+}
+
+BGTUser.getUser = function(uid) {
+        return BGTUser.users[uid];
 }
 
 BGTUser.prototype.updateLocation = function(location) {

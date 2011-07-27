@@ -5,14 +5,14 @@ this.process = function(request) {
 	if (request.uid && request.lat && request.lon) {
 		request.res.writeHead(200);
 		request.res.end('log module successful');
-		engine.updateUserLocation(engine.getUser(request.uid), new BGTLocation({lat:request.lat, lon:request.lon}));
+		engine.updateUserLocation(BGTUser.getUser(request.uid), new BGTLocation({lat:request.lat, lon:request.lon}));
 		return;
 	}
 	request.req.on('end', function() {
 		if (request.user) engine.removeUser(request.user);
 	});
 	request.req.on('close', function() {
-		engine.removeUser(request.user);
+		if (request.user) engine.removeUser(request.user);
 	});
 	var parseChunk = function(chunk) {
 		var data = querystring.parse(chunk);
@@ -43,7 +43,9 @@ this.process = function(request) {
 			BGTUser.login(data.uid, data.pass, function(err, user){
 				if (err) {
 					util.log(err);
+					request.res.writeHead(403);
 					request.res.end('authentication failure: ' + err);
+					request.req.connection.end();
 					return;
 				}
 				util.log('user logged in: ' + user);
@@ -63,7 +65,7 @@ this.process = function(request) {
 				return;
 			} else {
 				// anonymous connection
-				request.user = engine.getAnonymousUser();
+				request.user = BGTUser.getAnonymousUser();
 				util.log('new anonymous user: ' + request.user);
 			}
 		}

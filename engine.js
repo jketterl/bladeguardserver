@@ -9,30 +9,20 @@ BGTEngine = function(){
 	this.map = map = new BGTMap('/root/Strecke Ost lang.gpx');
 }
 
-BGTEngine.prototype.getMap = function() {
-	return this.map;
-}
-
-BGTEngine.prototype.getUser = function(uid) {
-	if (typeof(this.users[uid]) == 'undefined') {
-		this.addUser(new BGTUser(uid));
-	}
-	return this.users[uid];
-}
-
 BGTEngine.prototype.addUser = function(user) {
 	this.users[user.uid] = user;
 }
 
-BGTEngine.prototype.hasUser = function(uid) {
-	return typeof(this.users[uid]) != 'undefined';
+BGTEngine.prototype.removeUser = function(user){
+	delete this.users[user.uid];
+	if (this.userTimeouts[user.uid]) clearTimeout(this.userTimeouts[user.uid]);
+	this.sendUpdates({
+		quit:'<user id="' + user.uid + '"/>'
+	});
 }
 
-BGTEngine.prototype.getAnonymousUser = function() {
-	do {
-		random = 9000 + Math.floor(Math.random() * 1000);
-	} while (this.hasUser(random));
-	return this.getUser(random);
+BGTEngine.prototype.getMap = function() {
+	return this.map;
 }
 
 BGTEngine.prototype.loadModule = function(request) {
@@ -46,6 +36,7 @@ BGTEngine.prototype.loadModule = function(request) {
 }
 
 BGTEngine.prototype.updateUserLocation = function(user, location) {
+	this.addUser(user);
 	user.updateLocation(location);
 	this.sendLocationUpdates(user);
 	this.keepAliveUser(user);
@@ -58,14 +49,6 @@ BGTEngine.prototype.keepAliveUser = function(user) {
 		util.log(user + ': update timeout');
 		me.removeUser(user);
 	}, 60000);
-}
-
-BGTEngine.prototype.removeUser = function(user){
-	delete this.users[user.uid];
-	if (this.userTimeouts[user.uid]) clearTimeout(this.userTimeouts[user.uid]);
-	this.sendUpdates({
-		quit:'<user id="' + user.uid + '"/>'
-	});
 }
 
 BGTEngine.prototype.addMapConnection = function(conn) {
