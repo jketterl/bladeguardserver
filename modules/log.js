@@ -28,7 +28,6 @@ this.process = function(request) {
 			util.log('received update for ' + request.user + ': ' + chunk);
 			engine.updateUserLocation(request.user, new BGTLocation(data));
 		}
-		request.res.write('ACK');
 		request.timeout = setTimeout(function(){
 			util.log('connection for ' + request.user + ' timed out');
 			request.res.end();
