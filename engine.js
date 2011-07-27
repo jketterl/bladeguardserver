@@ -85,8 +85,9 @@ BGTEngine.prototype.removeMapConnection = function(conn) {
 }
 
 BGTEngine.prototype.sendCurrentLocations = function(res) {
-	var output = '<?xml version="1.0" encoding="UTF-8" ?>\n';
-	output += '<movements>' + this.getLocationXML(this.users) + '</movements>';
+	var output = this.getUpdateXML({
+		movements:this.getLocationXML(this.users)
+	});
 	res.write(output);
 }
 
@@ -97,16 +98,21 @@ BGTEngine.prototype.sendLocationUpdates = function(user) {
 }
 
 BGTEngine.prototype.sendUpdates = function(updates) {
+	var output = this.getUpdateXML(updates)
+
+	for (var i = 0; i < this.connections.length; i++) {
+		this.connections[i].write(output);
+	}
+}
+
+BGTEngine.prototype.getUpdateXML = function(updates) {
 	var output = '<?xml version="1.0" encoding="UTF-8" ?>\n';
 	for (var a in updates) {
 		output += '<' + a + '>';
 		output += updates[a];
 		output += '</' + a + '>';
 	}
-
-	for (var i = 0; i < this.connections.length; i++) {
-		this.connections[i].write(output);
-	}
+	return output;
 }
 
 BGTEngine.prototype.getLocationXML = function(users) {
