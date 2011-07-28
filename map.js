@@ -22,7 +22,8 @@ BGTMap.prototype.getCandidatesForLocation = function(location) {
 	var candidates = [];
 	for (var i = 0; i < this.points.length; i++) {
 		var distance = location.getDistanceTo(this.points[i]);
-		if (distance <= 0.05) {
+		// all points within a 100m range
+		if (distance <= 0.1) {
 			candidates.push({
 				index:i,
 				distance:distance,
