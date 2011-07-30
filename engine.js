@@ -71,7 +71,7 @@ BGTEngine.prototype.sendCurrentLocations = function(res) {
 	var me = this;
 	this.getMap().getMapXML(function(err, xml){
 		var output = me.getUpdateXML({
-			movements:me.getLocationXML(this.users),
+			movements:me.getLocationXML(me.users),
 			map:xml
 		});
 		res.write(output);
@@ -98,7 +98,7 @@ BGTEngine.prototype.getUpdateXML = function(updates) {
 	for (var a in updates) {
 		output += '<' + a + '>';
 		output += updates[a];
-		output += '</' + a + '>';
+		output += '</' + a + '>\n';
 	}
 	output += '</updates>';
 	return output;
