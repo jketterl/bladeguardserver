@@ -8,7 +8,7 @@ this.process = function(request){
 			return;
 		}
 		request.res.writeHead(200);
-		request.res.write(xml);
+		request.res.write('<?xml version="1.0" encoding="UTF-8" standalone="no" ?>\n' + xml);
 		request.res.end();
 	});
 }

@@ -31,8 +31,9 @@ BGTMap.prototype.getMapXML = function(callback) {
 			me.getMapXML(callback);
 		});
 	}
-	var xml = '<?xml version="1.0" encoding="UTF-8" standalone="no" ?>\n' +
-		  '<gpx xmlns="http://www.topografix.com/GPX/1/1" creator="BladeGuardTracker" version="1.1">\n'+
+
+	
+	var xml = '<gpx xmlns="http://www.topografix.com/GPX/1/1" creator="BladeGuardTracker" version="1.1">\n'+
 		  '<rte>';
 
 	for (var i = 0; i < this.points.length; i++) {

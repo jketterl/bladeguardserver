@@ -6,7 +6,7 @@ BGTEngine = function(){
 	this.users = [];
 	this.connections = [];
 	this.userTimeouts = {};
-	this.map = map = new BGTMap('/root/Strecke Ost lang.gpx');
+	this.map = map = new BGTMap('/root/Strecke West lang.gpx');
 }
 
 BGTEngine.prototype.addUser = function(user) {
@@ -68,10 +68,14 @@ BGTEngine.prototype.removeMapConnection = function(conn) {
 }
 
 BGTEngine.prototype.sendCurrentLocations = function(res) {
-	var output = this.getUpdateXML({
-		movements:this.getLocationXML(this.users)
+	var me = this;
+	this.getMap().getMapXML(function(err, xml){
+		var output = me.getUpdateXML({
+			movements:me.getLocationXML(this.users),
+			map:xml
+		});
+		res.write(output);
 	});
-	res.write(output);
 }
 
 BGTEngine.prototype.sendLocationUpdates = function(user) {
@@ -89,12 +93,14 @@ BGTEngine.prototype.sendUpdates = function(updates) {
 }
 
 BGTEngine.prototype.getUpdateXML = function(updates) {
-	var output = '<?xml version="1.0" encoding="UTF-8" ?>\n';
+	var output = '<?xml version="1.0" encoding="UTF-8" ?>\n'+
+		     '<updates>';
 	for (var a in updates) {
 		output += '<' + a + '>';
 		output += updates[a];
 		output += '</' + a + '>';
 	}
+	output += '</updates>';
 	return output;
 }
 
