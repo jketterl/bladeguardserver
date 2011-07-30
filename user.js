@@ -151,7 +151,6 @@ BGTUser.prototype.updatePlausiblePositions = function(selectedCandidates, locati
 				if (position.error > .5) {
 					util.log('purging one plausible position');
 					this.plausiblePositions.splice(i, 1);
-					util.log('array size is ' + this.plausiblePositions.length);
 				}
 			}
 		}
