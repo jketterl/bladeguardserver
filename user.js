@@ -59,21 +59,11 @@ BGTUser.prototype.updateLocation = function(location) {
 	try {
 		this.trackPosition(location);
 	} catch (e) {
-		sys.puts(e); sys.puts(e.stack);
+		sys.puts(e.stack);
 	}
 }
 
-BGTUser.prototype.trackPosition = function(location) {
-	// get a list of candidate route points from the map that the user is close to
-        var candidates = engine.getMap().getCandidatesForLocation(location);
-        if (candidates.length == 0) {
-		if (this.hasPosition()) {
-			this.testLocationInRange(location);
-		}
-		return;
-	}
-
-        // split candidates into groups that are index-wise close to each other
+BGTUser.prototype.buildCandidateGroups = function(candidates) {
         var candidateGroups = [];
         var currentGroup = [];
         var lastCandidate;
@@ -91,8 +81,10 @@ BGTUser.prototype.trackPosition = function(location) {
                 lastCandidate = candidates[i];
         }
         if (currentGroup.length > 0) candidateGroups.push(currentGroup);
+	return candidateGroups;
+}
 
-	// select one candidate per group that is closest to the users current position
+BGTUser.prototype.selectCandidatesFromGroups = function(candidateGroups) {
 	var selectedCandidates = [];
         for (var i = 0; i < candidateGroups.length; i++) {
                 var group = candidateGroups[i];
@@ -107,60 +99,59 @@ BGTUser.prototype.trackPosition = function(location) {
                 }
 		selectedCandidates.push(selected);
         }
-
-	if (this.hasPosition()) {
-		this.updatePosition(selectedCandidates, location);
-	} else {
-		this.updatePlausiblePositions(selectedCandidates);
-	}
+	return selectedCandidates;
 }
 
-BGTUser.prototype.testLocationInRange = function(location) {
-	var point1 = this.position.location;
-	var point2 = engine.getMap().getIndex(this.position.index+1);
+BGTUser.prototype.trackPosition = function(location) {
+	// get a list of candidate route points from the map that the user is close to
+        var candidates = engine.getMap().getCandidatesForLocation(location);
+
+        // split candidates into groups that are index-wise close to each other
+	var candidateGroups = this.buildCandidateGroups(candidates);
+
+	// select one candidate per group that is closest to the users current position
+	var selectedCandidates = this.selectCandidatesFromGroups(candidateGroups);
+
+	// update the list of plausible positions
+	this.updatePlausiblePositions(selectedCandidates, location);
+}
+
+BGTUser.prototype.getLocationError = function(candidate, location) {
+	var point1 = candidate.location;
+	var offset = typeof(candidate.direction) == 'undefined' || candidate.direction >= 0 ? 1 : -1
+	var point2 = engine.getMap().getIndex(candidate.index + offset);
 	var idealDistance = point1.getDistanceTo(point2);
 	var myDistance = point1.getDistanceTo(location) + point2.getDistanceTo(location);
 	var error = myDistance - idealDistance;
-	util.log('user error is ' + error);
-	// allowed error: 200m
-	if (error >= .2) {
-		this.resetPosition();
-	}
+	return error;
 }
 
-BGTUser.prototype.updatePosition = function (selectedCandidates, location) {
-	for (var i = 0; i < selectedCandidates.length; i++) {
-		var delta = engine.getMap().getIndexDelta(this.position.index, selectedCandidates[i].index);
-		if (delta >= -2 && delta < 10) {
-			this.setPosition(selectedCandidates[i]);
-			return;
-		}
-	}
-	util.log('could not update position with the given candidates.')
-	this.testLocationInRange(location)
-}
-
-BGTUser.prototype.updatePlausiblePositions = function(selectedCandidates) {
+BGTUser.prototype.updatePlausiblePositions = function(selectedCandidates, location) {
 	// try to find prevously selected candidates that are in index range
 	if (this.plausiblePositions) {
 		for (var i in this.plausiblePositions) {
 			var position = this.plausiblePositions[i];
+			var updated = false;
 			for (var k = 0; k < selectedCandidates.length; k++) {
 				var candidate = selectedCandidates[k];
 				if (!candidate.considered) {
 					var delta = engine.getMap().getIndexDelta(position.index, candidate.index);
-					util.log('delta between candidates: ' + delta);
 					if (Math.abs(delta) <= 10) {
+						updated = true;
 						candidate.considered = true;
-						candidate.score = (position.score ? position.score : 0);
-						// moving forward scores more points than moving backwards
-						if (delta >= 0) {
-							candidate.score += 10 * delta;
-						} else {
-							candidate.score += -4 * delta;
-						}
+						candidate.movements = (position.movements ? position.movements : 0) + delta;
+						candidate.fixed = (position.fixed ? position.fixed : false);
+						candidate.direction = (delta != 0 ? delta : position.direction || 0);
 						this.plausiblePositions[i] = candidate;
 					}
+				}
+			}
+			if (!updated) {
+				position.error = this.getLocationError(position, location);
+				if (position.error > .5) {
+					util.log('purging one plausible position');
+					this.plausiblePositions.splice(i, 1);
+					util.log('array size is ' + this.plausiblePositions.length);
 				}
 			}
 		}
@@ -174,24 +165,24 @@ BGTUser.prototype.updatePlausiblePositions = function(selectedCandidates) {
 	}
 
 	// iterate over the plausible positions and try to find one that has collected enough score
+	var bestCandidate = false;
 	for (var i in this.plausiblePositions) {
 		var position = this.plausiblePositions[i];
-		util.log('score is ' + position.score);
-		if (position.score >= 30) {
-			delete(position.score);
-			this.setPosition(position);
-			delete this.plausiblePositions;
-			break;
-		} else if (position.score <= -30) {
-			util.log('purging one plausible position');
-			delete(this.plausiblePositions[i]);
+		if (position.error > .2) continue;
+		if (this.plausiblePositions.length > 1 && !position.fixed && (!position.movements || !(position.movements >= 2 || position.movements <= -5))) continue;
+		if (!bestCandidate) {
+			bestCandidate = position; 
+		} else {
+			if (position.movements > bestCandidate.movements) bestCandidate = position;
 		}
 	}
+	if (bestCandidate) this.setPosition(bestCandidate); else this.resetPosition();
 }
 
 BGTUser.prototype.setPosition = function(position) {
 	util.log('position fix for ' + this + ': ' + position.index);
 	this.position = position;
+	position.fixed = true;
 }
 
 BGTUser.prototype.hasPosition = function() {
@@ -199,10 +190,9 @@ BGTUser.prototype.hasPosition = function() {
 }
 
 BGTUser.prototype.resetPosition = function() {
+	if (!this.hasPosition()) return;
 	util.log('resetting position for ' + this);
-	// convert the last known position into a plausible position to speedup re-positioning
-	this.position.score = 20;
-	this.plausiblePositions = [this.position];
+	this.position.fixed = false;
 	delete this.position;
 }
 
