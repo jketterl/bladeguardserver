@@ -26,7 +26,7 @@ db.connect(function(err){
 	};
 
 	https.createServer(options, function (req, res) {
-  		util.log('connect: ' + req.connection.socket.remoteAddress + ' requests ' + req.url);
+  		util.log('connect: ' + req.connection.socket.remoteAddress + ' requests ' + req.url + ' (' + req.headers['user-agent'] + ')');
 		var request = router.parse(req.url);
 		request.req = req; request.res = res;
 		var module = engine.loadModule(request);
