@@ -7,11 +7,15 @@ BGTMap = function(file) {
 	this.points = [];
 	var p = this.points;
 	var me = this;
+	this.loadCallbacks = [];
 
 	parser.addListener('end', function(result) {
-		for(var i = 0; i < result.rte.rtept.length; i++) {
+		for (var i = 0; i < result.rte.rtept.length; i++) {
 			var point = result.rte.rtept[i];
 			p.push(new BGTLocation({lat:point['@'].lat, lon:point['@'].lon}));
+		}
+		for (var i = 0; i < me.loadCallbacks.length; i++) {
+			me.loadCallbacks[i]();
 		}
 	});
 	fs.readFile(file, function(err, data) {
@@ -21,11 +25,22 @@ BGTMap = function(file) {
 };
 
 BGTMap.prototype.getMapXML = function(callback) {
-	if (this.xml) {
-		callback(null, this.xml);
-		return;
+	if (this.points.length == 0) {
+		var me = this;
+		this.loadCallbacks.push(function(){
+			me.getMapXML(callback);
+		});
 	}
-	callback(new Error('XML File not loaded'), false);
+	var xml = '<?xml version="1.0" encoding="UTF-8" standalone="no" ?>\n' +
+		  '<gpx xmlns="http://www.topografix.com/GPX/1/1" creator="BladeGuardTracker" version="1.1">\n'+
+		  '<rte>';
+
+	for (var i = 0; i < this.points.length; i++) {
+		xml += '<rtept lat="' + this.points[i].lat + '" lon="' + this.points[i].lon + '" />';
+	}
+
+	xml += '</rte></gpx>';
+	callback(null, xml);
 }
 
 BGTMap.prototype.getCandidatesForLocation = function(location) {

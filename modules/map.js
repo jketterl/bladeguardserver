@@ -1,6 +1,4 @@
 var fs = require('fs');
-var file = '/root/Strecke Ost lang.gpx';
-var bufferSize = 4096;
 
 this.process = function(request){
 	engine.getMap().getMapXML(function(err, xml) {
