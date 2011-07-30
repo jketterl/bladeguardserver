@@ -6,6 +6,7 @@ BGTMap = function(file) {
 	var parser = new xml2js.Parser();
 	this.points = [];
 	var p = this.points;
+	var me = this;
 
 	parser.addListener('end', function(result) {
 		for(var i = 0; i < result.rte.rtept.length; i++) {
@@ -13,10 +14,19 @@ BGTMap = function(file) {
 			p.push(new BGTLocation({lat:point['@'].lat, lon:point['@'].lon}));
 		}
 	});
-	fs.readFile('/root/Strecke Ost lang.gpx', function(err, data) {
-    		parser.parseString(data);
+	fs.readFile(file, function(err, data) {
+		me.xml = data;
+		parser.parseString(data);
 	});
 };
+
+BGTMap.prototype.getMapXML = function(callback) {
+	if (this.xml) {
+		callback(null, this.xml);
+		return;
+	}
+	callback(new Error('XML File not loaded'), false);
+}
 
 BGTMap.prototype.getCandidatesForLocation = function(location) {
 	var candidates = [];
