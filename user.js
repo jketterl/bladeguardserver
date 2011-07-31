@@ -69,7 +69,7 @@ BGTUser.prototype.buildCandidateGroups = function(candidates) {
         var lastCandidate;
         for (var i = 0; i < candidates.length; i++) {
                 if (typeof(lastCandidate) != 'undefined') {
-                        var delta = map.getIndexDelta(lastCandidate.index, candidates[i].index);
+                        var delta = engine.getMap().getIndexDelta(lastCandidate.index, candidates[i].index);
                         if (Math.abs(delta) >= 10) {
                                 if (currentGroup.length > 0) {
                                         candidateGroups.push(currentGroup);

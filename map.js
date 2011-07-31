@@ -1,13 +1,15 @@
 var fs = require('fs');
 var xml2js = require('xml2js');
 require('./location');
+var util = require('util');
 
-BGTMap = function(file) {
+BGTMap = function(id) {
 	var parser = new xml2js.Parser();
 	this.points = [];
 	var p = this.points;
 	var me = this;
 	this.loadCallbacks = [];
+	this.name = BGTMap.maps[id];
 
 	parser.addListener('end', function(result) {
 		for (var i = 0; i < result.rte.rtept.length; i++) {
@@ -18,11 +20,22 @@ BGTMap = function(file) {
 			me.loadCallbacks[i]();
 		}
 	});
-	fs.readFile(file, function(err, data) {
-		me.xml = data;
+	fs.readFile('/root/' + BGTMap.maps[id] + '.gpx', function(err, data) {
+		if (err) {
+			util.log(err);
+			// TODO: call loadCallbacks with an err parameter
+			return;
+		}
 		parser.parseString(data);
 	});
 };
+
+BGTMap.maps = [
+	'Strecke Ost lang',
+	'Strecke Ost kurz',
+	'Strecke West lang',
+	'Strecke West kurz'
+];
 
 BGTMap.prototype.getMapXML = function(callback) {
 	if (this.points.length == 0) {

@@ -6,7 +6,18 @@ BGTEngine = function(){
 	this.users = [];
 	this.connections = [];
 	this.userTimeouts = {};
-	this.map = map = new BGTMap('/root/Strecke West lang.gpx');
+	this.map = new BGTMap(2);
+}
+
+BGTEngine.prototype.setMap = function(map) {
+	util.log('setting new map: ' + map.name);
+	this.map = map;
+	var me = this;
+	map.getMapXML(function(err, xml){
+		me.sendUpdates({
+			map:xml
+		});
+	});
 }
 
 BGTEngine.prototype.addUser = function(user) {
