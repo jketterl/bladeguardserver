@@ -129,6 +129,13 @@ BGTUser.prototype.getLocationError = function(candidate, location) {
 BGTUser.prototype.updatePlausiblePositions = function(selectedCandidates, location) {
 	// try to find prevously selected candidates that are in index range
 	if (this.plausiblePositions) {
+		// first: purge all plausible positons that have been obtained from a different map than the current one
+		for (var i in this.plausiblePositions) {
+			if (this.plausiblePositions[i].map != engine.getMap()) {
+				util.log('purging one plausible position (not obtained from current map)');
+				this.plausiblePositions.splice(i, 1);
+			}
+		}
 		for (var i in this.plausiblePositions) {
 			var position = this.plausiblePositions[i];
 			var updated = false;
