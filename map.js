@@ -20,11 +20,12 @@ BGTMap = function(id) {
 			if (previousLocation) {
 				var distance = location.getDistanceTo(previousLocation);
 				length += distance;
-				location.distanceToPrevous = distance;
+				location.distanceToPrevious = distance;
 			}
 			p.push(location);
 			previousLocation = location;
 		}
+		p[0].distanceToPrevious = p[0].getDistanceTo(p[p.length-1]);
 		util.log('route length is ' + length);
 		for (var i = 0; i < me.loadCallbacks.length; i++) {
 			me.loadCallbacks[i]();
@@ -100,4 +101,15 @@ BGTMap.prototype.getIndexDelta = function(i1, i2) {
 		delta -= pointCount;
 	}
 	return delta;
+}
+
+BGTMap.prototype.getDistanceBetween = function(i1, i2) {
+	var index = i1;
+	var distance = 0;
+	while (index != i2) {
+		distance += this.points[index].distanceToPrevious;
+		index++;
+		if (index >= this.points.length) index = 0;
+	}
+	return distance;
 }
