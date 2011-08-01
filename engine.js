@@ -1,12 +1,14 @@
 require('./map');
 require('./user');
 var util = require('util');
+require('./stats');
 
 BGTEngine = function(){
 	this.users = [];
 	this.connections = [];
 	this.userTimeouts = {};
 	this.map = new BGTMap(2);
+	this.stats = new BGTStatsEngine(this);
 }
 
 BGTEngine.prototype.setMap = function(map) {
