@@ -12,10 +12,20 @@ BGTMap = function(id) {
 	this.name = BGTMap.maps[id];
 
 	parser.addListener('end', function(result) {
+		var previousLocation;
+		var length = 0;
 		for (var i = 0; i < result.rte.rtept.length; i++) {
 			var point = result.rte.rtept[i];
-			p.push(new BGTLocation({lat:point['@'].lat, lon:point['@'].lon}));
+			var location = new BGTLocation({lat:point['@'].lat, lon:point['@'].lon});
+			if (previousLocation) {
+				var distance = location.getDistanceTo(previousLocation);
+				length += distance;
+				location.distanceToPrevous = distance;
+			}
+			p.push(location);
+			previousLocation = location;
 		}
+		util.log('route length is ' + length);
 		for (var i = 0; i < me.loadCallbacks.length; i++) {
 			me.loadCallbacks[i]();
 		}
@@ -34,7 +44,10 @@ BGTMap.maps = [
 	'Strecke Ost lang',
 	'Strecke Ost kurz',
 	'Strecke West lang',
-	'Strecke West kurz'
+	'Strecke West kurz',
+	'Strecke Nord lang',
+	'Strecke Nord kurz',
+	'Strecke Familie'
 ];
 
 BGTMap.prototype.getMapXML = function(callback) {
