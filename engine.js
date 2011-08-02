@@ -78,7 +78,7 @@ BGTEngine.prototype.keepAliveUser = function(user) {
 BGTEngine.prototype.addMapConnection = function(conn) {
 	var me = this;
 	this.connections.push(conn);
-	conn.req.on('close', function() {
+	conn.request.req.on('close', function() {
 		conn.close();
 		me.removeMapConnection(conn);
 	});
@@ -91,15 +91,25 @@ BGTEngine.prototype.removeMapConnection = function(conn) {
 	}
 }
 
-BGTEngine.prototype.sendCurrentLocations = function(res) {
+BGTEngine.prototype.sendCurrentLocations = function(conn) {
 	var me = this;
 	this.getMap().getMapXML(function(err, xml){
+		var users = me.users;
+		// filter out logged in user if a session is available
+		if (conn.request.session && conn.request.session.getData().user) {
+			var filtered = [];
+			var user = conn.request.session.getData().user;
+			for (var i in users) {
+				if (users[i] != user) filtered[i] = users[i];
+			}
+			users = filtered;
+		}
 		var output = me.getUpdateXML({
-			movements:me.getLocationXML(me.users),
+			movements:me.getLocationXML(users),
 			map:xml,
 			stats:me.stats.getStatsXML()
 		});
-		res.write(output);
+		conn.write(output);
 	});
 }
 

@@ -1,10 +1,9 @@
-BGTConnection = function(req, res) {
-	this.req = req;
-	this.res = res;
+BGTConnection = function(request) {
+	this.request = request;
 }
 
 BGTConnection.prototype.write = function() {
-	this.res.write.apply(this.res, arguments);
+	this.request.res.write.apply(this.request.res, arguments);
 	this.setTimeout();
 }
 
