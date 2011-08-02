@@ -25,7 +25,11 @@ BGTMap = function(id) {
 			p.push(location);
 			previousLocation = location;
 		}
-		p[0].distanceToPrevious = p[0].getDistanceTo(p[p.length-1]);
+		// add distance for first point (loop course)
+		var distance = p[0].getDistanceTo(p[p.length-1]);
+		p[0].distanceToPrevious = distance;
+		length += distance;
+
 		util.log('route length is ' + length);
 		for (var i = 0; i < me.loadCallbacks.length; i++) {
 			me.loadCallbacks[i]();
