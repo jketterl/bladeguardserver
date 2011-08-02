@@ -1,5 +1,6 @@
 var crypto = require('crypto');
 var querystring = require('querystring');
+var util = require('util');
 
 BGTSession = function(key, data) {
 	this.key = key;
@@ -33,7 +34,10 @@ BGTSession.processRequest = function(request) {
 		var cookies = querystring.parse(request.req.headers.cookie, ';');
 		if (cookies.BGTSESSION) {
 		var session = BGTSession.getSession(cookies.BGTSESSION);
-			if (session) request.session = session;
+			if (session) {
+				util.log('session reconnected');
+				request.session = session;
+			}
 		}
 	}
 }
