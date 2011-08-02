@@ -13,6 +13,9 @@ BGTStatsEngine = function(engine) {
 	}, 10000);
 }
 
+var EventEmitter = require('events').EventEmitter;
+BGTStatsEngine.prototype = new EventEmitter;
+
 BGTStatsEngine.prototype.updateStats = function() {
 	var stats = {
 		users:0,
@@ -49,10 +52,7 @@ BGTStatsEngine.prototype.updateStats = function() {
 		stats.bladeNightLength = this.engine.getMap().getDistanceBetween(longest.i2, longest.i1);
 	}
 	this.stats = stats;
-	//util.log(util.inspect(stats));
-	this.engine.sendUpdates({
-		stats:'<bladenightlength>' + stats.bladeNightLength + '</bladenightlength>'
-	});
+	this.emit('stats', stats);
 }
 
 BGTStatsEngine.prototype.getLatestStats = function() {

@@ -45,6 +45,13 @@ BGTMap = function(id) {
 	});
 };
 
+BGTMap.loadedMaps = [];
+
+BGTMap.getMap = function(mapId) {
+	if (BGTMap.loadedMaps[mapId]) return BGTMap.loadedMaps[mapId];
+	return BGTMap.loadedMaps[mapId] = new BGTMap(mapId);
+}
+
 BGTMap.maps = [
 	'Strecke Ost lang',
 	'Strecke Ost kurz',

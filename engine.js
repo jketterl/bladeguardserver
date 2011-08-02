@@ -4,14 +4,21 @@ var util = require('util');
 require('./stats');
 
 BGTEngine = function(){
+	var me = this;
 	this.users = [];
 	this.connections = [];
 	this.userTimeouts = {};
-	this.map = new BGTMap(2);
+	this.map = BGTMap.getMap(2);
 	this.stats = new BGTStatsEngine(this);
+	this.stats.on('stats', function(stats) {
+		me.sendUpdates({
+                	stats:'<bladenightlength>' + stats.bladeNightLength + '</bladenightlength>'
+        	});
+	});
 }
 
 BGTEngine.prototype.setMap = function(map) {
+	if (map == this.map) return;
 	util.log('setting new map: ' + map.name);
 	this.map = map;
 	var me = this;
@@ -20,6 +27,10 @@ BGTEngine.prototype.setMap = function(map) {
 			map:xml
 		});
 	});
+	for (var i in this.users) {
+		var user = this.users[i];
+		if (user.hasPosition() && user.position.map != this.map) user.resetPosition();
+	}
 }
 
 BGTEngine.prototype.addUser = function(user) {

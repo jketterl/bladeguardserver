@@ -1,7 +1,7 @@
 this.process = function(request) {
 	var message = '';
 	if (request.mid) {
-		engine.setMap(new BGTMap(request.mid));
+		engine.setMap(BGTMap.getMap(request.mid));
 		message = 'Map changed!<br>';
 	}
 	request.res.writeHead(200);
