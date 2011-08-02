@@ -31,6 +31,8 @@ db.connect(function(err){
   		util.log('connect: ' + req.connection.socket.remoteAddress + ' requests ' + req.url + ' (' + req.headers['user-agent'] + ')');
 		var request = router.parse(req.url);
 		request.req = req; request.res = res;
+		// automatic session reconnect (!)
+		BGTSession.processRequest(request);
 		var module = engine.loadModule(request);
 		module.process(request);
 	}).listen(8000);

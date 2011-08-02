@@ -22,7 +22,6 @@ this.process = function(request) {
 						var session = BGTSession.newSession({
 							user:user
 						});
-						util.log('new session key: ' + session.key);
 						request.res.setHeader('Set-Cookie', ['BGTSESSION=' + session.key]);
 						request.res.writeHead(200);
 						request.res.end('login successful');
@@ -34,19 +33,13 @@ this.process = function(request) {
 			request.res.end('login failed!');
 		} else {
 			var user = function(request) {
-				if (request.req.headers.cookie) {
-					var cookies = querystring.parse(request.req.headers.cookie, ';');
-					if (cookies.BGTSESSION) {
-						var session = BGTSession.getSession(cookies.BGTSESSION);
-						if (session) {
-							return session.getData().user;
-						}
-					}
+				if (request.session) {
+					return request.session.getData().user;
 				}
 			}(request);
 			if (user) {
 				request.res.writeHead(200);
-				output += 'user already logged in';
+				output += 'user logged in: ' + user;
 			} else {
 				request.res.writeHead(403);
 				output += '<form method="post">';
