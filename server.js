@@ -7,6 +7,8 @@ var router = new BGTRouter();
 require('./connection');
 require('./location');
 var util = require('util');
+require('./session');
+
 db = new (require('db-mysql').Database)({
 	hostname:'localhost',
 	database:'bladeguardtracker',
