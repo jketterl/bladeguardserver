@@ -2,10 +2,20 @@ var querystring = require('querystring');
 var util = require('util');
 
 this.process = function(request) {
-	if (request.uid && request.lat && request.lon) {
+	if (request.session && request.session.getData().user) {
+		request.user = request.session.getData().user;
+	} else {
+		// anonymous connection
+		request.user = BGTUser.getAnonymousUser();
+		util.log('new anonymous user: ' + request.user);
+	}
+	if (request.lat && request.lon) {
+		if (!request.session || !request.session.getData().user) {
+			BGTSession.newSession({user:request.user});
+		}
+		engine.updateUserLocation(request.user, new BGTLocation({lat:request.lat, lon:request.lon}));
 		request.res.writeHead(200);
 		request.res.end('log module successful');
-		engine.updateUserLocation(BGTUser.getUser(request.uid), new BGTLocation({lat:request.lat, lon:request.lon}));
 		return;
 	}
 	request.req.on('end', function() {
@@ -34,40 +44,6 @@ this.process = function(request) {
 		}, 60000);
 	};
 	request.req.on('data', function(chunk) {
-		chunk = chunk.toString();
-		var data = querystring.parse(chunk);
-		// authenticate user first
-		if (data.uid && data.pass) {
-			request.authenticating = true;
-			BGTUser.login(data.uid, data.pass, function(err, user){
-				if (err) {
-					util.log(err);
-					request.res.writeHead(403);
-					request.res.end('authentication failure: ' + err);
-					request.req.connection.end();
-					return;
-				}
-				util.log('user logged in: ' + user);
-				request.user = user;
-				if (!request.queue) return;
-				for (var i = 0; i < request.queue.length; i++) parseChunk(request.queue[i]);
-				delete request.queue;
-			});
-			return;
-		}
-		// no user given?
-		if (!request.user) {
-			if (request.authenticating) {
-				//authentication has been requested and is waiting to be finished; form a queue
-				request.queue = request.queue || [];
-				request.queue.push(chunk);
-				return;
-			} else {
-				// anonymous connection
-				request.user = BGTUser.getAnonymousUser();
-				util.log('new anonymous user: ' + request.user);
-			}
-		}
-		parseChunk(chunk);
+		parseChunk(chunk.toString());
 	});
 }
