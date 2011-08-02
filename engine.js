@@ -85,7 +85,8 @@ BGTEngine.prototype.sendCurrentLocations = function(res) {
 	this.getMap().getMapXML(function(err, xml){
 		var output = me.getUpdateXML({
 			movements:me.getLocationXML(me.users),
-			map:xml
+			map:xml,
+			stats:me.stats.getStatsXML()
 		});
 		res.write(output);
 	});
@@ -121,7 +122,7 @@ BGTEngine.prototype.getLocationXML = function(users) {
 	output = '';
 	for (var i in users) if (users[i].location) {
 		user = users[i];
-		output += '<user id="' + user.uid + '">';
+		output += '<user id="' + user.uid + '" name="' + user.getName() + '">';
 		output += '<location><lat>' + user.location.lat + '</lat>';
 		output += '<lon>' + user.location.lon + '</lon></location>';
 		output += '</user>';

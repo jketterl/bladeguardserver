@@ -2,6 +2,7 @@ var util = require('util');
 
 BGTStatsEngine = function(engine) {
 	this.engine = engine;
+	this.stats = {};
 	var me = this;
 	setInterval(function(){
 		try {
@@ -47,8 +48,20 @@ BGTStatsEngine.prototype.updateStats = function() {
 		];
 		stats.bladeNightLength = this.engine.getMap().getDistanceBetween(longest.i2, longest.i1);
 	}
-	util.log(util.inspect(stats));
+	this.stats = stats;
+	//util.log(util.inspect(stats));
 	this.engine.sendUpdates({
 		stats:'<bladenightlength>' + stats.bladeNightLength + '</bladenightlength>'
 	});
+}
+
+BGTStatsEngine.prototype.getLatestStats = function() {
+	return this.stats;
+}
+
+BGTStatsEngine.prototype.getStatsXML = function() {
+	var stats = this.getLatestStats();
+	var output = '';
+	output += '<bladenightlength>' + stats.bladeNightLength + '</bladenightlength>';
+	return output;
 }

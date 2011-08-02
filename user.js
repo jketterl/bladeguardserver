@@ -202,7 +202,11 @@ BGTUser.prototype.resetPosition = function() {
 	delete this.position;
 }
 
-BGTUser.prototype.toString = function() {
+BGTUser.prototype.getName = function() {
 	if (this.name) return this.name;
-	return 'uid ' + this.uid
+	return 'anonymous user #' + this.uid
+}
+
+BGTUser.prototype.toString = function() {
+	return this.getName();
 }
