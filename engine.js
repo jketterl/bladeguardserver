@@ -122,7 +122,7 @@ BGTEngine.prototype.getLocationXML = function(users) {
 	output = '';
 	for (var i in users) if (users[i].location) {
 		user = users[i];
-		output += '<user id="' + user.uid + '" name="' + user.getName() + '">';
+		output += '<user id="' + user.uid + '" name="' + user.getName() + '" team="' + user.getTeam() + '">';
 		output += '<location><lat>' + user.location.lat + '</lat>';
 		output += '<lon>' + user.location.lon + '</lon></location>';
 		output += '</user>';

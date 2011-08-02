@@ -14,9 +14,10 @@ BGTUser.login = function(user, pass, callback) {
 	var me = this;
 	var hash = crypto.createHash('md5').update(pass).digest('hex');
 	db.query().
-		select('id as uid, name').
+		select('users.id as uid, users.name, team.name as team_name').
 		from('users').
-		where('name = ? and pass = ?', [user, hash]).
+		join({table:'team', type:'left', conditions:'users.team_id = team.id'}).
+		where('users.name = ? and pass = ?', [user, hash]).
 		execute(function(err, rows, cols) {
 			if (err) {
 				return callback(err);
@@ -205,6 +206,10 @@ BGTUser.prototype.resetPosition = function() {
 BGTUser.prototype.getName = function() {
 	if (this.name) return this.name;
 	return 'anonymous user #' + this.uid
+}
+
+BGTUser.prototype.getTeam = function() {
+	return this.team_name || 'Bladeguard';
 }
 
 BGTUser.prototype.toString = function() {
