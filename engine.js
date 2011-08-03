@@ -12,7 +12,7 @@ BGTEngine = function(){
 	this.stats = new BGTStatsEngine(this);
 	this.stats.on('stats', function(stats) {
 		me.sendUpdates({
-                	stats:'<bladenightlength>' + stats.bladeNightLength + '</bladenightlength>'
+                	stats:me.stats.getStatsXML(stats)
         	});
 	});
 }
