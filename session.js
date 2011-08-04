@@ -30,16 +30,21 @@ BGTSession.getSession = function(key) {
 }
 
 BGTSession.processRequest = function(request) {
+	var session;
 	if (request.req.headers.cookie) {
 		var cookies = querystring.parse(request.req.headers.cookie, ';');
 		if (cookies.BGTSESSION) {
-		var session = BGTSession.getSession(cookies.BGTSESSION);
-			if (session) {
-				util.log('session reconnected');
-				request.session = session;
-			}
+			session = BGTSession.getSession(cookies.BGTSESSION);
 		}
 	}
+	if (session) {
+		util.log('session reconnected');
+	} else {
+		util.log('issuing new session');
+		session = BGTSession.newSession();
+		request.res.setHeader('Set-Cookie', ['BGTSESSION=' + session.key]);
+	}
+	request.session = session;
 }
 
 BGTSession.sessions = [];

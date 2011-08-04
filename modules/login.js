@@ -19,10 +19,9 @@ this.process = function(request) {
 						request.res.end('login failed!');
 					} else {
 						util.log('user login: ' + user);
-						var session = BGTSession.newSession({
+						request.session.setData({
 							user:user
 						});
-						request.res.setHeader('Set-Cookie', ['BGTSESSION=' + session.key]);
 						request.res.writeHead(200);
 						request.res.end('login successful');
 					}
