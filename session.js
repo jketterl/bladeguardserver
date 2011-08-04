@@ -42,7 +42,7 @@ BGTSession.processRequest = function(request) {
 	} else {
 		util.log('issuing new session');
 		session = BGTSession.newSession();
-		request.res.setHeader('Set-Cookie', ['BGTSESSION=' + session.key]);
+		request.res.setHeader('Set-Cookie', ['BGTSESSION=' + session.key + '; path=/bgt']);
 	}
 	request.session = session;
 }
