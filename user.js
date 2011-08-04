@@ -14,7 +14,7 @@ BGTUser.login = function(user, pass, callback) {
 	var me = this;
 	var hash = crypto.createHash('md5').update(pass).digest('hex');
 	db.query().
-		select('users.id as uid, users.name, team.name as team_name').
+		select('users.id as uid, users.name, team.name as team_name, users.admin').
 		from('users').
 		join({table:'team', type:'left', conditions:'users.team_id = team.id'}).
 		where('users.name = ? and pass = ?', [user, hash]).
@@ -51,6 +51,10 @@ BGTUser.addUser = function(user) {
 
 BGTUser.getUser = function(uid) {
         return BGTUser.users[uid];
+}
+
+BGTUser.prototype.isAdmin = function() {
+	return this.admin && true;
 }
 
 BGTUser.prototype.updateLocation = function(location) {

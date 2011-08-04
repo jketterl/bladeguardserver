@@ -1,7 +1,7 @@
 this.process = function(request) {
-	if (!request.session || !request.session.getData().user) {
+	if (!request.session.getData().user || !request.session.getData().user.isAdmin()) {
 		request.res.writeHead(403);
-		request.res.end('You must be logged in');
+		request.res.end('You are not authorized to use this page.');
 		return;
 	}
 	var message = '';
