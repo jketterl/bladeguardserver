@@ -23,8 +23,8 @@ db.connect(function(err){
 	}
 
 	var options = {
-		key: fs.readFileSync('/usr/local/apache2/conf/server.key'),
-		cert: fs.readFileSync('/usr/local/apache2/conf/server.crt')
+		key: fs.readFileSync('/home/ec2-user/keys/server.key'),
+		cert: fs.readFileSync('/home/ec2-user/keys/server.crt')
 	};
 
 	https.createServer(options, function (req, res) {
@@ -35,5 +35,5 @@ db.connect(function(err){
 		BGTSession.processRequest(request);
 		var module = engine.loadModule(request);
 		module.process(request);
-	}).listen(8000);
+	}).listen(443);
 });

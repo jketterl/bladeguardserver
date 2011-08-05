@@ -35,7 +35,7 @@ BGTMap = function(id) {
 			me.loadCallbacks[i]();
 		}
 	});
-	fs.readFile('/root/' + BGTMap.maps[id] + '.gpx', function(err, data) {
+	fs.readFile('/home/ec2-user/maps/' + BGTMap.maps[id] + '.gpx', function(err, data) {
 		if (err) {
 			util.log(err);
 			// TODO: call loadCallbacks with an err parameter
