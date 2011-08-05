@@ -31,10 +31,10 @@ BGTStatsEngine.prototype.updateStats = function() {
 		if (user.hasPosition()) {
 			stats.tracked++;
 			positions.push(user.position.index);
-		}
-		if (user.location && user.location.speed) {
-			stats.speeded++;
-			speedSum += parseFloat(user.location.speed);
+			if (user.location && user.location.speed) {
+				stats.speeded++;
+				speedSum += parseFloat(user.location.speed);
+			}
 		}
 	}
 	positions.sort(function(a,b){return a-b;});
