@@ -1,4 +1,5 @@
-BGTUpdate = function(data) {
+BGTUpdate = function(category, data) {
+	this.category = category;
 	this.data = data;
 }
 
@@ -13,6 +14,12 @@ BGTUpdate.prototype.toString = function() {
 BGTUpdate.prototype.isApplicable = function(conn) {
 	return true;
 }
+
+BGTUpdate.prototype.getCategory = function() {
+	return this.category;
+}
+
+
 
 BGTLocationUpdate = function(user) {
 	this.user = user;
@@ -35,4 +42,8 @@ BGTLocationUpdate.prototype.getXML = function() {
 	output += '<lon>' + this.user.location.lon + '</lon></location>';
 	output += '</user>';
 	return output;
+}
+
+BGTLocationUpdate.prototype.getCategory = function() {
+	return 'movements';
 }

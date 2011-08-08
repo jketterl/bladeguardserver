@@ -1,10 +1,10 @@
 BGTConnection = function(request) {
 	var me = this;
 	this.request = request;
-	this.updates = {};
+	this.updates = [];
 	// send updates in 5s intervals
 	this.writeInterval = setInterval(function(){
-		var updates = me.updates; me.updates = {};
+		var updates = me.updates; me.updates = [];
 		me.sendUpdates(updates);
 	}, 5000);
 }
@@ -23,29 +23,35 @@ BGTConnection.prototype.sendUpdates = function(updates) {
 }
 
 BGTConnection.prototype.getUpdateXML = function(updates) {
+	var sorted = {};
+	for (var i in updates) {
+		var category = updates[i].getCategory();
+		if (typeof(sorted[category]) != 'undefined') {
+			sorted[category].push(updates[i]);
+		} else {
+			sorted[category] = [updates[i]];
+		}
+	}
+
 	var output = '';
-	for (var a in updates) {
+	for (var a in sorted) {
 		output += '<' + a + '>';
-		for (var i in updates[a]) {
-			var update = updates[a][i];
-			if (update.isApplicable(this)) output += updates[a][i];
+		for (var i in sorted[a]) {
+			var update = sorted[a][i];
+			if (update.isApplicable(this)) output += update;
 		}
 		output += '</' + a + '>';
 	}
 	return output;
 }
 
-BGTConnection.prototype.queueUpdate = function(updates) {
+BGTConnection.prototype.queueUpdates = function(updates) {
+	if (typeof(updates) != 'object' ) throw "unsupported value";
+	if (!(updates instanceof Array)) {
+		return this.queueUpdates([updates]);
+	}
 	for (var a in updates) {
-		if (updates[a].length == 0) continue;
-		for (var i in updates[a]) {
-			var update = updates[a][i];
-			if (typeof(this.updates[a]) != 'undefined') {
-				this.updates[a].push(update);
-			} else {
-				this.updates[a] = [update];
-			}
-		}
+		this.updates.push(updates[a]);
 	}
 }
 

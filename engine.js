@@ -12,9 +12,7 @@ BGTEngine = function(){
 	this.map = BGTMap.getMap(2);
 	this.stats = new BGTStatsEngine(this);
 	this.stats.on('stats', function(stats) {
-		me.sendUpdates({
-                	stats:[new BGTUpdate(me.stats.getStatsXML(stats))]
-        	});
+		me.sendUpdates(new BGTUpdate('stats', me.stats.getStatsXML(stats)));
 	});
 	this.onUserUpdate = function(user, location){
 		me.sendLocationUpdates(user);
@@ -28,9 +26,7 @@ BGTEngine.prototype.setMap = function(map) {
 	this.map = map;
 	var me = this;
 	map.getMapXML(function(err, xml){
-		me.sendUpdates({
-			map:[new BGTUpdate(xml)]
-		});
+		me.sendUpdates(new BGTUpdate('map', xml));
 	});
 	for (var i in this.users) {
 		var user = this.users[i];
@@ -50,9 +46,7 @@ BGTEngine.prototype.removeUser = function(user){
 	this.users[user.uid].removeListener('updatelocation', this.onUserUpdate);
 	delete this.users[user.uid];
 	if (this.userTimeouts[user.uid]) clearTimeout(this.userTimeouts[user.uid]);
-	this.sendUpdates({
-		quit:[new BGTUpdate('<user id="' + user.uid + '"/>')]
-	});
+	this.sendUpdates(new BGTUpdate('quit', '<user id="' + user.uid + '"/>'));
 }
 
 BGTEngine.prototype.getMap = function() {
@@ -102,23 +96,20 @@ BGTEngine.prototype.removeMapConnection = function(conn) {
 BGTEngine.prototype.sendCurrentLocations = function(conn) {
 	var me = this;
 	this.getMap().getMapXML(function(err, xml){
-		conn.sendUpdates({
-			movements:me.getLocationXML(me.users),
-			map:[new BGTUpdate(xml)],
-			stats:[new BGTUpdate(me.stats.getStatsXML())]
-		});
+		updates = me.getLocationXML(me.users);
+		updates.push(new BGTUpdate('map', xml));
+		updates.push(new BGTUpdate('stats', me.stats.getStatsXML()));
+		conn.sendUpdates(updates);
 	});
 }
 
 BGTEngine.prototype.sendLocationUpdates = function(user) {
-	this.sendUpdates({
-		movements:this.getLocationXML([user])
-	});
+	this.sendUpdates(this.getLocationXML([user]));
 }
 
 BGTEngine.prototype.sendUpdates = function(updates) {
 	for (var i = 0; i < this.connections.length; i++) {
-		this.connections[i].queueUpdate(updates);
+		this.connections[i].queueUpdates(updates);
 	}
 }
 
