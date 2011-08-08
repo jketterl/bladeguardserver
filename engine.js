@@ -13,7 +13,7 @@ BGTEngine = function(){
 	this.stats = new BGTStatsEngine(this);
 	this.stats.on('stats', function(stats) {
 		me.sendUpdates({
-                	stats:me.stats.getStatsXML(stats)
+                	stats:[new BGTUpdate(me.stats.getStatsXML(stats))]
         	});
 	});
 	this.onUserUpdate = function(user, location){
@@ -29,7 +29,7 @@ BGTEngine.prototype.setMap = function(map) {
 	var me = this;
 	map.getMapXML(function(err, xml){
 		me.sendUpdates({
-			map:xml
+			map:[new BGTUpdate(xml)]
 		});
 	});
 	for (var i in this.users) {
@@ -51,7 +51,7 @@ BGTEngine.prototype.removeUser = function(user){
 	delete this.users[user.uid];
 	if (this.userTimeouts[user.uid]) clearTimeout(this.userTimeouts[user.uid]);
 	this.sendUpdates({
-		quit:'<user id="' + user.uid + '"/>'
+		quit:[new BGTUpdate('<user id="' + user.uid + '"/>')]
 	});
 }
 
@@ -102,20 +102,10 @@ BGTEngine.prototype.removeMapConnection = function(conn) {
 BGTEngine.prototype.sendCurrentLocations = function(conn) {
 	var me = this;
 	this.getMap().getMapXML(function(err, xml){
-		var users = me.users;
-		// filter out logged in user if a session is available
-		if (conn.request.session && conn.request.session.getData().user) {
-			var filtered = [];
-			var user = conn.request.session.getData().user;
-			for (var i in users) {
-				if (users[i] != user) filtered[i] = users[i];
-			}
-			users = filtered;
-		}
 		conn.sendUpdates({
-			movements:me.getLocationXML(users),
-			map:xml,
-			stats:me.stats.getStatsXML()
+			movements:me.getLocationXML(me.users),
+			map:[new BGTUpdate(xml)],
+			stats:[new BGTUpdate(me.stats.getStatsXML())]
 		});
 	});
 }
@@ -133,13 +123,9 @@ BGTEngine.prototype.sendUpdates = function(updates) {
 }
 
 BGTEngine.prototype.getLocationXML = function(users) {
-	output = '';
-	for (var i in users) if (users[i].location) {
-		user = users[i];
-		output += '<user id="' + user.uid + '" name="' + user.getName() + '" team="' + user.getTeam() + '">';
-		output += '<location><lat>' + user.location.lat + '</lat>';
-		output += '<lon>' + user.location.lon + '</lon></location>';
-		output += '</user>';
+	outputArray = [];
+	for (var i in users) {
+		outputArray.push(new BGTLocationUpdate(users[i]));
 	}
-	return output;
+	return outputArray;
 }

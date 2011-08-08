@@ -26,7 +26,10 @@ BGTConnection.prototype.getUpdateXML = function(updates) {
 	var output = '';
 	for (var a in updates) {
 		output += '<' + a + '>';
-		output += updates[a];
+		for (var i in updates[a]) {
+			var update = updates[a][i];
+			if (update.isApplicable(this)) output += updates[a][i];
+		}
 		output += '</' + a + '>';
 	}
 	return output;
@@ -34,11 +37,14 @@ BGTConnection.prototype.getUpdateXML = function(updates) {
 
 BGTConnection.prototype.queueUpdate = function(updates) {
 	for (var a in updates) {
-		if (updates[a] == '') continue;
-		if (typeof(this.updates[a]) != 'undefined') {
-			this.updates[a] += updates[a];
-		} else {
-			this.updates[a] = updates[a];
+		if (updates[a].length == 0) continue;
+		for (var i in updates[a]) {
+			var update = updates[a][i];
+			if (typeof(this.updates[a]) != 'undefined') {
+				this.updates[a].push(update);
+			} else {
+				this.updates[a] = [update];
+			}
 		}
 	}
 }
