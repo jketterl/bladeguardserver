@@ -15,6 +15,10 @@ BGTEngine = function(){
                 	stats:me.stats.getStatsXML(stats)
         	});
 	});
+	this.onUserUpdate = function(user, location){
+		me.sendLocationUpdates(user);
+		me.keepAliveUser(user);
+	}
 }
 
 BGTEngine.prototype.setMap = function(map) {
@@ -34,10 +38,15 @@ BGTEngine.prototype.setMap = function(map) {
 }
 
 BGTEngine.prototype.addUser = function(user) {
+	if (this.users[user.uid] == user) return;
+	var me = this;
 	this.users[user.uid] = user;
+	user.on('locationupdate', this.onUserUpdate);
 }
 
 BGTEngine.prototype.removeUser = function(user){
+	if (!this.users[user.uid]) return;
+	this.users[user.uid].removeListener('updatelocation', this.onUserUpdate);
 	delete this.users[user.uid];
 	if (this.userTimeouts[user.uid]) clearTimeout(this.userTimeouts[user.uid]);
 	this.sendUpdates({
@@ -62,8 +71,6 @@ BGTEngine.prototype.loadModule = function(request) {
 BGTEngine.prototype.updateUserLocation = function(user, location) {
 	this.addUser(user);
 	user.updateLocation(location);
-	this.sendLocationUpdates(user);
-	this.keepAliveUser(user);
 }
 
 BGTEngine.prototype.keepAliveUser = function(user) {

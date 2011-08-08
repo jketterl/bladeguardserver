@@ -8,6 +8,9 @@ BGTUser = function(uid) {
 	} else this.uid = uid;
 }
 
+var EventEmitter = require('events').EventEmitter;
+BGTUser.prototype = new EventEmitter;
+
 BGTUser.users = []
 
 BGTUser.login = function(user, pass, callback) {
@@ -60,6 +63,7 @@ BGTUser.prototype.isAdmin = function() {
 BGTUser.prototype.updateLocation = function(location) {
 	if (this.location) this.lastLocation = location;
 	this.location = location;
+	this.emit('locationupdate', this, location);
 	
 	try {
 		this.trackPosition(location);
@@ -194,6 +198,7 @@ BGTUser.prototype.setPosition = function(position) {
 	util.log('position fix for ' + this + ': ' + position.index);
 	this.position = position;
 	position.fixed = true;
+	this.emit('position', this, position);
 }
 
 BGTUser.prototype.hasPosition = function() {
@@ -205,6 +210,7 @@ BGTUser.prototype.resetPosition = function() {
 	util.log('resetting position for ' + this);
 	this.position.fixed = false;
 	delete this.position;
+	this.emit('position', this, false);
 }
 
 BGTUser.prototype.getName = function() {
