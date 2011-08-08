@@ -103,6 +103,13 @@ BGTMap.prototype.getIndex = function(index) {
 	return this.points[index];
 }
 
+BGTMap.prototype.getIndexAtOffset = function(index, offset) {
+	var dest = index + offset;
+	while (dest < this.points.length) dest += this.points.length;
+	dest = dest % this.points.length;
+	return this.getIndex(dest);
+}
+
 BGTMap.prototype.getIndexDelta = function(i1, i2) {
 	var delta = i2 - i1;
 	var pointCount = this.points.length;

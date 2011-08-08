@@ -124,7 +124,7 @@ BGTUser.prototype.trackPosition = function(location) {
 BGTUser.prototype.getLocationError = function(candidate, location) {
 	var point1 = candidate.location;
 	var offset = typeof(candidate.direction) == 'undefined' || candidate.direction >= 0 ? 1 : -1
-	var point2 = engine.getMap().getIndex(candidate.index + offset);
+	var point2 = engine.getMap().getIndexAtOffset(candidate.index, offset);
 	var idealDistance = point1.getDistanceTo(point2);
 	var myDistance = point1.getDistanceTo(location) + point2.getDistanceTo(location);
 	var error = myDistance - idealDistance;
