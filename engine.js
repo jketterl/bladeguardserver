@@ -2,6 +2,7 @@ require('./map');
 require('./user');
 var util = require('util');
 require('./stats');
+require('./update');
 
 BGTEngine = function(){
 	var me = this;
@@ -111,12 +112,11 @@ BGTEngine.prototype.sendCurrentLocations = function(conn) {
 			}
 			users = filtered;
 		}
-		var output = me.getUpdateXML({
+		conn.sendUpdates({
 			movements:me.getLocationXML(users),
 			map:xml,
 			stats:me.stats.getStatsXML()
 		});
-		conn.write(output);
 	});
 }
 
@@ -127,23 +127,9 @@ BGTEngine.prototype.sendLocationUpdates = function(user) {
 }
 
 BGTEngine.prototype.sendUpdates = function(updates) {
-	var output = this.getUpdateXML(updates)
-
 	for (var i = 0; i < this.connections.length; i++) {
-		this.connections[i].write(output);
+		this.connections[i].queueUpdate(updates);
 	}
-}
-
-BGTEngine.prototype.getUpdateXML = function(updates) {
-	var output = '<?xml version="1.0" encoding="UTF-8" ?>\n'+
-		     '<updates>';
-	for (var a in updates) {
-		output += '<' + a + '>';
-		output += updates[a];
-		output += '</' + a + '>\n';
-	}
-	output += '</updates>';
-	return output;
 }
 
 BGTEngine.prototype.getLocationXML = function(users) {

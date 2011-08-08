@@ -1,10 +1,46 @@
 BGTConnection = function(request) {
+	var me = this;
 	this.request = request;
+	this.updates = {};
+	// send updates in 5s intervals
+	this.writeInterval = setInterval(function(){
+		var updates = me.updates; me.updates = {};
+		me.sendUpdates(updates);
+	}, 5000);
 }
 
 BGTConnection.prototype.write = function() {
 	this.request.res.write.apply(this.request.res, arguments);
 	this.setTimeout();
+}
+
+BGTConnection.prototype.sendUpdates = function(updates) {
+	var xml = this.getUpdateXML(updates);
+	if (xml == '') return;
+	var output = '<?xml version="1.0" encoding="UTF-8" ?>\n' +
+		     '<updates>' + xml + '</updates>';
+	this.write(output);
+}
+
+BGTConnection.prototype.getUpdateXML = function(updates) {
+	var output = '';
+	for (var a in updates) {
+		output += '<' + a + '>';
+		output += updates[a];
+		output += '</' + a + '>';
+	}
+	return output;
+}
+
+BGTConnection.prototype.queueUpdate = function(updates) {
+	for (var a in updates) {
+		if (updates[a] == '') continue;
+		if (typeof(this.updates[a]) != 'undefined') {
+			this.updates[a] += updates[a];
+		} else {
+			this.updates[a] = updates[a];
+		}
+	}
 }
 
 BGTConnection.prototype.setTimeout = function() {
@@ -17,4 +53,5 @@ BGTConnection.prototype.setTimeout = function() {
 
 BGTConnection.prototype.close = function() {
 	if (this.timeout) clearTimeout(this.timeout);
+	if (this.writeInterval) clearInterval(this.writeInterval);
 }
