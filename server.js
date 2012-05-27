@@ -8,6 +8,7 @@ require('./connection');
 require('./location');
 var util = require('util');
 require('./session');
+var WebSocketServer = require('websocket').server;
 
 db = new (require('db-mysql').Database)({
 	hostname:'localhost',
@@ -27,7 +28,7 @@ db.connect(function(err){
 		cert: fs.readFileSync('/home/ec2-user/keys/server.crt')
 	};
 
-	https.createServer(options, function (req, res) {
+	var httpServer = https.createServer(options, function (req, res) {
   		util.log('connect: ' + req.connection.socket.remoteAddress + ' requests ' + req.url + ' (' + req.headers['user-agent'] + ')');
 		var request = router.parse(req.url);
 		request.req = req; request.res = res;
@@ -36,4 +37,13 @@ db.connect(function(err){
 		var module = engine.loadModule(request);
 		module.process(request);
 	}).listen(443);
+
+	var wsServer = new WebSocketServer({
+		httpServer:httpServer
+	});
+
+	wsServer.on('request', function(request){
+		var connection = request.accept();
+		connection.sendUTF('this is a test!');
+	});
 });
