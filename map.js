@@ -59,7 +59,8 @@ BGTMap.maps = [
 	'Strecke West kurz',
 	'Strecke Nord lang',
 	'Strecke Nord kurz',
-	'Strecke Familie'
+	'Strecke Familie',
+	'Strecke Familienbladenight Unterhaching'
 ];
 
 BGTMap.prototype.getMapXML = function(callback) {
