@@ -1,7 +1,7 @@
 var querystring = require('querystring');
 
 BGTRouter = function(){
-	this.regex = new RegExp('^\\/bgt\\/([a-z]+)(\\/[a-z]+)*(\\?(.*))?');
+	this.regex = new RegExp('^\\/bgt\\/([a-z]+)(\\/[a-z.-_]*)*(\\?(.*))?$');
 }
 
 BGTRouter.prototype.parse = function(url){
