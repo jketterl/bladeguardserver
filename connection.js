@@ -3,7 +3,6 @@ BGTConnection = function(request) {
 	this.request = request;
 	this.updates = [];
 	me.request.req.on('close', function(){
-		console.info('connection close');
 		me.emit('close');
 	});
 	// send updates in 5s intervals
