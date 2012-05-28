@@ -79,7 +79,7 @@ BGTEngine.prototype.keepAliveUser = function(user) {
 BGTEngine.prototype.addMapConnection = function(conn) {
 	var me = this;
 	this.connections.push(conn);
-	conn.request.req.on('close', function() {
+	conn.on('close', function() {
 		conn.close();
 		me.removeMapConnection(conn);
 	});

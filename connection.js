@@ -2,12 +2,19 @@ BGTConnection = function(request) {
 	var me = this;
 	this.request = request;
 	this.updates = [];
+	me.request.req.on('close', function(){
+		console.info('connection close');
+		me.emit('close');
+	});
 	// send updates in 5s intervals
 	this.writeInterval = setInterval(function(){
 		var updates = me.updates; me.updates = [];
 		me.sendUpdates(updates);
 	}, 5000);
 }
+
+var util = require('util');
+util.inherits(BGTConnection, require('events').EventEmitter);
 
 BGTConnection.prototype.write = function() {
 	this.request.res.write.apply(this.request.res, arguments);

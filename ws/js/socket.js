@@ -3,11 +3,15 @@ var print = function(text){
 	var div = document.getElementById('events');
 	var el = document.createElement('div');
 	el.innerHTML = text;
-	div.appendChild(el);
+	div.insertBefore(el, div.childNodes[0]);
 };
+function htmlEntities(str) {
+	return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
 socket.onopen = function(){
 	print('socket connected!');
 };
 socket.onmessage = function(message){
-	print('message received: "' + message.data + '"');
+	console.info(message);
+	print('message received: "' + htmlEntities(message.data) + '"');
 };

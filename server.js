@@ -9,6 +9,7 @@ require('./location');
 var util = require('util');
 require('./session');
 var WebSocketServer = require('websocket').server;
+require('./socketconnection');
 
 db = new (require('db-mysql').Database)({
 	hostname:'localhost',
@@ -43,7 +44,7 @@ db.connect(function(err){
 	});
 
 	wsServer.on('request', function(request){
-		var connection = request.accept();
-		connection.sendUTF('this is a test!');
+		var connection = new BGTSocketConnection(request.accept());
+		engine.addMapConnection(connection);
 	});
 });
