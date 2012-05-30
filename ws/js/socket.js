@@ -2,9 +2,10 @@ var htmlEntities = function(str) {
 	return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 };
 var print = function(text){
-	var div = document.getElementById('events');
-	var el = document.createElement('div');
-	el.innerHTML = text;
+	var div = document.getElementById('events'),
+	    el = document.createElement('div'),
+	    date = new Date();
+	el.innerHTML = date.toISOString() + ': ' + text;
 	div.insertBefore(el, div.childNodes[0]);
 };
 
@@ -21,7 +22,13 @@ var connect = function(){
 	socket.onclose = function(){
 		print('socket disconnected! waiting for reconnect...');
 		setTimeout(connect, 5000);
-	}
+	};
+	socket.onerror = function(){
+		console.info(arguments);
+		print('socket error! reconnecting...');
+		socket.close();
+		connect();
+	};
 };
 
 connect();
