@@ -10,6 +10,7 @@ BGTConnection = function(request) {
 		var updates = me.updates; me.updates = [];
 		me.sendUpdates(updates);
 	}, 5000);
+	this.sendUpdates(new BGTUpdate('noop', {}));
 }
 
 var util = require('util');
@@ -21,6 +22,10 @@ BGTConnection.prototype.write = function() {
 }
 
 BGTConnection.prototype.sendUpdates = function(updates) {
+	if (typeof(updates) != 'object' ) throw "unsupported value";
+	if (!(updates instanceof Array)) {
+		return this.sendUpdates([updates]);
+	}
 	var xml = this.getUpdateXML(updates);
 	if (xml == '') return;
 	var output = '<?xml version="1.0" encoding="UTF-8" ?>\n' +
@@ -52,10 +57,6 @@ BGTConnection.prototype.getUpdateXML = function(updates) {
 }
 
 BGTConnection.prototype.queueUpdates = function(updates) {
-	if (typeof(updates) != 'object' ) throw "unsupported value";
-	if (!(updates instanceof Array)) {
-		return this.queueUpdates([updates]);
-	}
 	for (var a in updates) {
 		this.updates.push(updates[a]);
 	}
