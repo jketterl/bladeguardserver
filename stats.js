@@ -70,11 +70,3 @@ BGTStatsEngine.prototype.setStats = function(stats) {
 BGTStatsEngine.prototype.getLatestStats = function() {
 	return this.stats;
 }
-
-BGTStatsEngine.prototype.getStatsXML = function() {
-	var stats = this.getLatestStats();
-	var output = '';
-	if (stats.bladeNightLength) output += '<bladenightlength>' + stats.bladeNightLength + '</bladenightlength>';
-	if (stats.bladeNightSpeed) output += '<bladenightspeed>' + stats.bladeNightSpeed + '</bladenightspeed>';
-	return output;
-}

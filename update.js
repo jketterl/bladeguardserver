@@ -1,3 +1,5 @@
+var util = require('util');
+
 BGTUpdate = function(category, data) {
 	this.category = category;
 	this.data = data;
@@ -55,4 +57,14 @@ BGTLocationUpdate.prototype.getData = function() {
 
 BGTLocationUpdate.prototype.getCategory = function() {
 	return 'movements';
+}
+
+BGTStatsUpdate = function(stats) {
+	this.stats = stats;
+}
+
+util.inherits(BGTStatsUpdate, BGTUpdate);
+
+BGTStatsUpdate.prototype.getData = function() {
+	return this.stats;
 }

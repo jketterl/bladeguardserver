@@ -11,7 +11,7 @@ BGTEngine = function(){
 	this.map = BGTMap.getMap(2);
 	this.stats = new BGTStatsEngine(this);
 	this.stats.on('stats', function(stats) {
-		me.sendUpdates(new BGTUpdate('stats', me.stats.getStatsXML(stats)));
+		me.sendUpdates(new BGTStatsUpdate(stats));
 	});
 	this.onUserUpdate = function(user, location){
 		me.sendLocationUpdates(user);
@@ -103,7 +103,7 @@ BGTEngine.prototype.sendCurrentLocations = function(conn) {
 	this.getMap().getMapXML(function(err, xml){
 		updates = me.getLocationXML(me.users);
 		updates.push(new BGTUpdate('map', xml));
-		updates.push(new BGTUpdate('stats', me.stats.getStatsXML()));
+		updates.push(new BGTStatsUpdate(me.stats.getLatestStats()));
 		conn.sendUpdates(updates);
 	});
 }
