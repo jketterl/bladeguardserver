@@ -52,7 +52,7 @@ BGTSocketConnection.prototype.processMessage = function(message){
 		console.warn('message could not be parsed (no command)');
 		return false;
 	}
-	var fn = this['process' + data.command];
+	var fn = this['process' + data.command.charAt(0).toUpperCase() + data.command.slice(1)];
 	if (typeof(fn) != 'function') {
 		console.warn('unknown command:"' + data.command + '"');
 		return false;
@@ -76,11 +76,11 @@ BGTSocketConnection.prototype.processMessage = function(message){
 	}
 };
 
-BGTSocketConnection.prototype.processlog = function(data){
+BGTSocketConnection.prototype.processLog = function(data){
 	this.emit('location', new BGTLocation(data));
 };
 
-BGTSocketConnection.prototype.processauth = function(data, callback){
+BGTSocketConnection.prototype.processAuth = function(data, callback){
 	var me = this;
 	if (!data.user || !data.pass) {
 		util.log('login attempt with missing credentials - denied');
@@ -99,7 +99,7 @@ BGTSocketConnection.prototype.processauth = function(data, callback){
 	});
 };
 
-BGTSocketConnection.prototype.processquit = function(data){
+BGTSocketConnection.prototype.processQuit = function(data){
 	this.emit('quit');
 };
 
