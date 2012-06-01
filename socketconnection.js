@@ -9,16 +9,19 @@ BGTSocketConnection = function(socket){
 	me.socket.on('message', function(message){
 		me.processMessage(message);
 	});
+	me.subscribed = [];
 }
 
 util.inherits(BGTSocketConnection, require('events').EventEmitter);
 
 BGTSocketConnection.prototype.sendUpdates = function(updates){
 	var me = this,
-	    sorted = {};
+	    sorted;
 
 	for (var i in updates) {
 		var category = updates[i].getCategory();
+		if (!this.isSubscribed(category)) continue;
+		sorted = sorted || {};
 		if (typeof(sorted[category]) != 'undefined') {
 			sorted[category].push(updates[i]);
 		} else {
@@ -26,6 +29,7 @@ BGTSocketConnection.prototype.sendUpdates = function(updates){
 		}
 	}
 
+	if (!sorted) return;
 	me.socket.sendUTF(JSON.stringify(sorted));
 };
 
@@ -101,6 +105,20 @@ BGTSocketConnection.prototype.processAuth = function(data, callback){
 
 BGTSocketConnection.prototype.processQuit = function(data){
 	this.emit('quit');
+};
+
+BGTSocketConnection.prototype.processSubscribeUpdates = function(data){
+	if (!data.category || this.isSubscribed(data.category)) return;
+	this.subscribed.push(data.category);
+};
+
+BGTSocketConnection.prototype.processUnSubscribeUpdates = function(data){
+	if (!data.category || !this.isSubscribed(data.category)) return;
+	this.subscribed.splice(this.subscribed.indexOf(data.category), 1);
+};
+
+BGTSocketConnection.prototype.isSubscribed = function(category){
+	return this.subscribed.indexOf(category) >= 0;
 };
 
 BGTSocketConnection.prototype.setUser = function(user){
