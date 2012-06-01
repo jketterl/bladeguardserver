@@ -19,18 +19,19 @@ BGTSocketConnection.prototype.sendUpdates = function(updates){
 	    sorted;
 
 	for (var i in updates) {
-		var category = updates[i].getCategory();
+		var update = updates[i],
+		    category = update.getCategory();
 		if (!this.isSubscribed(category)) continue;
 		sorted = sorted || {};
 		if (typeof(sorted[category]) != 'undefined') {
-			sorted[category].push(updates[i]);
+			sorted[category].push(update);
 		} else {
-			sorted[category] = [updates[i]];
+			sorted[category] = [update];
 		}
 	}
 
 	if (!sorted) return;
-	me.socket.sendUTF(JSON.stringify(sorted));
+	me.socket.sendUTF(JSON.stringify({event:'update', data:sorted}));
 };
 
 BGTSocketConnection.prototype.queueUpdates = function(updates){

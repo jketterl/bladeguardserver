@@ -10,11 +10,11 @@ BGTUpdate.prototype.getData = function() {
 }
 
 BGTUpdate.prototype.toJSON = function() {
-	return JSON.stringify(this.getData());
+	return this.getData();
 }
 
 BGTUpdate.prototype.toString = function() {
-	return this.toJSON();
+	return JSON.stringify(this);
 }
 
 BGTUpdate.prototype.isApplicable = function(conn) {
@@ -51,7 +51,7 @@ BGTLocationUpdate.prototype.getData = function() {
 		},
 		location:{
 			lat:this.user.location.lat,
-			long:this.user.location.lon
+			lon:this.user.location.lon
 		}
 	}
 }
