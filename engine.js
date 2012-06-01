@@ -145,8 +145,7 @@ BGTEngine.prototype.getCurrentData = function(category) {
 	var me = this;
 	switch (category) {
 		case 'movements':
-			var updates = me.getLocationXML(me.user);
-			return updates;
+			return me.getLocationXML(me.users);
 		case 'map':
 			return new BGTUpdate('map', me.getMap());
 		case 'stats':
