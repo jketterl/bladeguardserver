@@ -85,6 +85,7 @@ BGTEngine.prototype.keepAliveUser = function(user) {
 
 BGTEngine.prototype.addMapConnection = function(conn) {
 	var me = this;
+	if (me.connections.indexOf(conn) >= 0) return;
 	this.connections.push(conn);
 	conn.on('close', function() {
 		conn.close();
@@ -96,7 +97,7 @@ BGTEngine.prototype.addMapConnection = function(conn) {
 	conn.on('quit', function() {
 		me.removeUser(conn.getUser());
 	});
-	this.sendCurrentLocations(conn);
+	//this.sendCurrentLocations(conn);
 }
 
 BGTEngine.prototype.removeMapConnection = function(conn) {
@@ -105,6 +106,7 @@ BGTEngine.prototype.removeMapConnection = function(conn) {
 	}
 }
 
+/*
 BGTEngine.prototype.sendCurrentLocations = function(conn) {
 	var me = this;
 	var send = function(){
@@ -119,6 +121,7 @@ BGTEngine.prototype.sendCurrentLocations = function(conn) {
 		map.on('load', send);
 	}
 }
+*/
 
 BGTEngine.prototype.sendLocationUpdates = function(user) {
 	this.sendUpdates(this.getLocationXML([user]));
@@ -126,7 +129,7 @@ BGTEngine.prototype.sendLocationUpdates = function(user) {
 
 BGTEngine.prototype.sendUpdates = function(updates) {
 	for (var i = 0; i < this.connections.length; i++) {
-		this.connections[i].queueUpdates(updates);
+		this.connections[i].sendUpdates(updates);
 	}
 }
 
@@ -136,4 +139,21 @@ BGTEngine.prototype.getLocationXML = function(users) {
 		outputArray.push(new BGTLocationUpdate(users[i]));
 	}
 	return outputArray;
+}
+
+BGTEngine.prototype.getCurrentData = function(category) {
+	var me = this;
+	switch (category) {
+		case 'movements':
+			var updates = me.getLocationXML(me.user);
+			return updates;
+		case 'map':
+			return new BGTUpdate('map', me.getMap());
+		case 'stats':
+			return new BGTStatsUpdate(me.stats.getLatestStats());
+		case 'quit':
+			return false;
+		default:
+			util.log('unable to get current status data for category "' + category + '"');
+	}
 }

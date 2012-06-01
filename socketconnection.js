@@ -7,7 +7,7 @@ BGTSocketConnection = function(socket){
 		me.emit('close');
 	});
 	me.socket.on('message', function(message){
-		me.processMessage(message);
+		me.parseMessage(message);
 	});
 	me.subscribed = [];
 }
@@ -15,6 +15,7 @@ BGTSocketConnection = function(socket){
 util.inherits(BGTSocketConnection, require('events').EventEmitter);
 
 BGTSocketConnection.prototype.sendUpdates = function(updates){
+	if (!(updates instanceof Array)) return this.sendUpdates([updates]);
 	var me = this,
 	    sorted;
 
@@ -34,14 +35,9 @@ BGTSocketConnection.prototype.sendUpdates = function(updates){
 	me.socket.sendUTF(JSON.stringify({event:'update', data:sorted}));
 };
 
-BGTSocketConnection.prototype.queueUpdates = function(updates){
-	if (!(updates instanceof Array)) return this.queueUpdates([updates]);
-	this.sendUpdates(updates);
-};
-
 BGTSocketConnection.prototype.close = function(){};
 
-BGTSocketConnection.prototype.processMessage = function(message){
+BGTSocketConnection.prototype.parseMessage = function(message){
 	var me = this;
 	if (message.type != 'utf8') {
 		console.warn('unsupported message type: "' + message.type + '"');
@@ -111,6 +107,8 @@ BGTSocketConnection.prototype.processQuit = function(data){
 BGTSocketConnection.prototype.processSubscribeUpdates = function(data){
 	if (!data.category || this.isSubscribed(data.category)) return;
 	this.subscribed.push(data.category);
+	var updates = engine.getCurrentData(data.category);
+	if (updates) this.sendUpdates(updates);
 };
 
 BGTSocketConnection.prototype.processUnSubscribeUpdates = function(data){
