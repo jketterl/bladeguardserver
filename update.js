@@ -3,12 +3,16 @@ BGTUpdate = function(category, data) {
 	this.data = data;
 }
 
-BGTUpdate.prototype.getXML = function() {
+BGTUpdate.prototype.getData = function() {
 	return this.data;
 }
 
+BGTUpdate.prototype.toJSON = function() {
+	return JSON.stringify(this.getData());
+}
+
 BGTUpdate.prototype.toString = function() {
-	return this.getXML();
+	return this.toJSON();
 }
 
 BGTUpdate.prototype.isApplicable = function(conn) {
@@ -35,13 +39,18 @@ BGTLocationUpdate.prototype.isApplicable = function(conn) {
 	return true;
 }
 
-BGTLocationUpdate.prototype.getXML = function() {
-	var output = '';
-	output += '<user id="' + this.user.uid + '" name="' + this.user.getName() + '" team="' + this.user.getTeam() + '">';
-	output += '<location><lat>' + this.user.location.lat + '</lat>';
-	output += '<lon>' + this.user.location.lon + '</lon></location>';
-	output += '</user>';
-	return output;
+BGTLocationUpdate.prototype.getData = function() {
+	return {
+		user:{
+			id:this.user.uid,
+			name:this.user.getName(),
+			team:this.user.getTeam()
+		},
+		location:{
+			lat:this.user.location.lat,
+			long:this.user.location.lon
+		}
+	}
 }
 
 BGTLocationUpdate.prototype.getCategory = function() {
