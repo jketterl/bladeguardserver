@@ -43,11 +43,12 @@ BGTSocketConnection.prototype.processMessage = function(message){
 		console.warn('message could not be parsed (no command)');
 		return false;
 	}
-	if (typeof(this['process' + data.command]) != 'function') {
+	var fn = this['process' + data.command];
+	if (typeof(fn) != 'function') {
 		console.warn('unknown command:"' + data.command + '"');
 		return false;
 	}
-	return this['process' + data.command](data.data || {}, function(success){
+	var callback = function(success){
 		var response = {success:true};
 		if (typeof(success) == 'boolean') response.success = success;
 		if (util.isError(success)) {
@@ -56,14 +57,18 @@ BGTSocketConnection.prototype.processMessage = function(message){
 				message:success.message
 			};
 		}
-		if (data.requestId) response.requestId = data.requestId;
+		if (typeof(data.requestId) != 'undefined') response.requestId = data.requestId;
 		me.socket.sendUTF(JSON.stringify(response));
-	});
+	};
+	if (fn.length > 1) {
+		return fn.apply(this, [data.data || {}, callback]);
+	} else {
+		return callback(fn.apply(this, [data.data || {}]));
+	}
 };
 
-BGTSocketConnection.prototype.processlog = function(data, callback){
+BGTSocketConnection.prototype.processlog = function(data){
 	this.emit('location', new BGTLocation(data));
-	process.nextTick(callback);
 };
 
 BGTSocketConnection.prototype.processauth = function(data, callback){
@@ -85,10 +90,14 @@ BGTSocketConnection.prototype.processauth = function(data, callback){
 	});
 };
 
+BGTSocketConnection.prototype.processquit = function(data){
+	this.emit('quit');
+};
+
 BGTSocketConnection.prototype.setUser = function(user){
 	this.user = user;
 	return this;
-}
+};
 
 BGTSocketConnection.prototype.getUser = function(){
 	if (!this.user) {

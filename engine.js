@@ -86,6 +86,9 @@ BGTEngine.prototype.addMapConnection = function(conn) {
 	conn.on('location', function(location) {
 		me.updateUserLocation(conn.getUser(), location);
 	});
+	conn.on('quit', function() {
+		me.removeUser(conn.getUser());
+	});
 	this.sendCurrentLocations(conn);
 }
 
