@@ -5,11 +5,11 @@ var util = require('util');
 
 BGTMap = function(id) {
 	var parser = new xml2js.Parser();
-	this.points = [];
-	var p = this.points;
+	var p = this.points = [];
 	var me = this;
 	this.loadCallbacks = [];
 	this.name = BGTMap.maps[id];
+	me.loaded = false;
 
 	parser.addListener('end', function(result) {
 		var previousLocation;
@@ -34,6 +34,8 @@ BGTMap = function(id) {
 		for (var i = 0; i < me.loadCallbacks.length; i++) {
 			me.loadCallbacks[i]();
 		}
+		me.emit('load');
+		me.loaded = true;
 	});
 	fs.readFile('/home/ec2-user/maps/' + BGTMap.maps[id] + '.gpx', function(err, data) {
 		if (err) {
@@ -44,6 +46,8 @@ BGTMap = function(id) {
 		parser.parseString(data);
 	});
 };
+
+util.inherits(BGTMap, require('events').EventEmitter);
 
 BGTMap.loadedMaps = [];
 
@@ -62,26 +66,6 @@ BGTMap.maps = [
 	'Strecke Familie',
 	'Strecke Familienbladenight Unterhaching'
 ];
-
-BGTMap.prototype.getMapXML = function(callback) {
-	if (this.points.length == 0) {
-		var me = this;
-		this.loadCallbacks.push(function(){
-			me.getMapXML(callback);
-		});
-	}
-
-	
-	var xml = '<gpx xmlns="http://www.topografix.com/GPX/1/1" creator="BladeGuardTracker" version="1.1">\n'+
-		  '<rte>';
-
-	for (var i = 0; i < this.points.length; i++) {
-		xml += '<rtept lat="' + this.points[i].lat + '" lon="' + this.points[i].lon + '" />';
-	}
-
-	xml += '</rte></gpx>';
-	callback(null, xml);
-}
 
 BGTMap.prototype.getCandidatesForLocation = function(location) {
 	var candidates = [];
@@ -131,4 +115,15 @@ BGTMap.prototype.getDistanceBetween = function(i1, i2) {
 		if (index >= this.points.length) index = 0;
 	}
 	return distance;
+}
+
+BGTMap.prototype.toJSON = function(){
+	return {
+		name:this.name,
+		points:this.points
+	};
+}
+
+BGTMap.prototype.toString = function(){
+	return JSON.stringify(this.toJSON);
 }

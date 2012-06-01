@@ -24,6 +24,12 @@ BGTEngine.prototype.setMap = function(map) {
 	util.log('setting new map: ' + map.name);
 	this.map = map;
 	var me = this;
+	if (map.loaded) {
+		me.sendUpdates(new BGTUpdate('map', map));
+	} else map.on('load', function(){
+		me.sendUpdates(new BGTUpdate('map', map));
+	});
+	/*
 	map.getMapXML(function(err, xml){
 		me.sendUpdates(new BGTUpdate('map', xml));
 	});
@@ -31,6 +37,7 @@ BGTEngine.prototype.setMap = function(map) {
 		var user = this.users[i];
 		if (user.hasPosition() && user.position.map != this.map) user.resetPosition();
 	}
+	*/
 }
 
 BGTEngine.prototype.addUser = function(user) {
@@ -100,12 +107,17 @@ BGTEngine.prototype.removeMapConnection = function(conn) {
 
 BGTEngine.prototype.sendCurrentLocations = function(conn) {
 	var me = this;
-	this.getMap().getMapXML(function(err, xml){
+	var send = function(){
 		updates = me.getLocationXML(me.users);
-		updates.push(new BGTUpdate('map', xml));
+		updates.push(new BGTUpdate('map', me.map));
 		updates.push(new BGTStatsUpdate(me.stats.getLatestStats()));
 		conn.sendUpdates(updates);
-	});
+	};
+	if (this.map.loaded) {
+		send();
+	} else {
+		map.on('load', send);
+	}
 }
 
 BGTEngine.prototype.sendLocationUpdates = function(user) {
