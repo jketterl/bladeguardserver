@@ -14,10 +14,19 @@ BGTSocketConnection = function(socket){
 util.inherits(BGTSocketConnection, require('events').EventEmitter);
 
 BGTSocketConnection.prototype.sendUpdates = function(updates){
-	var me = this;
-	updates.forEach(function(update){
-		me.socket.sendUTF(update.toString());
-	});
+	var me = this,
+	    sorted = {};
+
+	for (var i in updates) {
+		var category = updates[i].getCategory();
+		if (typeof(sorted[category]) != 'undefined') {
+			sorted[category].push(updates[i]);
+		} else {
+			sorted[category] = [updates[i]];
+		}
+	}
+
+	me.socket.sendUTF(JSON.stringify(sorted));
 };
 
 BGTSocketConnection.prototype.queueUpdates = function(updates){

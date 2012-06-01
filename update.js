@@ -29,6 +29,7 @@ BGTUpdate.prototype.getCategory = function() {
 
 BGTLocationUpdate = function(user) {
 	this.user = user;
+	this.category = 'movements';
 }
 
 BGTLocationUpdate.prototype = new BGTUpdate;
@@ -55,12 +56,9 @@ BGTLocationUpdate.prototype.getData = function() {
 	}
 }
 
-BGTLocationUpdate.prototype.getCategory = function() {
-	return 'movements';
-}
-
 BGTStatsUpdate = function(stats) {
 	this.stats = stats;
+	this.category = 'stats';
 }
 
 util.inherits(BGTStatsUpdate, BGTUpdate);
