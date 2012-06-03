@@ -55,7 +55,7 @@ BGTSocketConnection.prototype.parseMessage = function(message){
 	}
 	var fn = this['process' + data.command.charAt(0).toUpperCase() + data.command.slice(1)];
 	if (typeof(fn) != 'function') {
-		util.log('unknown command:"' + data.command + '"');
+		util.log('unknown command: "' + data.command + '"');
 		return false;
 	}
 	var callback = function(success){
@@ -119,12 +119,19 @@ BGTSocketConnection.prototype.processUnSubscribeUpdates = function(data){
 };
 
 BGTSocketConnection.prototype.processGetMaps = function(data){
+	if (!this.getUser().isAdmin()) return new Error('only admin users are allowed to list maps.');
 	result = [];
 	for (var i in BGTMap.maps) {
 		result.push({id:i,name:BGTMap.maps[i]});
 	}
 	return result;
 }
+
+BGTSocketConnection.prototype.processSetMap = function(data){
+	if (!this.getUser().isAdmin()) return new Error('only admin users can switch the map');
+	if (typeof(data.id) == 'undefined') return new Error("Missing map id!");
+	engine.setMap(BGTMap.getMap(data.id));
+};
 
 BGTSocketConnection.prototype.isSubscribed = function(category){
 	return this.subscribed.indexOf(category) >= 0;
