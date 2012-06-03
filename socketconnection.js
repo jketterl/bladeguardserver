@@ -40,7 +40,7 @@ BGTSocketConnection.prototype.close = function(){};
 BGTSocketConnection.prototype.parseMessage = function(message){
 	var me = this;
 	if (message.type != 'utf8') {
-		console.warn('unsupported message type: "' + message.type + '"');
+		util.warn('unsupported message type: "' + message.type + '"');
 		return false;
 	}
 	var data = false;
@@ -50,12 +50,12 @@ BGTSocketConnection.prototype.parseMessage = function(message){
 		return false;
 	}
 	if (!data.command) {
-		console.warn('message could not be parsed (no command)');
+		util.log('message could not be parsed (no command)');
 		return false;
 	}
 	var fn = this['process' + data.command.charAt(0).toUpperCase() + data.command.slice(1)];
 	if (typeof(fn) != 'function') {
-		console.warn('unknown command:"' + data.command + '"');
+		util.log('unknown command:"' + data.command + '"');
 		return false;
 	}
 	var callback = function(success){
@@ -66,6 +66,8 @@ BGTSocketConnection.prototype.parseMessage = function(message){
 			response.data = {
 				message:success.message
 			};
+		} else {
+			response.data = success;
 		}
 		if (typeof(data.requestId) != 'undefined') response.requestId = data.requestId;
 		me.socket.sendUTF(JSON.stringify(response));
@@ -115,6 +117,14 @@ BGTSocketConnection.prototype.processUnSubscribeUpdates = function(data){
 	if (!data.category || !this.isSubscribed(data.category)) return;
 	this.subscribed.splice(this.subscribed.indexOf(data.category), 1);
 };
+
+BGTSocketConnection.prototype.processGetMaps = function(data){
+	result = [];
+	for (var i in BGTMap.maps) {
+		result.push({id:i,name:BGTMap.maps[i]});
+	}
+	return result;
+}
 
 BGTSocketConnection.prototype.isSubscribed = function(category){
 	return this.subscribed.indexOf(category) >= 0;
