@@ -138,6 +138,13 @@ BGTSocketConnection.prototype.processSetMap = function(data){
 	engine.setMap(BGTMap.getMap(data.id));
 };
 
+BGTSocketConnection.prototype.processGetTeams = function(data, callback){
+	db.query().select('id, name').from('team').where('active').execute(function(err, rows){
+		if (err) return callback(err);
+		callback(rows);
+	});
+};
+
 BGTSocketConnection.prototype.isSubscribed = function(category){
 	return this.subscribed.indexOf(category) >= 0;
 };
