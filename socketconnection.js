@@ -39,27 +39,8 @@ BGTSocketConnection.prototype.sendUpdates = function(updates){
 BGTSocketConnection.prototype.close = function(){};
 
 BGTSocketConnection.prototype.parseMessage = function(message){
-	var me = this;
-	if (message.type != 'utf8') {
-		util.warn('unsupported message type: "' + message.type + '"');
-		return false;
-	}
-	var data = false;
-	try {
-		data = JSON.parse(message.utf8Data);
-	} catch (e) {
-		return false;
-	}
-	if (!data.command) {
-		util.log('message could not be parsed (no command)');
-		return false;
-	}
-	var fn = this['process' + data.command.charAt(0).toUpperCase() + data.command.slice(1)];
-	if (typeof(fn) != 'function') {
-		util.log('unknown command: "' + data.command + '"');
-		return false;
-	}
-	var callback = function(success){
+	var me = this,
+	    callback = function(success){
 		var response = {success:true};
 		if (typeof(success) == 'boolean') response.success = success;
 		if (util.isError(success)) {
@@ -73,6 +54,25 @@ BGTSocketConnection.prototype.parseMessage = function(message){
 		if (typeof(data.requestId) != 'undefined') response.requestId = data.requestId;
 		me.socket.sendUTF(JSON.stringify(response));
 	};
+	if (message.type != 'utf8') {
+		util.warn('unsupported message type: "' + message.type + '"');
+		return callback(new Error('unsupported message type: "' + message.type + '"'));
+	}
+	var data = false;
+	try {
+		data = JSON.parse(message.utf8Data);
+	} catch (e) {
+		return callback(false);
+	}
+	if (!data.command) {
+		util.log('message could not be parsed (no command)');
+		return callback(new Error('message could not be parsed (no command)'));
+	}
+	var fn = this['process' + data.command.charAt(0).toUpperCase() + data.command.slice(1)];
+	if (typeof(fn) != 'function') {
+		util.log('unknown command: "' + data.command + '"');
+		return callback(new Error('unknown command: "' + data.command + '"'));
+	}
 	if (fn.length > 1) {
 		return fn.apply(this, [data.data || {}, callback]);
 	} else {
