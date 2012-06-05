@@ -23,6 +23,7 @@ BGTSocketConnection.prototype.sendUpdates = function(updates){
 		var update = updates[i],
 		    category = update.getCategory();
 		if (!this.isSubscribed(category)) continue;
+		if (!update.isApplicable(this)) continue;
 		sorted = sorted || {};
 		if (typeof(sorted[category]) != 'undefined') {
 			sorted[category].push(update);
@@ -103,6 +104,10 @@ BGTSocketConnection.prototype.processAuth = function(data, callback){
 };
 
 BGTSocketConnection.prototype.processQuit = function(data){
+	this.emit('quit');
+};
+
+BGTSocketConnection.prototype.processGpsUnavailable = function(data){
 	this.emit('quit');
 };
 

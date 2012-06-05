@@ -74,3 +74,7 @@ BGTConnection.prototype.close = function() {
 	if (this.timeout) clearTimeout(this.timeout);
 	if (this.writeInterval) clearInterval(this.writeInterval);
 }
+
+BGTConnection.prototype.getUser = function(){
+	return this.request.session.getData().user;
+};

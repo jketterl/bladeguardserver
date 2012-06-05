@@ -36,8 +36,8 @@ BGTLocationUpdate.prototype = new BGTUpdate;
 
 BGTLocationUpdate.prototype.isApplicable = function(conn) {
 	if (!this.user.location) return false;
-	if (conn.request.session.getData().user) {
-		if (conn.request.session.getData().user == this.user) return false;
+	if (conn.getUser()) {
+		if (conn.getUser() == this.user) return false;
 	}
 	return true;
 }
