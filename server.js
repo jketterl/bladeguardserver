@@ -4,7 +4,6 @@ require('./engine');
 engine = new BGTEngine();
 require('./router');
 var router = new BGTRouter();
-require('./connection');
 require('./location');
 var util = require('util');
 require('./session');
