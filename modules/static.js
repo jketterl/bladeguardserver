@@ -22,13 +22,21 @@ module.exports.process = function(req){
 				return req.res.end();
 			}
 		}
+		if (req.req.headers['if-modified-since']) {
+			var modified = new Date(req.req.headers['if-modified-since']);
+			if (stats.mtime <= modified) {
+				req.res.writeHead(304);
+				return req.res.end();
+			}
+		}
 		mime.fileWrapper(file, function(err, type){
 			if (err) {
 				req.res.writeHead(503);
 				return req.res.end('internal server error');
 			}
 			req.res.writeHead(200, {
-				'Content-Type':type
+				'Content-Type':type,
+				'Last-Modified':stats.mtime.toGMTString()
 			});
 			var stream = fs.createReadStream(file); 
 			stream.on('error', function(err){
