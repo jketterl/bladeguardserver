@@ -1,4 +1,5 @@
 var fs = require('fs');
+var mime = require('mime-magic');
 
 module.exports.process = function(req){
 	var me = this,
@@ -21,12 +22,21 @@ module.exports.process = function(req){
 				return req.res.end();
 			}
 		}
-		var stream = fs.createReadStream(file); 
-		stream.on('error', function(err){
-			console.info(err.stack);
-			req.res.writeHead(503);
-			req.res.end('filesystem error');
+		mime.fileWrapper(file, function(err, type){
+			if (err) {
+				req.res.writeHead(503);
+				return req.res.end('internal server error');
+			}
+			req.res.writeHead(200, {
+				'Content-Type':type
+			});
+			var stream = fs.createReadStream(file); 
+			stream.on('error', function(err){
+				console.info(err.stack);
+				req.res.writeHead(503);
+				req.res.end('filesystem error');
+			});
+			stream.pipe(req.res);
 		});
-		stream.pipe(req.res);
 	});
 };
