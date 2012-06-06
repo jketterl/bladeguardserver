@@ -12,11 +12,30 @@ Ext.onReady(function(){
 		model:'BGT.Event'
 	});
 
+	var dockedItems = [];
+	['movements', 'stats', 'quit', 'map'].forEach(function(category){
+		dockedItems.push({
+			xtype:'checkbox',
+			boxLabel:category,
+			listeners:{
+				change:function(checkbox, checked){
+					method = (checked ? '' : 'un') + 'subscribe';
+					socket[method](category); 
+				}
+			}
+		});
+	});
+
 	Ext.create('Ext.container.Viewport', {
 		layout:'fit',
 		items:[Ext.create('Ext.grid.Panel',{
 			title:'Debugging console',
 			store:store,
+			dockedItems:[{
+				dock:'top',
+				xtype:'toolbar',
+				items:dockedItems
+			}],
 			columns:[
 				{header:'Timestamp', dataIndex:'timestamp', xtype:'datecolumn', format:'d.m.Y H:i:s', width:150},
 				{header:'Typ', dataIndex:'type'},
@@ -35,8 +54,9 @@ Ext.onReady(function(){
 		while (store.getCount() > 30) store.removeAt(30);
 	};
 
+	var socket;
 	var connect = function(){
-		var socket = new WebSocket('wss://' + location.hostname + '/bgt/socket');
+		socket = new WebSocket('wss://' + location.hostname + '/bgt/socket');
 		socket.subscribe = function(category){
 			var me = this;
 			if (category instanceof Array) return category.forEach(function(category){
@@ -47,9 +67,19 @@ Ext.onReady(function(){
 				data:{category:category}
 			}));
 		};
+		socket.unsubscribe = function(category){
+			var me = this;
+			if (category instanceof Array) return category.forEach(function(category){
+				me.subscribe(category);
+			});
+			me.send(JSON.stringify({
+				command:'unSubscribeUpdates',
+				data:{category:category}
+			}));
+		};
 		socket.onopen = function(){
 			pushToStore('socket connected!');
-			socket.subscribe(['movements', 'quit', 'map', 'stats']);
+			//socket.subscribe(['movements', 'quit', 'map', 'stats']);
 		};
 		socket.onmessage = function(message){
 			pushToStore('message received' , message.data);
