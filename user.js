@@ -225,3 +225,15 @@ BGTUser.prototype.getTeam = function() {
 BGTUser.prototype.toString = function() {
 	return this.getName();
 }
+
+BGTUser.prototype.setTeam = function(id, callback) {
+	var me = this;
+	db.query().select('name').from('team').where('id = ?', [id]).execute(function(err, result){
+		if (err) return callback(err);
+		if (result.length == 0) return callback(new Error("Team not found."));
+		me.team_name = result[0].name;
+		db.query().update('users').set({team_id:id}).where('id = ?', [me.uid]).execute(function(err, result){
+			return callback(err ? err : true);
+		});
+	});
+};
