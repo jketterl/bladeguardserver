@@ -168,6 +168,12 @@ BGTSocketConnection.prototype.processSignup = function(data, callback){
 	});
 };
 
+BGTSocketConnection.prototype.processGetEvents = function(data, callback){
+	db.query().select('id, title, start').from('event').where('start >= ?', [new Date()]).order({start:'ASC'}).execute(function(err, results){
+		callback(err ? err : results);
+	});
+};
+
 BGTSocketConnection.prototype.isSubscribed = function(category){
 	return this.subscribed.indexOf(category) >= 0;
 };
