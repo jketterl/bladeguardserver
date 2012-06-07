@@ -174,6 +174,20 @@ BGTSocketConnection.prototype.processGetEvents = function(data, callback){
 	});
 };
 
+BGTSocketConnection.prototype.processEnableControl = function(data){
+	util.log("incoming control request");
+	var me = this;
+	setTimeout(function(){
+		me.socket.sendUTF(JSON.stringify({command:"shutdown"}));
+	}, 10000);
+	this.controlled = true;
+};
+
+BGTSocketConnection.prototype.processDisableControl = function(data){
+	util.log("control session ended");
+	this.controlled = false;
+};
+
 BGTSocketConnection.prototype.isSubscribed = function(category){
 	return this.subscribed.indexOf(category) >= 0;
 };
