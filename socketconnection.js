@@ -37,6 +37,10 @@ BGTSocketConnection.prototype.sendUpdates = function(updates){
 	me.socket.sendUTF(JSON.stringify({event:'update', data:sorted}));
 };
 
+BGTSocketConnection.prototype.sendCommand = function(command, data) {
+	this.socket.sendUTF(JSON.stringify({command:command, data:data || {}}));
+};
+
 BGTSocketConnection.prototype.close = function(){};
 
 BGTSocketConnection.prototype.parseMessage = function(message){
@@ -168,19 +172,19 @@ BGTSocketConnection.prototype.processSignup = function(data, callback){
 	});
 };
 
-BGTSocketConnection.prototype.processGetEvents = function(data, callback){
-	db.query().select('id, title, start').from('event').where('start >= ?', [new Date()]).order({start:'ASC'}).execute(function(err, results){
-		callback(err ? err : results);
-	});
+BGTSocketConnection.prototype.processGetEvents = function(data){
+	return BGTEvent.getAll();
 };
 
 BGTSocketConnection.prototype.processEnableControl = function(data){
 	util.log("incoming control request");
 	var me = this;
-	setTimeout(function(){
-		me.socket.sendUTF(JSON.stringify({command:"shutdown"}));
-	}, 10000);
-	this.controlled = true;
+	try {
+		BGTEvent.get(data.eventId).registerConnection(me);
+		this.controlled = true;
+	} catch (e) {
+		return e;
+	}
 };
 
 BGTSocketConnection.prototype.processDisableControl = function(data){

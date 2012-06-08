@@ -23,6 +23,9 @@ BGTEvent.loadAll = function(callback) {
 		if (err) return callback(err);
 		for (var i = 0; i < results.length; i++) {
 			var event = new BGTEvent(results[i]);
+			event.once('end', function(){
+				me.events.splice(event.id, 1);
+			});
 			me.events[event.id] = event;
 		}
 		callback();

@@ -9,6 +9,7 @@ var util = require('util');
 require('./session');
 var WebSocketServer = require('websocket').server;
 require('./socketconnection');
+require('./event.js');
 
 db = new (require('db-mysql').Database)({
 	hostname:'localhost',
@@ -23,27 +24,34 @@ db.connect(function(err){
 		return;
 	}
 
-	var options = {
-		key: fs.readFileSync('/home/ec2-user/keys/server.key'),
-		cert: fs.readFileSync('/home/ec2-user/keys/server.crt')
-	};
+	BGTEvent.loadAll(function(err){
+		if (err) {
+			util.log('could not load event data from database; exiting.');
+			return;
+		}
 
-	var httpServer = https.createServer(options, function (req, res) {
-  		util.log('connect: ' + req.connection.socket.remoteAddress + ' requests ' + req.url + ' (' + req.headers['user-agent'] + ')');
-		var request = router.parse(req.url);
-		request.req = req; request.res = res;
-		// automatic session reconnect (!)
-		BGTSession.processRequest(request);
-		var module = engine.loadModule(request);
-		module.process(request);
-	}).listen(443);
+		var options = {
+			key: fs.readFileSync('/home/ec2-user/keys/server.key'),
+			cert: fs.readFileSync('/home/ec2-user/keys/server.crt')
+		};
 
-	var wsServer = new WebSocketServer({
-		httpServer:httpServer
-	});
+		var httpServer = https.createServer(options, function (req, res) {
+			util.log('connect: ' + req.connection.socket.remoteAddress + ' requests ' + req.url + ' (' + req.headers['user-agent'] + ')');
+			var request = router.parse(req.url);
+			request.req = req; request.res = res;
+			// automatic session reconnect (!)
+			BGTSession.processRequest(request);
+			var module = engine.loadModule(request);
+			module.process(request);
+		}).listen(443);
 
-	wsServer.on('request', function(request){
-		var connection = new BGTSocketConnection(request.accept());
-		engine.addMapConnection(connection);
+		var wsServer = new WebSocketServer({
+			httpServer:httpServer
+		});
+
+		wsServer.on('request', function(request){
+			var connection = new BGTSocketConnection(request.accept());
+			engine.addMapConnection(connection);
+		});
 	});
 });
