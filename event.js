@@ -8,7 +8,7 @@ BGTEvent = function(data){
 	setTimeout(function(){
 		me.doStart();
 	}, this.start - date);
-	this.connections = [];
+	//this.connections = [];
 };
 
 var util = require('util');
@@ -19,7 +19,7 @@ BGTEvent.events = [];
 
 BGTEvent.loadAll = function(callback) {
 	var me = this;
-	db.query().select('id, title, start').from('event').where('start >= ?', [new Date()]).execute(function(err, results){
+	db.query().select('id, title, start, end').from('event').where('start >= ?', [new Date()]).execute(function(err, results){
 		if (err) return callback(err);
 		for (var i = 0; i < results.length; i++) {
 			var event = new BGTEvent(results[i]);
@@ -44,8 +44,8 @@ BGTEvent.getAll = function() {
 };
 
 BGTEvent.prototype.registerConnection = function(conn){
-	if (this.connections.indexOf(conn) >= 0) return;
-	this.connections.push(conn);
+	//if (this.connections.indexOf(conn) >= 0) return;
+	//this.connections.push(conn);
 	if (this.started) {
 		conn.sendCommand('enableGPS');
 	} else {
@@ -64,9 +64,10 @@ BGTEvent.prototype.doStart = function(){
 	this.started = true;
 	this.emit('start');
 	var me = this;
+	var date = new Date();
 	setTimeout(function(){
 		me.doEnd();
-	}, 60000);
+	}, this.end - date);
 };
 
 BGTEvent.prototype.doEnd = function(){
