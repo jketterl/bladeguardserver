@@ -117,15 +117,33 @@ BGTSocketConnection.prototype.processGpsUnavailable = function(data){
 };
 
 BGTSocketConnection.prototype.processSubscribeUpdates = function(data){
-	if (!data.category || this.isSubscribed(data.category)) return;
-	this.subscribed.push(data.category);
-	var updates = engine.getCurrentData(data.category);
+	if (!data.category) return;
+	return this.subscribe(data.category);
+};
+
+BGTSocketConnection.prototype.subscribe = function(category) {
+	var me = this;
+	if (category instanceof Array) return category.forEach(function(category){
+		me.subscribe(category);
+	});
+	if (this.isSubscribed(category)) return;
+	this.subscribed.push(category);
+	var updates = engine.getCurrentData(category);
 	if (updates) this.sendUpdates(updates);
 };
 
 BGTSocketConnection.prototype.processUnSubscribeUpdates = function(data){
-	if (!data.category || !this.isSubscribed(data.category)) return;
-	this.subscribed.splice(this.subscribed.indexOf(data.category), 1);
+	if (!data.category) return;
+	return this.unsubscribe(data.category);
+};
+
+BGTSocketConnection.prototype.unsubscribe = function(category) {
+	var me = this;
+	if (category instanceof Array) return category.forEach(function(category){
+		me.unsubscribe(category);
+	});
+	if (!this.isSubscribed(category)) return;
+	this.subscribed.splice(this.subscribed.indexOf(category), 1);
 };
 
 BGTSocketConnection.prototype.processGetMaps = function(data){
