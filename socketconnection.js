@@ -211,6 +211,12 @@ BGTSocketConnection.prototype.processDisableControl = function(data){
 	this.controlled = false;
 };
 
+BGTSocketConnection.prototype.processStartEvent = function(data){
+	if (!this.getUser().isAdmin()) return new Error('only admin users are allowed to start events');
+	if (typeof(data.eventId) == 'undefined') return new Error('event id missing');
+	BGTEvent.get(data.eventId).doStart();
+};
+
 BGTSocketConnection.prototype.isSubscribed = function(category){
 	return this.subscribed.indexOf(category) >= 0;
 };

@@ -5,9 +5,9 @@ BGTEvent = function(data){
 	}
 	me.started = false;
 	var date = new Date();
-	setTimeout(function(){
+	/*setTimeout(function(){
 		me.doStart();
-	}, this.start - date);
+	}, this.start - date);*/
 	//this.connections = [];
 };
 
@@ -22,8 +22,6 @@ BGTEvent.loadAll = function(callback) {
 	db.query().select('id, title, start, end').from('event').where('start >= ?', [new Date()]).execute(function(err, results){
 		if (err) return callback(err);
 		results.forEach(function(event){
-		//for (var i = 0; i < results.length; i++) {
-			//var event = new BGTEvent(results[i]);
 			event = new BGTEvent(event);
 			event.once('end', function(){
 				me.events.splice(event.id, 1);
@@ -48,10 +46,7 @@ BGTEvent.getAll = function() {
 BGTEvent.prototype.registerConnection = function(conn){
 	//if (this.connections.indexOf(conn) >= 0) return;
 	//this.connections.push(conn);
-	var now = new Date();
-	// do not accept connections that are too far ahead in the future
-	// allow connections 2h5min before event start
-	if (this.start - now > 7250000) throw new Error('Event is not open for control connections yet.');
+	if (!this.isActive) throw new Error('Event is not open for control connections yet.');
 	if (this.started) {
 		conn.sendCommand('enableGPS');
 	} else {
@@ -63,6 +58,13 @@ BGTEvent.prototype.registerConnection = function(conn){
 		conn.sendCommand('shutdown');
 	});
 };
+
+BGTEvent.prototype.isActive = function(){
+	var now = new Date();
+	// do not accept connections that are too far ahead in the future
+	// allow connections 2h5min before event start
+	return this.start - now <= 7250000;
+}
 
 BGTEvent.prototype.doStart = function(){
 	if (this.started) return;
