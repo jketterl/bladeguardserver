@@ -47,7 +47,7 @@ BGTEvent.prototype.registerConnection = function(conn){
 	//if (this.connections.indexOf(conn) >= 0) return;
 	//this.connections.push(conn);
 	if (!this.isActive) throw new Error('Event is not open for control connections yet.');
-	if (this.started) {
+	if (this.started && !this.paused) {
 		conn.sendCommand('enableGPS');
 	} else {
 		this.once('start', function(){
@@ -56,6 +56,12 @@ BGTEvent.prototype.registerConnection = function(conn){
 	}
 	this.once('end', function(){
 		conn.sendCommand('shutdown');
+	});
+	this.on('pause', function(){
+		conn.sendCommand('disableGPS');
+	});
+	this.on('resume', function(){
+		conn.sendCommand('enableGPS');
 	});
 };
 
@@ -67,6 +73,7 @@ BGTEvent.prototype.isActive = function(){
 }
 
 BGTEvent.prototype.doStart = function(){
+	if (this.paused) return this.resume();
 	if (this.started) return;
 	util.log('Starting event: ' + this.title);
 	this.started = true;
@@ -83,4 +90,18 @@ BGTEvent.prototype.doEnd = function(){
 	this.started = false;
 	this.emit('end');
 	util.log('Event ended: ' + this.title);
+};
+
+BGTEvent.prototype.pause = function(){
+	if (this.paused) return;
+	util.log('Pausing event: ' + this.title);
+	this.emit('pause');
+	this.paused = true;
+};
+
+BGTEvent.prototype.resume = function(){
+	if (!this.paused) return;
+	util.log('Resuming event: ' + this.title);
+	this.emit('resume');
+	this.paused = false;
 };
