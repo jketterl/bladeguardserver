@@ -56,11 +56,12 @@ BGTSocketConnection.prototype.parseMessage = function(message){
 		} else {
 			response.data = success;
 		}
-		if (typeof(data.requestId) != 'undefined') response.requestId = data.requestId;
+		if (data && typeof(data.requestId) != 'undefined') response.requestId = data.requestId;
 		me.socket.sendUTF(JSON.stringify(response));
 	};
 	if (message.type != 'utf8') {
-		util.warn('unsupported message type: "' + message.type + '"');
+		util.log('unsupported message type: "' + message.type + '"');
+		console.info(message);
 		return callback(new Error('unsupported message type: "' + message.type + '"'));
 	}
 	var data = false;
