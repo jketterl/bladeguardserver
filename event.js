@@ -48,6 +48,10 @@ BGTEvent.getAll = function() {
 BGTEvent.prototype.registerConnection = function(conn){
 	//if (this.connections.indexOf(conn) >= 0) return;
 	//this.connections.push(conn);
+	var now = new Date();
+	// do not accept connections that are too far ahead in the future
+	// allow connections 2h5min before event start
+	if (this.start - now > 7250000) throw new Error('Event is not open for control connections yet.');
 	if (this.started) {
 		conn.sendCommand('enableGPS');
 	} else {
