@@ -21,13 +21,15 @@ BGTEvent.loadAll = function(callback) {
 	var me = this;
 	db.query().select('id, title, start, end').from('event').where('start >= ?', [new Date()]).execute(function(err, results){
 		if (err) return callback(err);
-		for (var i = 0; i < results.length; i++) {
-			var event = new BGTEvent(results[i]);
+		results.forEach(function(event){
+		//for (var i = 0; i < results.length; i++) {
+			//var event = new BGTEvent(results[i]);
+			event = new BGTEvent(event);
 			event.once('end', function(){
 				me.events.splice(event.id, 1);
 			});
 			me.events[event.id] = event;
-		}
+		});
 		callback();
 	});
 }
