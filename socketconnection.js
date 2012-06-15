@@ -207,6 +207,11 @@ BGTSocketConnection.prototype.processEnableControl = function(data){
 };
 
 BGTSocketConnection.prototype.processDisableControl = function(data){
+	try {
+		BGTEvent.get(data.eventId).unregisterConnection(this);
+	} catch (e) {
+		return e;
+	}
 	util.log("control session ended");
 	this.controlled = false;
 };

@@ -5,10 +5,39 @@ BGTEvent = function(data){
 	}
 	me.started = false;
 	var date = new Date();
-	/*setTimeout(function(){
-		me.doStart();
-	}, this.start - date);*/
-	//this.connections = [];
+	setTimeout(function(){
+		me.activate();
+	}, this.start - 7500000 - date);
+	
+	var connections = [];
+
+	me.registerConnection = function(conn){
+		if (!this.isActive) throw new Error('Event is not open for control connections yet.');
+		if (connections.indexOf(conn) >= 0) return;
+		connections.push(conn);
+		if (this.started && !this.paused) {
+			conn.sendCommand('enableGPS');
+		};
+	};
+
+	me.unregisterConnection = function(conn){
+		var index;
+		if ((index = connections.indexOf(conn)) < 0) return;
+		connections.splice(index, 1);
+	};
+
+	var sendCommand = function(command){
+		return function(){
+			connections.forEach(function(conn){
+				conn.sendCommand(command);
+			});
+		};
+	};
+
+	this.on('start', sendCommand('enableGPS'));
+	this.on('end', sendCommand('shutdown'));
+	this.on('pause', sendCommand('disableGPS'));
+	this.on('resume', sendCommand('enableGPS'));
 };
 
 var util = require('util');
@@ -43,33 +72,8 @@ BGTEvent.getAll = function() {
 	return result;
 };
 
-BGTEvent.prototype.registerConnection = function(conn){
-	//if (this.connections.indexOf(conn) >= 0) return;
-	//this.connections.push(conn);
-	if (!this.isActive) throw new Error('Event is not open for control connections yet.');
-	if (this.started && !this.paused) {
-		conn.sendCommand('enableGPS');
-	} else {
-		this.once('start', function(){
-			conn.sendCommand('enableGPS');
-		})
-	}
-	this.once('end', function(){
-		conn.sendCommand('shutdown');
-	});
-	this.on('pause', function(){
-		conn.sendCommand('disableGPS');
-	});
-	this.on('resume', function(){
-		conn.sendCommand('enableGPS');
-	});
-};
-
 BGTEvent.prototype.isActive = function(){
-	var now = new Date();
-	// do not accept connections that are too far ahead in the future
-	// allow connections 2h5min before event start
-	return this.start - now <= 7250000;
+	return this.active == true;
 }
 
 BGTEvent.prototype.doStart = function(){
@@ -104,4 +108,9 @@ BGTEvent.prototype.resume = function(){
 	util.log('Resuming event: ' + this.title);
 	this.emit('resume');
 	this.paused = false;
+};
+
+BGTEvent.prototype.activate = function(){
+	this.active = true;
+	// TODO: load map
 };
