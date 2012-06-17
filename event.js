@@ -15,9 +15,8 @@ BGTEvent = function(data){
 		if (!this.isActive) throw new Error('Event is not open for control connections yet.');
 		if (connections.indexOf(conn) >= 0) return;
 		connections.push(conn);
-		if (this.started && !this.paused) {
-			conn.sendCommand('enableGPS');
-		};
+		// restore last state on connection
+		conn.sendCommand((this.started && !this.paused ? 'en' : 'dis') + 'ableGPS');
 	};
 
 	me.unregisterConnection = function(conn){
