@@ -52,7 +52,7 @@ BGTEvent.loadAll = function(callback) {
 		results.forEach(function(event){
 			event = new BGTEvent(event);
 			event.once('end', function(){
-				me.events.splice(event.id, 1);
+				delete me.events[event.id];
 			});
 			me.events[event.id] = event;
 		});
@@ -76,6 +76,7 @@ BGTEvent.prototype.isActive = function(){
 }
 
 BGTEvent.prototype.doStart = function(){
+	if (!this.isActive()) throw new Error('Event is not active yet.');
 	if (this.paused) return this.resume();
 	if (this.started) return;
 	util.log('Starting event: ' + this.title);
@@ -89,6 +90,7 @@ BGTEvent.prototype.doStart = function(){
 };
 
 BGTEvent.prototype.doEnd = function(){
+	if (!this.isActive()) throw new Error('Event is not active yet.');
 	if (!this.started) return;
 	this.started = false;
 	this.emit('end');
@@ -96,6 +98,7 @@ BGTEvent.prototype.doEnd = function(){
 };
 
 BGTEvent.prototype.pause = function(){
+	if (!this.isActive()) throw new Error('Event is not active yet.');
 	if (this.paused) return;
 	util.log('Pausing event: ' + this.title);
 	this.emit('pause');
@@ -103,6 +106,7 @@ BGTEvent.prototype.pause = function(){
 };
 
 BGTEvent.prototype.resume = function(){
+	if (!this.isActive()) throw new Error('Event is not active yet.');
 	if (!this.paused) return;
 	util.log('Resuming event: ' + this.title);
 	this.emit('resume');

@@ -82,7 +82,11 @@ BGTSocketConnection.prototype.parseMessage = function(message){
 	if (fn.length > 1) {
 		return fn.apply(this, [data.data || {}, callback]);
 	} else {
-		return callback(fn.apply(this, [data.data || {}]));
+		try {
+			return callback(fn.apply(this, [data.data || {}]));
+		} catch (e) {
+			callback(e);
+		}
 	}
 };
 
