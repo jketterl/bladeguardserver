@@ -109,7 +109,7 @@ BGTSocketConnection.prototype.processAuth = function(data, callback){
 		}
 		util.log('user login: ' + user);
 		me.setUser(user);
-		callback(user);
+		callback(user.toJSON());
 	});
 };
 

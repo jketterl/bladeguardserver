@@ -237,3 +237,11 @@ BGTUser.prototype.setTeam = function(id, callback) {
 		});
 	});
 };
+
+BGTUser.prototype.toJSON = function(){
+	var res = {}, me = this;
+	['uid', 'name', 'team_name', 'admin'].forEach(function(offset){
+		res[offset] = me[offset];
+	});
+	return res;
+};
