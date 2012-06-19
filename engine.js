@@ -106,23 +106,6 @@ BGTEngine.prototype.removeMapConnection = function(conn) {
 	}
 }
 
-/*
-BGTEngine.prototype.sendCurrentLocations = function(conn) {
-	var me = this;
-	var send = function(){
-		updates = me.getLocationXML(me.users);
-		updates.push(new BGTUpdate('map', me.map));
-		updates.push(new BGTStatsUpdate(me.stats.getLatestStats()));
-		conn.sendUpdates(updates);
-	};
-	if (this.map.loaded) {
-		send();
-	} else {
-		map.on('load', send);
-	}
-}
-*/
-
 BGTEngine.prototype.sendLocationUpdates = function(user) {
 	this.sendUpdates(this.getLocationXML([user]));
 }
