@@ -11,12 +11,13 @@ var WebSocketServer = require('websocket').server;
 require('./socketconnection');
 require('./event.js');
 
-db = new (require('db-mysql').Database)({
+/*db = new (require('db-mysql').Database)({
 	hostname:'localhost',
 	database:'bladeguardtracker',
 	user:'bgt',
 	password:'bgtiscool'
-});
+});*/
+db = require('./db');
 
 db.connect(function(err){
 	if (err) {

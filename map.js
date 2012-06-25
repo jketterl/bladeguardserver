@@ -4,6 +4,7 @@ require('./location');
 var util = require('util');
 
 BGTMap = function(id) {
+	if (typeof(id) == 'undefined') return;
 	var parser = new xml2js.Parser();
 	var p = this.points = [];
 	var me = this;
