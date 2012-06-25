@@ -1,7 +1,6 @@
 var https = require('https');
 var fs = require('fs');
 require('./engine');
-engine = new BGTEngine();
 require('./router');
 var router = new BGTRouter();
 require('./location');
@@ -25,6 +24,7 @@ db.connect(function(err){
 		return;
 	}
 
+	engine = new BGTEngine();
 	BGTEvent.loadAll(function(err){
 		if (err) {
 			util.log('could not load event data from database; exiting.');

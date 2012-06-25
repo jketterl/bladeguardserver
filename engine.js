@@ -8,7 +8,11 @@ BGTEngine = function(){
 	var me = this;
 	this.users = [];
 	this.connections = [];
-	this.map = BGTMap.getMap(2);
+	// load a default map
+	BGTMap.getMap(1, function(map){
+		if (util.isError(map)) throw map;
+		me.setMap(map);
+	});
 	this.stats = new BGTStatsEngine(this);
 	this.stats.on('stats', function(stats) {
 		me.sendUpdates(new BGTStatsUpdate(stats));
@@ -29,15 +33,6 @@ BGTEngine.prototype.setMap = function(map) {
 	} else map.on('load', function(){
 		me.sendUpdates(new BGTUpdate('map', map));
 	});
-	/*
-	map.getMapXML(function(err, xml){
-		me.sendUpdates(new BGTUpdate('map', xml));
-	});
-	for (var i in this.users) {
-		var user = this.users[i];
-		if (user.hasPosition() && user.position.map != this.map) user.resetPosition();
-	}
-	*/
 }
 
 BGTEngine.prototype.addUser = function(user) {

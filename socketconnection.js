@@ -151,19 +151,22 @@ BGTSocketConnection.prototype.unsubscribe = function(category) {
 	this.subscribed.splice(this.subscribed.indexOf(category), 1);
 };
 
-BGTSocketConnection.prototype.processGetMaps = function(data){
+BGTSocketConnection.prototype.processGetMaps = function(data, callback){
 	if (!this.getUser().isAdmin()) return new Error('only admin users are allowed to list maps.');
-	result = [];
-	for (var i in BGTMap.maps) {
-		result.push({id:i,name:BGTMap.maps[i]});
-	}
-	return result;
+	BGTMap.getMaps(callback);
 }
 
-BGTSocketConnection.prototype.processSetMap = function(data){
+BGTSocketConnection.prototype.processSetMap = function(data, callback){
 	if (!this.getUser().isAdmin()) return new Error('only admin users can switch the map');
 	if (typeof(data.id) == 'undefined') return new Error("Missing map id!");
-	engine.setMap(BGTMap.getMap(data.id));
+	BGTMap.getMap(data.id, function(map){
+		if (util.isError(map)) {
+			util.log(map);
+			return callback(map);
+		}
+		engine.setMap(map);
+		callback(true);
+	});
 };
 
 BGTSocketConnection.prototype.processGetTeams = function(data, callback){

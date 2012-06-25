@@ -1,72 +1,36 @@
-var fs = require('fs');
-var xml2js = require('xml2js');
 require('./location');
 var util = require('util');
 
-BGTMap = function(id) {
-	if (typeof(id) == 'undefined') return;
-	var parser = new xml2js.Parser();
-	var p = this.points = [];
-	var me = this;
-	this.loadCallbacks = [];
-	this.name = BGTMap.maps[id];
-	me.loaded = false;
-
-	parser.addListener('end', function(result) {
-		var previousLocation;
-		var length = 0;
-		for (var i = 0; i < result.rte.rtept.length; i++) {
-			var point = result.rte.rtept[i];
-			var location = new BGTLocation({lat:point['@'].lat, lon:point['@'].lon});
-			if (previousLocation) {
-				var distance = location.getDistanceTo(previousLocation);
-				length += distance;
-				location.distanceToPrevious = distance;
-			}
-			p.push(location);
-			previousLocation = location;
-		}
-		// add distance for first point (loop course)
-		var distance = p[0].getDistanceTo(p[p.length-1]);
-		p[0].distanceToPrevious = distance;
-		length += distance;
-
-		util.log('route length is ' + length);
-		for (var i = 0; i < me.loadCallbacks.length; i++) {
-			me.loadCallbacks[i]();
-		}
-		me.emit('load');
-		me.loaded = true;
-	});
-	fs.readFile('/home/ec2-user/maps/' + BGTMap.maps[id] + '.gpx', function(err, data) {
-		if (err) {
-			util.log(err);
-			// TODO: call loadCallbacks with an err parameter
-			return;
-		}
-		parser.parseString(data);
-	});
-};
+BGTMap = function() {};
 
 util.inherits(BGTMap, require('events').EventEmitter);
 
 BGTMap.loadedMaps = [];
 
-BGTMap.getMap = function(mapId) {
-	if (BGTMap.loadedMaps[mapId]) return BGTMap.loadedMaps[mapId];
-	return BGTMap.loadedMaps[mapId] = new BGTMap(mapId);
-}
+BGTMap.getMap = function(mapId, callback) {
+	if (BGTMap.loadedMaps[mapId]) return process.nextTick(function(){
+		callback(BGTMap.loadedMaps[mapId]);
+	});
+	var map = new BGTMap();
+	BGTMap.loadedMaps[mapId] = map;
+	db.query().select('title').from('map').where('id = ?', [mapId]).execute(function(err, result){
+		if (err) return callback(new Error(err));
+		if (result.length == 0) return callback(new Error('map with id ' + mapId + ' not found'));
+		map.name = result[0].title;
+		db.query().select('lat, lon').from('points').where('map_id = ?', [mapId]).order('seq').execute(function(err, res){
+			if (err) return callback(new Error(err));
+			map.setPoints(res);
+			callback(map);
+		})
+	});
+};
 
-BGTMap.maps = [
-	'Strecke Ost lang',
-	'Strecke Ost kurz',
-	'Strecke West lang',
-	'Strecke West kurz',
-	'Strecke Nord lang',
-	'Strecke Nord kurz',
-	'Strecke Familie',
-	'Strecke Familienbladenight Unterhaching'
-];
+BGTMap.getMaps = function(callback) {
+	db.query().select('id, title as name').from('map').execute(function(err, result){
+		if (err) return callback(err);
+		callback(result);
+	});
+};
 
 BGTMap.prototype.getCandidatesForLocation = function(location) {
 	var candidates = [];
@@ -128,3 +92,29 @@ BGTMap.prototype.toJSON = function(){
 BGTMap.prototype.toString = function(){
 	return JSON.stringify(this.toJSON);
 }
+
+BGTMap.prototype.setPoints = function(points){
+	var me = this,
+	    p = this.points = [];
+	var previousLocation;
+	var length = 0;
+	for (var i = 0; i < points.length; i++) {
+		var point = points[i];
+		var location = new BGTLocation({lat:point.lat, lon:point.lon});
+		if (previousLocation) {
+			var distance = location.getDistanceTo(previousLocation);
+			length += distance;
+			location.distanceToPrevious = distance;
+		}
+		p.push(location);
+		previousLocation = location;
+	}
+	// add distance for first point (loop course)
+	var distance = p[0].getDistanceTo(p[p.length-1]);
+	p[0].distanceToPrevious = distance;
+	length += distance;
+
+	util.log('route length is ' + length);
+	me.loaded = true;
+	me.emit('load');
+};
