@@ -5,6 +5,10 @@ BGTUser = function(uid) {
 	if (typeof(uid) == 'object') for (var a in uid) {
 		this[a] = uid[a];
 	} else this.uid = uid;
+	var hash = crypto.createHash('md5').update('random:' + Math.random()*1000000).digest('hex');
+	this.getHash = function(){
+		return hash;
+	}
 }
 
 var EventEmitter = require('events').EventEmitter;
@@ -41,6 +45,13 @@ BGTUser.getAnonymousUser = function() {
         } while (BGTUser.hasUser(random));
         return BGTUser.addUser(new BGTUser(random));
 }
+
+BGTUser.getOlivierUser = function() {
+	var user = this.getAnonymousUser();
+	user.name = 'OUser #' + user.uid;
+	user.foreignServer = true;
+	return user;
+};
 
 BGTUser.hasUser = function(uid) {
         return typeof(BGTUser.users[uid]) != 'undefined';

@@ -11,21 +11,31 @@ BGTBridge.Olivier = function(){};
 util.inherits(BGTBridge.Olivier, BGTBridge);
 
 BGTBridge.Olivier.prototype.sendUpdates = function(updates){
-	updates.forEach(function(update){
-		if (!(update instanceof BGTLocationUpdate)) return;
-		var location = update.getData().user.location;
+	for (var i in updates) try {
+		var update = updates[i];
+		if (!(update instanceof BGTLocationUpdate)) continue;
+		// all users from olivier are flagged like this
+		if (update.user.foreignServer) return;
+		var location = update.getData().location;
 		var data = {
-			lat:location.lat,
-			lon:location.lon
+			latitude:location.lat,
+			longitude:location.lon,
+			userName:update.user.getHash()
 		};
-		http.request({
+		var req = http.request({
 			host:'ocroquette.fr',
-			port:8090,
+			path:'/bladenighttracker/userupdate',
+			port:8081,
 			method:'PUT'
 		}, function(response){
-			response.pipe(process.stdout);
-		}).write(JSON.stringify(data)).on('error', function(err){
+			if (response.statusCode == 200) return;
+			util.log('error from oliviers server:');
+			response.pipe(process.stderr);
+		});
+		req.on('error', function(err){
 			util.log('error sending data to olivier: ' + err.message);
-		}).end();
-	});
+		});
+		req.write(JSON.stringify(data));
+		req.end();
+	} catch (e) { console.info(e.stack) };
 };
