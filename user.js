@@ -1,4 +1,3 @@
-var sys = require('sys');
 var util = require('util');
 var crypto = require('crypto');
 
@@ -68,7 +67,7 @@ BGTUser.prototype.updateLocation = function(location) {
 	try {
 		this.trackPosition(location);
 	} catch (e) {
-		sys.puts(e.stack);
+		console.warn(e.stack);
 	}
 }
 
