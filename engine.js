@@ -3,6 +3,7 @@ require('./user');
 var util = require('util');
 require('./stats');
 require('./update');
+require('./bridge');
 
 BGTEngine = function(){
 	var me = this;
@@ -20,7 +21,9 @@ BGTEngine = function(){
 	this.onUserUpdate = function(user, location){
 		me.sendLocationUpdates(user);
 		me.keepAliveUser(user);
-	}
+	};
+	// Bridge to Oliviers server
+	me.addMapConnection(new BGTBridge.Olivier());
 }
 
 BGTEngine.prototype.setMap = function(map) {
