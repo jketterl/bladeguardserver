@@ -126,6 +126,24 @@ BGTSocketConnection.prototype.processSubscribeUpdates = function(data){
 	return this.subscribe(data.category);
 };
 
+BGTSocketConnection.prototype.processUpdateRegistration = function(data, callback){
+	var me = this;
+	db.query().select('id').from('registration').where('registration_id = ?', [data.regId]).execute(function(err, result){
+		if (err) return callback(err);
+		var user = me.getUser();
+		var userId = user.anonymous ? null : user.uid;
+		if (result.length) {
+			db.query().update('registration').set({user_id:userId}).where('registration_id = ?', [data.regId]).execute(function(err, result){
+				callback(err ? err : true);
+			});
+		} else {
+			db.query().insert('registration', ['registration_id', 'user_id'], [data.regId, userId]).execute(function(err, result){
+				callback(err ? err : true);
+			});
+		}
+	});
+};
+
 BGTSocketConnection.prototype.subscribe = function(category) {
 	var me = this;
 	if (category instanceof Array) return category.forEach(function(category){

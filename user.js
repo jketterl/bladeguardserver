@@ -43,7 +43,9 @@ BGTUser.getAnonymousUser = function() {
         do {
                 random = 9000 + Math.floor(Math.random() * 1000);
         } while (BGTUser.hasUser(random));
-        return BGTUser.addUser(new BGTUser(random));
+	var user = new BGTUser(random);
+	user.anonymous = true;
+        return BGTUser.addUser(user);
 }
 
 BGTUser.getOlivierUser = function() {
