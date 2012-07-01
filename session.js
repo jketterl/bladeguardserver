@@ -38,9 +38,9 @@ BGTSession.processRequest = function(request) {
 		}
 	}
 	if (session) {
-		util.log('session reconnected');
+		//util.log('session reconnected');
 	} else {
-		util.log('issuing new session');
+		//util.log('issuing new session');
 		session = BGTSession.newSession();
 		request.res.setHeader('Set-Cookie', ['BGTSESSION=' + session.key + '; path=/bgt']);
 	}
