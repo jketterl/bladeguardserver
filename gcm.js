@@ -8,7 +8,7 @@ BGT.GCM.Service = function(config){
 BGT.GCM.Service.prototype.sendBroadcastMessage = function(message) {
 	var me = this;
 	db.query().select('registration_id').from('registration').execute(function(err, result){
-		if (err) returnn util.log('Error querying registrations from the DB\n' + err.stack);
+		if (err) return util.log('Error querying registrations from the DB\n' + err.stack);
 		var ids = [];
 		result.forEach(function(row){
 			ids.push(row.registration_id);
