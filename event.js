@@ -47,17 +47,22 @@ BGTEvent.events = [];
 
 BGTEvent.loadAll = function(callback) {
 	var me = this;
-	db.query().select('id, title, start, end, map, weather').from('event').where('start >= ?', [new Date()]).execute(function(err, results){
-		if (err) return callback(err);
-		results.forEach(function(event){
-			event = new BGTEvent(event);
-			event.once('end', function(){
-				delete me.events[event.id];
+	db.query()
+		.select('event.id as id, event.title, start, end, map, weather, map.title as mapName')
+		.from('event')
+		.join({table:'map', type:'left', conditions:'event.map = map.id'})
+		.where('start >= ?', [new Date()])
+		.execute(function(err, results){
+			if (err) return callback(err);
+			results.forEach(function(event){
+				event = new BGTEvent(event);
+				event.once('end', function(){
+					delete me.events[event.id];
+				});
+				me.events[event.id] = event;
 			});
-			me.events[event.id] = event;
+			callback();
 		});
-		callback();
-	});
 }
 
 BGTEvent.get = function(id) {
