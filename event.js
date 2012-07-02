@@ -47,7 +47,7 @@ BGTEvent.events = [];
 
 BGTEvent.loadAll = function(callback) {
 	var me = this;
-	db.query().select('id, title, start, end').from('event').where('start >= ?', [new Date()]).execute(function(err, results){
+	db.query().select('id, title, start, end, map').from('event').where('start >= ?', [new Date()]).execute(function(err, results){
 		if (err) return callback(err);
 		results.forEach(function(event){
 			event = new BGTEvent(event);
@@ -114,6 +114,10 @@ BGTEvent.prototype.resume = function(){
 };
 
 BGTEvent.prototype.activate = function(){
-	this.active = true;
-	// TODO: load map
+	var me = this;
+	me.active = true;
+	BGTMap.getMap(me.map, function(map){
+		if (util.isError(map)) return util.log('Error loading map ' + me.map + ':\n' + map.stack);
+		engine.setMap(map);
+	});
 };
