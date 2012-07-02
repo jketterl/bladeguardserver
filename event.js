@@ -47,7 +47,7 @@ BGTEvent.events = [];
 
 BGTEvent.loadAll = function(callback) {
 	var me = this;
-	db.query().select('id, title, start, end, map').from('event').where('start >= ?', [new Date()]).execute(function(err, results){
+	db.query().select('id, title, start, end, map, weather').from('event').where('start >= ?', [new Date()]).execute(function(err, results){
 		if (err) return callback(err);
 		results.forEach(function(event){
 			event = new BGTEvent(event);
@@ -120,4 +120,25 @@ BGTEvent.prototype.activate = function(){
 		if (util.isError(map)) return util.log('Error loading map ' + me.map + ':\n' + map.stack);
 		engine.setMap(map);
 	});
+};
+
+BGTEvent.prototype.setWeatherDecision = function(decision, callback){
+	this.weather = decision;
+	BGT.messenger.sendBroadcastMessage({
+		eventId:this.id,
+		title:this.title,
+		weather:this.weather
+	}, function(response){
+		if (util.isError(response)) util.log('Error sending message via GCM:\n' + response.stack);
+	});
+	db.query().update('event').set({weather:this.weather}).where('id = ?', [this.id]).execute(function(err, result){
+		if (callback) callback(err ? err : true);
+	});
+};
+
+BGTEvent.prototype.update = function(data, callback){
+	for (var a in data) switch (a) {
+		case "weather":
+			return this.setWeatherDecision(data[a], callback);
+	}
 };

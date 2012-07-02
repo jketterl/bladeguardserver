@@ -136,4 +136,4 @@ BGTEngine.prototype.getCurrentData = function(category) {
 		default:
 			util.log('unable to get current status data for category "' + category + '"');
 	}
-}
+};

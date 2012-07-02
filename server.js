@@ -9,14 +9,10 @@ require('./session');
 var WebSocketServer = require('websocket').server;
 require('./socketconnection');
 require('./event.js');
-
-/*db = new (require('db-mysql').Database)({
-	hostname:'localhost',
-	database:'bladeguardtracker',
-	user:'bgt',
-	password:'bgtiscool'
-});*/
 db = require('./db');
+BGT = {};
+require('./gcm');
+BGT.messenger = new BGT.GCM.Service(require('./config/gcm.json'));
 
 db.connect(function(err){
 	if (err) {

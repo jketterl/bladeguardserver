@@ -1,11 +1,12 @@
 var https = require('https'),
 	util = require('util');
 
+BGT.GCM = {};
 BGT.GCM.Service = function(config){
 	this.config = config;
 };
 
-BGT.GCM.Service.prototype.sendBroadcastMessage = function(message) {
+BGT.GCM.Service.prototype.sendBroadcastMessage = function(message, callback) {
 	var me = this;
 	db.query().select('registration_id').from('registration').execute(function(err, result){
 		if (err) return util.log('Error querying registrations from the DB\n' + err.stack);
@@ -25,10 +26,15 @@ BGT.GCM.Service.prototype.sendBroadcastMessage = function(message) {
 			req[key] = me.config[key];
 		});
 		req = https.request(req, function(res){
-			res.pipe(process.stdout);
+			if (res.statusCode != 200) {
+				callback(new Error('GCM service returned code ' + res.statusCode));
+			} else res.on('end', function(){
+				callback(true);
+			});
 		});
 		req.on('error', function(err){
 			util.log('error sending command to GCM\n' + err.stack);
+			callback(err);
 		});
 		var data = {
 			registration_ids:ids,
