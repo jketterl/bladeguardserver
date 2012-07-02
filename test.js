@@ -9,6 +9,6 @@ db.connect(function(){
 	var gcm = new BGT.GCM.Service(config);
 
 	gcm.sendBroadcastMessage(
-		{message:"Hello World"}
+		{message:"Wir fahren"}
 	);
 });
