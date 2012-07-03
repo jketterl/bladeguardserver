@@ -31,6 +31,7 @@ BGT.GCM.Service.prototype.sendBroadcastMessage = function(message, callback) {
 			} else res.on('end', function(){
 				callback(true);
 			});
+			res.pipe(process.stdout);
 		});
 		req.on('error', function(err){
 			util.log('error sending command to GCM\n' + err.stack);
