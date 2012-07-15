@@ -70,6 +70,11 @@ BGTSocketConnection.prototype.parseMessage = function(message){
 	} catch (e) {
 		return callback(false);
 	}
+	if (data.handshake) {
+		this.handshake = data.handshake;
+		util.log('handshake: ' + JSON.stringify(data.handshake));
+		return callback(true);
+	}
 	if (!data.command) {
 		util.log('message could not be parsed (no command)');
 		return callback(new Error('message could not be parsed (no command)'));
