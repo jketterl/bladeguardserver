@@ -23,7 +23,10 @@ BGTEngine = function(){
 		me.keepAliveUser(user);
 	};
 	// Bridge to Oliviers server
-	me.addMapConnection(new BGTBridge.Olivier());
+	me.bridges = {
+		olivier:new BGTBridge.Olivier()
+	};
+	for (var a in me.bridges) me.addMapConnection(me.bridges[a]);
 }
 
 BGTEngine.prototype.setMap = function(map) {

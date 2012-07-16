@@ -17,17 +17,8 @@ module.exports.process = function(req){
 			req.res.writeHead(503, {'content-type':'application/json'});
 			return req.res.end(JSON.stringify({message:'could not parse your data'}));
 		}
-		engine.updateUserLocation(getUser(data.userName), new BGTLocation({lat: data.latitude, lon: data.longitude}));
+		engine.bridges.olivier.updateUserLocation(data);
 		req.res.writeHead(200, {'content-type':'application/json'});
 		req.res.end(JSON.stringify({message:'OK'}));
 	});
-};
-
-var users = {};
-
-var getUser = function(userName){
-	if (typeof users[userName] == 'undefined') {
-		users[userName] = BGTUser.getOlivierUser();
-	}
-	return users[userName];
 };

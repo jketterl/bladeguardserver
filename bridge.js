@@ -6,7 +6,10 @@ BGTBridge = function(){};
 
 util.inherits(BGTBridge, EventEmitter);
 
-BGTBridge.Olivier = function(){};
+BGTBridge.Olivier = function(){
+	var me = this;
+	me.users = {};
+};
 
 util.inherits(BGTBridge.Olivier, BGTBridge);
 
@@ -45,3 +48,15 @@ BGTBridge.Olivier.prototype.sendUpdates = function(updates){
 		req.end();
 	} catch (e) { console.info(e.stack) };
 };
+
+BGTBridge.Olivier.prototype.getUser = function(userName) {
+	var me = this;
+	if (typeof me.users[userName] == 'undefined') {
+		me.users[userName] = BGTUser.getOlivierUser();
+	}
+	return me.users[userName];
+};
+
+BGTBridge.Olivier.prototype.updateUserLocation = function(data) {
+	engine.updateUserLocation(this.getUser(data.userName), new BGTLocation({lat: data.latitude, lon: data.longitude}));
+}
