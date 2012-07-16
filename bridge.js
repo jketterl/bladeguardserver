@@ -9,6 +9,7 @@ util.inherits(BGTBridge, EventEmitter);
 BGTBridge.Olivier = function(){
 	var me = this;
 	me.users = {};
+	me.enabled = true;
 };
 
 util.inherits(BGTBridge.Olivier, BGTBridge);
@@ -17,6 +18,7 @@ util.inherits(BGTBridge.Olivier, BGTBridge);
 BGTBridge.Olivier.password = 'uHHqdERal489A73FiVZxqgbUcBsq6JMKG4QlOYN1smAO59UVtv';
 
 BGTBridge.Olivier.prototype.sendUpdates = function(updates){
+	if (!this.enabled) return;
 	for (var i in updates) try {
 		var update = updates[i];
 		if (!(update instanceof BGTLocationUpdate)) continue;
@@ -58,5 +60,16 @@ BGTBridge.Olivier.prototype.getUser = function(userName) {
 };
 
 BGTBridge.Olivier.prototype.updateUserLocation = function(data) {
+	if (!this.enabled) return;
 	engine.updateUserLocation(this.getUser(data.userName), new BGTLocation({lat: data.latitude, lon: data.longitude}));
+}
+
+BGTBridge.Olivier.prototype.enable = function(){
+	if (this.enabled) return;
+	this.enabled = true;
+}
+
+BGTBridge.Olivier.prototype.disable = function(){
+	if (!this.enabled) return;
+	this.enabled = false;
 }

@@ -140,3 +140,11 @@ BGTEngine.prototype.getCurrentData = function(category) {
 			util.log('unable to get current status data for category "' + category + '"');
 	}
 };
+
+BGTEngine.prototype.enableBridges = function(){
+	for (var a in this.bridges) this.bridges[a].enable();
+};
+
+BGTEngine.prototype.disableBridges = function(){
+	for (var a in this.bridges) this.bridges[a].disable();
+}

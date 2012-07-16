@@ -270,6 +270,14 @@ BGTSocketConnection.prototype.processShutdownEvent = function(data){
 	BGTEvent.get(data.eventId).doEnd();
 };
 
+BGTSocketConnection.prototype.processDisableBridges = function(data){
+	engine.disableBridges();
+};
+
+BGTSocketConnection.prototype.processEnableBridges = function(data){
+	engine.enableBridges();
+};
+
 BGTSocketConnection.prototype.isSubscribed = function(category){
 	return this.subscribed.indexOf(category) >= 0;
 };
