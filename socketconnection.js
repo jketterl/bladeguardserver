@@ -127,7 +127,7 @@ BGTSocketConnection.prototype.processGpsUnavailable = function(data){
 };
 
 BGTSocketConnection.prototype.processSubscribeUpdates = function(data){
-	if (!data.category) return;
+	if (!data.category) return new Error('missing parameters');
 	return this.subscribe(data.category);
 };
 
@@ -167,7 +167,7 @@ BGTSocketConnection.prototype.subscribe = function(category) {
 };
 
 BGTSocketConnection.prototype.processUnSubscribeUpdates = function(data){
-	if (!data.category) return;
+	if (!data.category) return new Error('missing parameters');
 	return this.unsubscribe(data.category);
 };
 
