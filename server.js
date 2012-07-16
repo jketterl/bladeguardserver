@@ -33,7 +33,7 @@ db.connect(function(err){
 		};
 
 		var httpServer = https.createServer(options, function (req, res) {
-			util.log('connect: ' + req.connection.socket.remoteAddress + ' requests ' + req.url + ' (' + req.headers['user-agent'] + ')');
+			//util.log('connect: ' + req.connection.socket.remoteAddress + ' requests ' + req.url + ' (' + req.headers['user-agent'] + ')');
 			var request = router.parse(req.url);
 			request.req = req; request.res = res;
 			// automatic session reconnect (!)
