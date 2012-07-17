@@ -27,9 +27,12 @@ Ext.onReady(function(){
 	});
 
 	Ext.create('Ext.container.Viewport', {
-		layout:'fit',
+		layout:'border',
 		items:[Ext.create('Ext.grid.Panel',{
 			title:'Debugging console',
+			region:'east',
+			split:true,
+			width:400,
 			store:store,
 			dockedItems:[{
 				dock:'top',
@@ -41,7 +44,23 @@ Ext.onReady(function(){
 				{header:'Typ', dataIndex:'type'},
 				{header:'Daten', dataIndex:'data', flex:1}
 			]
-		})]
+		}), {
+			title:'Karte',
+			region:'center',
+			width:300,
+			listeners:{
+				render:function(container){
+					var map = new google.maps.Map(this.body.dom, {
+						center:new google.maps.LatLng(48.132501, 11.543460),
+						zoom:14,
+						mapTypeId:google.maps.MapTypeId.ROADMAP
+					});
+					this.on('resize', function(){
+						google.maps.event.trigger(map, 'resize');
+					});
+				}
+			}
+		}]
 	});
 
 	var pushToStore = function(type, data) {
