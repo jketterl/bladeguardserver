@@ -78,5 +78,14 @@ Ext.define('BGT.map.Panel', {
 				marker.setPosition(position);
 			}
 		});
+	},
+	processQuit:function(quits){
+		var me = this;
+		quits.forEach(function(quit){
+			var marker = me.userMarkers[quit.user.id];
+			if (!marker) return;
+			marker.setMap(null);
+			delete me.userMarkers[quit.user.id];
+		});
 	}
 });
