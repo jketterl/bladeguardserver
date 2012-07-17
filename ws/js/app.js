@@ -3,20 +3,6 @@ var launch = function(){
 		model:'BGT.Event'
 	});
 
-	var dockedItems = [];
-	['movements', 'stats', 'quit', 'map'].forEach(function(category){
-		dockedItems.push({
-			xtype:'checkbox',
-			boxLabel:category,
-			listeners:{
-				change:function(checkbox, checked){
-					method = (checked ? '' : 'un') + 'subscribe';
-					socket[method](category); 
-				}
-			}
-		});
-	});
-
 	var pushToStore = function(type, data) {
 		var event = Ext.create('BGT.Event', {
 			timestamp:new Date(),
@@ -47,11 +33,6 @@ var launch = function(){
 			split:true,
 			width:400,
 			store:store,
-			dockedItems:[{
-				dock:'top',
-				xtype:'toolbar',
-				items:dockedItems
-			}],
 			columns:[
 				{header:'Timestamp', dataIndex:'timestamp', xtype:'datecolumn', format:'d.m.Y H:i:s', width:150},
 				{header:'Typ', dataIndex:'type'},

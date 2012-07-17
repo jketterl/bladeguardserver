@@ -70,7 +70,8 @@ Ext.define('BGT.map.Panel', {
 				marker = new google.maps.Marker({
 					position:position,
 					map:me.map,
-					title:movement.user.name
+					title:movement.user.name,
+					icon:'img/map_pin.png'
 				});
 				me.userMarkers[movement.user.id] = marker;
 			} else {
