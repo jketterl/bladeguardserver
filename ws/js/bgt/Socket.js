@@ -14,7 +14,9 @@ Ext.define('BGT.Socket', {
 			} catch (e) {};
 		};
 		me.socket.onclose = function(){
-			setTimeout(me.connect, 5000);
+			setTimeout(function(){
+				me.connect()
+			}, 5000);
 		};
 		me.socket.onerror = function(){
 			socket.close();
