@@ -1,13 +1,4 @@
-Ext.onReady(function(){
-	Ext.define('BGT.Event', {
-		extend:'Ext.data.Model',
-		fields:[
-			{name:'timestamp', type:'date'},
-			{name:'type', type:'text'},
-			{name:'data', type:'object'}
-		]
-	});
-
+var launch = function(){
 	var store = new Ext.data.Store({
 		model:'BGT.Event'
 	});
@@ -44,23 +35,11 @@ Ext.onReady(function(){
 				{header:'Typ', dataIndex:'type'},
 				{header:'Daten', dataIndex:'data', flex:1}
 			]
-		}), {
+		}), Ext.create('BGT.map.Panel', {
 			title:'Karte',
 			region:'center',
-			width:300,
-			listeners:{
-				render:function(container){
-					var map = new google.maps.Map(this.body.dom, {
-						center:new google.maps.LatLng(48.132501, 11.543460),
-						zoom:14,
-						mapTypeId:google.maps.MapTypeId.ROADMAP
-					});
-					this.on('resize', function(){
-						google.maps.event.trigger(map, 'resize');
-					});
-				}
-			}
-		}]
+			width:300
+		})]
 	});
 
 	var pushToStore = function(type, data) {
@@ -115,4 +94,17 @@ Ext.onReady(function(){
 	};
 
 	connect();
+};
+
+Ext.onReady(function(){
+	Ext.Loader.setConfig({
+		enabled:true,
+		paths:{
+			'BGT':'js/bgt'
+		}
+	});
+
+	Ext.require([
+		'BGT.Event'
+	], launch);
 });

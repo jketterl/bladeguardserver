@@ -1,0 +1,2 @@
+Ext.define('BGT.Socket', {
+});
