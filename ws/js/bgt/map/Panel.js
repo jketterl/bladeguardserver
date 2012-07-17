@@ -1,5 +1,9 @@
 Ext.define('BGT.map.Panel', {
 	extend:'Ext.panel.Panel',
+	constructor:function(){
+		this.userMarkers = [];
+		this.callParent(arguments);
+	},
 	listeners:{
 		render:function(container){
 			container.map = new google.maps.Map(this.body.dom, {
@@ -16,7 +20,12 @@ Ext.define('BGT.map.Panel', {
 		var me = this;
 
 		me.socket.on('connect', function(){
-			me.socket.subscribe(['map']);
+			me.socket.subscribe(['map', 'movements', 'quit']);
+			me.userMarkers.forEach(function(marker){
+				marker.setMap(null);
+			});
+			me.userMarkers = [];
+			if (me.routeOverlay) me.routeOverlay.setMap(null);
 		});
 		me.socket.on('message', function(data){
 			me.parseIncomingMessage(data);
@@ -51,5 +60,22 @@ Ext.define('BGT.map.Panel', {
 			strokeOpacity:.75
 		});
 		me.routeOverlay.setMap(me.map);
+	},
+	processMovements:function(movements){
+		var me = this;
+		movements.forEach(function(movement){
+			var marker = me.userMarkers[movement.user.id];
+			var position = new google.maps.LatLng(movement.location.lat, movement.location.lon)
+			if (!marker) {
+				marker = new google.maps.Marker({
+					position:position,
+					map:me.map,
+					title:movement.user.name
+				});
+				me.userMarkers[movement.user.id] = marker;
+			} else {
+				marker.setPosition(position);
+			}
+		});
 	}
 });
