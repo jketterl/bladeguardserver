@@ -2,6 +2,12 @@ Ext.define('BGT.map.Panel', {
 	extend:'Ext.panel.Panel',
 	constructor:function(){
 		this.userMarkers = [];
+		this.markerImage = new google.maps.MarkerImage(
+			'img/map_pin.png',
+			false,
+			false,
+			new google.maps.Point(7, 7)
+		);
 		this.callParent(arguments);
 	},
 	listeners:{
@@ -71,7 +77,7 @@ Ext.define('BGT.map.Panel', {
 					position:position,
 					map:me.map,
 					title:movement.user.name,
-					icon:'img/map_pin.png'
+					icon:me.markerImage
 				});
 				me.userMarkers[movement.user.id] = marker;
 			} else {
