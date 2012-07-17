@@ -17,6 +17,28 @@ var launch = function(){
 		});
 	});
 
+	var pushToStore = function(type, data) {
+		var event = Ext.create('BGT.Event', {
+			timestamp:new Date(),
+			type:type,
+			data:data
+		});
+		store.insert(0, event);
+		while (store.getCount() > 30) store.removeAt(30);
+	};
+
+	var socket = Ext.create('BGT.Socket', {
+		url:'wss://' + location.hostname + '/bgt/socket'
+	});
+
+	socket.on('connect', function(){
+		pushToStore('socket connected');
+	});
+	socket.on('message', function(data){
+		pushToStore('message received', Ext.JSON.encode(data));
+	});
+	socket.connect();
+
 	Ext.create('Ext.container.Viewport', {
 		layout:'border',
 		items:[Ext.create('Ext.grid.Panel',{
@@ -38,62 +60,10 @@ var launch = function(){
 		}), Ext.create('BGT.map.Panel', {
 			title:'Karte',
 			region:'center',
-			width:300
+			width:300,
+			socket:socket
 		})]
 	});
-
-	var pushToStore = function(type, data) {
-		var event = Ext.create('BGT.Event', {
-			timestamp:new Date(),
-			type:type,
-			data:data
-		});
-		store.insert(0, event);
-		while (store.getCount() > 30) store.removeAt(30);
-	};
-
-	var socket;
-	var connect = function(){
-		socket = new WebSocket('wss://' + location.hostname + '/bgt/socket');
-		socket.subscribe = function(category){
-			var me = this;
-			if (category instanceof Array) return category.forEach(function(category){
-				me.subscribe(category);
-			});
-			me.send(JSON.stringify({
-				command:'subscribeUpdates',
-				data:{category:category}
-			}));
-		};
-		socket.unsubscribe = function(category){
-			var me = this;
-			if (category instanceof Array) return category.forEach(function(category){
-				me.subscribe(category);
-			});
-			me.send(JSON.stringify({
-				command:'unSubscribeUpdates',
-				data:{category:category}
-			}));
-		};
-		socket.onopen = function(){
-			pushToStore('socket connected!');
-			//socket.subscribe(['movements', 'quit', 'map', 'stats']);
-		};
-		socket.onmessage = function(message){
-			pushToStore('message received' , message.data);
-		};
-		socket.onclose = function(){
-			pushToStore('socket disconnected! waiting for reconnect...');
-			setTimeout(connect, 5000);
-		};
-		socket.onerror = function(){
-			pushToStore('socket error! reconnecting...');
-			socket.close();
-			connect();
-		};
-	};
-
-	connect();
 };
 
 Ext.onReady(function(){
