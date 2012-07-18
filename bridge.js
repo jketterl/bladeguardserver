@@ -36,7 +36,7 @@ BGTBridge.Olivier.prototype.sendUpdates = function(updates){
 		var req = http.request({
 			host:'ocroquette.fr',
 			path:'/bladenighttracker/userupdate',
-			port:8081,
+			port:8080,
 			method:'PUT'
 		}, function(response){
 			if (response.statusCode == 200) return;
