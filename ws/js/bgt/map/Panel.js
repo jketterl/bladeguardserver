@@ -54,9 +54,16 @@ Ext.define('BGT.map.Panel', {
 
 
 		var coordinates = [];
+		var bounds;
 		map.points.forEach(function(point){
-			coordinates.push(new google.maps.LatLng(point.lat, point.lon));
-		})
+			var coord = new google.maps.LatLng(point.lat, point.lon);
+			coordinates.push(coord);
+			if (!bounds) {
+				bounds = new google.maps.LatLngBounds(coord, coord);
+			} else {
+				bounds.extend(coord);
+			}
+		});
 
 		if (!me.routeOverlay) {
 			me.routeOverlay = new google.maps.Polyline({
@@ -69,6 +76,8 @@ Ext.define('BGT.map.Panel', {
 		} else {
 			me.routeOverlay.setPath(coordinates);
 		}
+
+		me.map.fitBounds(bounds);
 	},
 	processMovements:function(movements){
 		var me = this;
