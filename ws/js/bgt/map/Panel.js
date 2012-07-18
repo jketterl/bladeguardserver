@@ -52,20 +52,23 @@ Ext.define('BGT.map.Panel', {
 		var me = this;
 		map = map[0];
 
-		if (me.routeOverlay) me.routeOverlay.setMap(null);
 
 		var coordinates = [];
 		map.points.forEach(function(point){
 			coordinates.push(new google.maps.LatLng(point.lat, point.lon));
 		})
 
-		me.routeOverlay = new google.maps.Polyline({
-			path:coordinates,
-			strokeColor:'#0000FF',
-			strokeWeight:2,
-			strokeOpacity:.75
-		});
-		me.routeOverlay.setMap(me.map);
+		if (!me.routeOverlay) {
+			me.routeOverlay = new google.maps.Polyline({
+				path:coordinates,
+				strokeColor:'#0000FF',
+				strokeWeight:2,
+				strokeOpacity:.75
+			});
+			me.routeOverlay.setMap(me.map);
+		} else {
+			me.routeOverlay.setPath(coordinates);
+		}
 	},
 	processMovements:function(movements){
 		var me = this;

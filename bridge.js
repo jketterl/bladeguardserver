@@ -9,7 +9,7 @@ util.inherits(BGTBridge, EventEmitter);
 BGTBridge.Olivier = function(){
 	var me = this;
 	me.users = {};
-	me.enabled = true;
+	me.enabled = false;
 };
 
 util.inherits(BGTBridge.Olivier, BGTBridge);
@@ -36,7 +36,7 @@ BGTBridge.Olivier.prototype.sendUpdates = function(updates){
 		var req = http.request({
 			host:'ocroquette.fr',
 			path:'/bladenighttracker/userupdate',
-			port:8080,
+			port:8081,
 			method:'PUT'
 		}, function(response){
 			if (response.statusCode == 200) return;
