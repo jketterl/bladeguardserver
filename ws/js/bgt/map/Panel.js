@@ -31,7 +31,7 @@ Ext.define('BGT.map.Panel', {
 				marker.setMap(null);
 			});
 			me.userMarkers = [];
-			if (me.routeOverlay) me.routeOverlay.setMap(null);
+			if (me.routeOverlay) me.routeOverlay.setMap(setPath([]));
 		});
 		me.socket.on('message', function(data){
 			me.parseIncomingMessage(data);
