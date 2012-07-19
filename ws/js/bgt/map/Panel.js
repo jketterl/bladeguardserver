@@ -8,11 +8,24 @@ Ext.define('BGT.map.Panel', {
 			false,
 			new google.maps.Point(7, 7)
 		);
+		this.trackOverlay = new google.maps.Polyline({
+			path:[],
+			strokeColor:'#FFC000',
+			strokeWeight:6,
+			strokeOpacity:1
+		});
+		this.routeOverlay = new google.maps.Polyline({
+			path:[],
+			strokeColor:'#0000FF',
+			strokeWeight:2,
+			strokeOpacity:.5
+		});
 		this.callParent(arguments);
 	},
 	listeners:{
 		render:function(container){
-			container.map = new google.maps.Map(this.body.dom, {
+			var me = container;
+			me.map = new google.maps.Map(this.body.dom, {
 				center:new google.maps.LatLng(48.132501, 11.543460),
 				zoom:14,
 				mapTypeId:google.maps.MapTypeId.ROADMAP
@@ -20,18 +33,21 @@ Ext.define('BGT.map.Panel', {
 			this.on('resize', function(){
 				google.maps.event.trigger(container.map, 'resize');
 			});
+			me.trackOverlay.setMap(me.map);
+			me.routeOverlay.setMap(me.map);
 		}
 	},
 	initComponent:function(){
 		var me = this;
 
 		me.socket.on('connect', function(){
-			me.socket.subscribe(['map', 'movements', 'quit']);
+			me.socket.subscribe(['map', 'movements', 'quit', 'stats']);
 			me.userMarkers.forEach(function(marker){
 				marker.setMap(null);
 			});
 			me.userMarkers = [];
-			if (me.routeOverlay) me.routeOverlay.setMap(setPath([]));
+			if (me.routeOverlay) me.routeOverlay.setPath([]);
+			if (me.trackOverlay) me.trackOverlay.setPath([]);
 		});
 		me.socket.on('message', function(data){
 			me.parseIncomingMessage(data);
@@ -47,6 +63,20 @@ Ext.define('BGT.map.Panel', {
 			if (!me[fn] || typeof(me[fn]) != 'function') return;
 			me[fn](data.data[a]);
 		}
+	},
+	processStats:function(stats){
+		var me = this;
+		stats = stats[0];
+		var coordinates = [];
+		if (stats.between) {
+			var i = stats.between[0];
+			while (i != stats.between[1]) {
+				coordinates.push(me.coordinates[i]);
+				i++;
+				if (i >= me.coordinates.length) i = 0;
+			}
+		}
+		me.trackOverlay.setPath(coordinates);
 	},
 	processMap:function(map){
 		var me = this;
@@ -65,17 +95,9 @@ Ext.define('BGT.map.Panel', {
 			}
 		});
 
-		if (!me.routeOverlay) {
-			me.routeOverlay = new google.maps.Polyline({
-				path:coordinates,
-				strokeColor:'#0000FF',
-				strokeWeight:2,
-				strokeOpacity:.75
-			});
-			me.routeOverlay.setMap(me.map);
-		} else {
-			me.routeOverlay.setPath(coordinates);
-		}
+		me.routeOverlay.setPath(coordinates);
+
+		me.coordinates = coordinates;
 
 		me.map.fitBounds(bounds);
 	},
