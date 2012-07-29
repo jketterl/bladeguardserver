@@ -29,7 +29,7 @@ db.connect(function(err){
 
 		var options = {
 			key: fs.readFileSync('/home/ec2-user/keys/server.key'),
-			cert: fs.readFileSync('/home/ec2-user/keys/server.crt')
+			cert: fs.readFileSync('/home/ec2-user/keys/v3.crt')
 		};
 
 		var httpServer = https.createServer(options, function (req, res) {
