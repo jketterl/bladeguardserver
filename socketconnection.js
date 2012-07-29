@@ -271,10 +271,12 @@ BGTSocketConnection.prototype.processShutdownEvent = function(data){
 };
 
 BGTSocketConnection.prototype.processDisableBridges = function(data){
+	if (!this.getUser().isAdmin()) return new Error('only admin users are allowed to start events');
 	engine.disableBridges();
 };
 
 BGTSocketConnection.prototype.processEnableBridges = function(data){
+	if (!this.getUser().isAdmin()) return new Error('only admin users are allowed to start events');
 	engine.enableBridges();
 };
 
