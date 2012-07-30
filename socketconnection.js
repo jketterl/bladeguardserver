@@ -188,8 +188,8 @@ BGTSocketConnection.prototype.processGetMaps = function(data, callback){
 }
 
 BGTSocketConnection.prototype.processSetMap = function(data, callback){
-	if (!this.getUser().isAdmin()) return new Error('only admin users can switch the map');
-	if (typeof(data.id) == 'undefined') return new Error("Missing map id!");
+	if (!this.getUser().isAdmin()) return callback(new Error('only admin users can switch the map'));
+	if (typeof(data.id) == 'undefined') return callback(new Error("Missing map id!"));
 	BGTMap.getMap(data.id, function(map){
 		if (util.isError(map)) {
 			util.log(map);
