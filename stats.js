@@ -43,13 +43,19 @@ BGTStatsEngine.prototype.updateStats = function() {
 		for (var i = 0; i < positions.length; i++) {
 			var nextIndex = i + 1;
 			if (nextIndex >= positions.length) nextIndex = 0;
-			var distance = this.engine.getMap().getDistanceBetween(positions[i], positions[nextIndex]);
-			if (typeof(longest) == 'undefined' || longest.distance < distance) {
-				longest = {
-					distance:distance,
-					i1:positions[i],
-					i2:positions[nextIndex]
-				};
+			try {
+				var distance = this.engine.getMap().getDistanceBetween(positions[i], positions[nextIndex]);
+				if (typeof(longest) == 'undefined' || longest.distance < distance) {
+					longest = {
+						distance:distance,
+						i1:positions[i],
+						i2:positions[nextIndex]
+					};
+				}
+			} catch (e) {
+				// it's possible that a user has an outdated position (obtained from the oild map) after a map switch. this could lead to an exception here.
+				// we ignore that case for now. after the next update coming from the user (or his/her removal on timeout) everything will be fine.
+				//util.log(e.stack);
 			}
 		}
 		stats.between = [

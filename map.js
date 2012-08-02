@@ -72,12 +72,14 @@ BGTMap.prototype.getIndexDelta = function(i1, i2) {
 }
 
 BGTMap.prototype.getDistanceBetween = function(i1, i2) {
-	var index = i1;
-	var distance = 0;
+	var len = this.points.length,
+	    index = i1,
+	    distance = 0;
+	if (i1 > len || i2 > len) throw new Error('point index too big');
 	while (index != i2) {
 		distance += this.points[index].distanceToPrevious;
 		index++;
-		if (index >= this.points.length) index = 0;
+		if (index >= len) index = 0;
 	}
 	return distance;
 }
