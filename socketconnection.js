@@ -10,6 +10,9 @@ BGTSocketConnection = function(socket){
 	me.socket.on('message', function(message){
 		me.parseMessage(message);
 	});
+	me.socket.on('error', function(e){
+		util.log('WebSocket error:\n' + e.stack);
+	});
 	me.subscribed = [];
 }
 
