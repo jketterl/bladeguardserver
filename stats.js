@@ -39,13 +39,13 @@ BGTStatsEngine.prototype.updateStats = function() {
 	}
 	positions.sort(function(a,b){return a-b;});
 	if (positions.length > 1) {
-		var longest;
+		var longest = false;
 		for (var i = 0; i < positions.length; i++) {
 			var nextIndex = i + 1;
 			if (nextIndex >= positions.length) nextIndex = 0;
 			try {
 				var distance = this.engine.getMap().getDistanceBetween(positions[i], positions[nextIndex]);
-				if (typeof(longest) == 'undefined' || longest.distance < distance) {
+				if (!longest || longest.distance < distance) {
 					longest = {
 						distance:distance,
 						i1:positions[i],
@@ -58,11 +58,13 @@ BGTStatsEngine.prototype.updateStats = function() {
 				//util.log(e.stack);
 			}
 		}
-		stats.between = [
-			longest.i2,
-			longest.i1	
-		];
-		stats.bladeNightLength = this.engine.getMap().getDistanceBetween(longest.i2, longest.i1);
+		if (longest) {
+			stats.between = [
+				longest.i2,
+				longest.i1	
+			];
+			stats.bladeNightLength = this.engine.getMap().getDistanceBetween(longest.i2, longest.i1);
+		}
 	}
 	if (stats.speeded > 0) stats.bladeNightSpeed = speedSum / stats.speeded;
 	this.setStats(stats);
