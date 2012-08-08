@@ -21,23 +21,30 @@ util.inherits(BGTSocketConnection, require('events').EventEmitter);
 BGTSocketConnection.prototype.sendUpdates = function(updates){
 	if (!(updates instanceof Array)) return this.sendUpdates([updates]);
 	var me = this,
-	    sorted;
+	    send = function(){
+		if (!me.sorted) return;
+		me.socket.sendUTF(JSON.stringify({event:'update', data:me.sorted}));
+		me.sorted = false;
+	};
 
 	for (var i in updates) {
 		var update = updates[i],
 		    category = update.getCategory();
 		if (!this.isSubscribed(category)) continue;
 		if (!update.isApplicable(this)) continue;
-		sorted = sorted || {};
-		if (typeof(sorted[category]) != 'undefined') {
-			sorted[category].push(update);
+		if (!me.sorted) {
+			me.sorted = {};
+			if (me.handshake) setTimeout(send, 200);
+		}
+		if (typeof(me.sorted[category]) != 'undefined') {
+			me.sorted[category].push(update);
 		} else {
-			sorted[category] = [update];
+			me.sorted[category] = [update];
 		}
 	}
 
-	if (!sorted) return;
-	me.socket.sendUTF(JSON.stringify({event:'update', data:sorted}));
+	if (me.handshake) return;
+	send();
 };
 
 BGTSocketConnection.prototype.sendCommand = function(command, data) {
