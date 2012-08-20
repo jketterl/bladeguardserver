@@ -128,6 +128,7 @@ BGTEvent.prototype.activate = function(){
 };
 
 BGTEvent.prototype.setWeatherDecision = function(decision, callback){
+	if (this.weather == decision) return callback(true);
 	this.weather = decision;
 	BGT.messenger.sendBroadcastMessage({
 		eventId:this.id,
