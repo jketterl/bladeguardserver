@@ -1,0 +1,19 @@
+{
+	"name":"bladenightserver",
+	"version":"0.0.1-alpha",
+	"author":{
+		"name":"Jakob Ketterl",
+		"email":"jakob.ketterl@gmx.de",
+		"url":"http://www.justjakob.kde"
+	},
+	"repository":{
+		"type":"git",
+		"url":"https://github.com/jketterl/bladeguardserver.git"
+	},
+	"dependencies":{
+		"websocket":">=1.0.6",
+		"mime-magic":">=0.2.6",
+		"db-mysql":">=0.7.6",
+		"xml2js":">=0.1.14"
+	}
+}
