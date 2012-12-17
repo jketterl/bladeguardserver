@@ -1,2 +1,3 @@
 ws/js/ext*
 /node_modules
+config/keys/*
