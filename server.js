@@ -27,28 +27,40 @@ db.connect(function(err){
 			return;
 		}
 
-		var options = {
-			key: fs.readFileSync('/home/ec2-user/keys/server.key'),
-			cert: fs.readFileSync('/home/ec2-user/keys/v3.crt')
+		var startServer = function(options){
+			var httpServer = https.createServer(options, function (req, res) {
+				//util.log('connect: ' + req.connection.socket.remoteAddress + ' requests ' + req.url + ' (' + req.headers['user-agent'] + ')');
+				var request = router.parse(req.url);
+				request.req = req; request.res = res;
+				// automatic session reconnect (!)
+				BGTSession.processRequest(request);
+				var module = engine.loadModule(request);
+				module.process(request);
+			}).listen(443);
+
+			var wsServer = new WebSocketServer({
+				httpServer:httpServer
+			});
+
+			wsServer.on('request', function(request){
+				var connection = new BGTSocketConnection(request.accept());
+				engine.addMapConnection(connection);
+			});
 		};
 
-		var httpServer = https.createServer(options, function (req, res) {
-			//util.log('connect: ' + req.connection.socket.remoteAddress + ' requests ' + req.url + ' (' + req.headers['user-agent'] + ')');
-			var request = router.parse(req.url);
-			request.req = req; request.res = res;
-			// automatic session reconnect (!)
-			BGTSession.processRequest(request);
-			var module = engine.loadModule(request);
-			module.process(request);
-		}).listen(443);
+		var options = require('./config/keys.json');
+		var callbacks = 0;
+		for (var a in options) {
+			callbacks ++;
+			(function(a){
+				fs.readFile(options[a], function(err, data){
+					if (err) throw err;
+					callbacks--;
+					options[a] = data.toString();
+					if (callbacks == 0) startServer(options);
+				});
+			})(a);
+		}
 
-		var wsServer = new WebSocketServer({
-			httpServer:httpServer
-		});
-
-		wsServer.on('request', function(request){
-			var connection = new BGTSocketConnection(request.accept());
-			engine.addMapConnection(connection);
-		});
 	});
 });
