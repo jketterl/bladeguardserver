@@ -27,6 +27,11 @@ BGTStatsEngine.prototype.updateStats = function() {
 	var speedSum = 0;
 	for (var i in this.engine.users) {
 		var user = this.engine.users[i];
+		// the "stats" flag indicates, whether or not the user is to be considered for stats calculation
+		if (!user.stats) {
+			console.info('skipping user ' + user);
+			continue;
+		}
 		stats.users++;
 		if (user.hasPosition()) {
 			stats.tracked++;

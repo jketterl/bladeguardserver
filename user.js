@@ -9,6 +9,8 @@ BGTUser = function(uid) {
 	this.getHash = function(){
 		return hash;
 	}
+	// this line turns on stats tracking for anonymous users.
+	if (typeof(this.stats) == 'undefined') this.stats = true;
 }
 
 var EventEmitter = require('events').EventEmitter;
@@ -20,7 +22,7 @@ BGTUser.login = function(user, pass, callback) {
 	var me = this;
 	var hash = crypto.createHash('md5').update(pass).digest('hex');
 	db.query().
-		select('users.id as uid, users.name, team.name as team_name, users.admin').
+		select('users.id as uid, users.name, team.name as team_name, users.admin, team.stats as stats').
 		from('users').
 		join({table:'team', type:'left', conditions:'users.team_id = team.id'}).
 		where('users.name = ? and pass = ?', [user, hash]).
