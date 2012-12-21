@@ -61,7 +61,7 @@ BGTEvent.loadAll = function(callback) {
 				});
 				me.events[event.id] = event;
 			});
-			callback();
+			callback(me.events);
 		});
 }
 
@@ -121,10 +121,6 @@ BGTEvent.prototype.resume = function(){
 BGTEvent.prototype.activate = function(){
 	var me = this;
 	me.active = true;
-	BGTMap.getMap(me.map, function(map){
-		if (util.isError(map)) return util.log('Error loading map ' + me.map + ':\n' + map.stack);
-		engine.setMap(map);
-	});
 };
 
 BGTEvent.prototype.setWeatherDecision = function(decision, callback){
@@ -147,4 +143,24 @@ BGTEvent.prototype.update = function(data, callback){
 		case "weather":
 			return this.setWeatherDecision(data[a], callback);
 	}
+};
+
+BGTEvent.prototype.getEngine = function(){
+	var me = this;
+	if (!me._engine) {
+		me._engine = new BGTEngine()
+		BGTMap.getMap(me.map, function(map){
+			if (util.isError(map)) return util.log('Error loading map ' + me.map + ':\n' + map.stack);
+			me._engine.setMap(map);
+		});
+	}
+	return me._engine;
+};
+
+BGTEvent.prototype.toJSON = function(){
+	var res = {}, me = this;
+	(['id', 'title', 'start', 'end', 'map', 'weather', 'mapName']).forEach(function(idx){
+		res[idx] = me[idx];
+	});
+	return res;
 };

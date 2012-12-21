@@ -100,6 +100,7 @@ BGTSocketConnection.prototype.parseMessage = function(message){
 		try {
 			return callback(fn.apply(this, [data.data || {}]));
 		} catch (e) {
+			util.log('error processing user command:\n' + e.stack);
 			callback(e);
 		}
 	}

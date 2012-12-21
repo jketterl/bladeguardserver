@@ -20,12 +20,14 @@ db.connect(function(err){
 		return;
 	}
 
-	engine = new BGTEngine();
-	BGTEvent.loadAll(function(err){
-		if (err) {
+	BGTEvent.loadAll(function(events){
+		if (util.isError(events)) {
 			util.log('could not load event data from database; exiting.');
 			return;
 		}
+
+		BGT.currentEvent = BGTEvent.getAll()[0];
+		engine = BGT.currentEvent.getEngine();
 
 		var startServer = function(options){
 			var httpServer = https.createServer(options, function (req, res) {
@@ -34,7 +36,10 @@ db.connect(function(err){
 				request.req = req; request.res = res;
 				// automatic session reconnect (!)
 				BGTSession.processRequest(request);
-				var module = engine.loadModule(request);
+				var module = require('./modules/error');
+				try {
+					module = require('./modules/' + request.module);
+				} catch (e) {}
 				module.process(request);
 			}).listen(443);
 

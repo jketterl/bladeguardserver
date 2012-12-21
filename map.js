@@ -11,17 +11,17 @@ BGTMap.getMap = function(mapId, callback) {
 	if (BGTMap.loadedMaps[mapId]) return process.nextTick(function(){
 		callback(BGTMap.loadedMaps[mapId]);
 	});
-	var map = new BGTMap();
-	BGTMap.loadedMaps[mapId] = map;
 	db.query().select('title').from('map').where('id = ?', [mapId]).execute(function(err, result){
+		var map = new BGTMap();
 		if (err) return callback(new Error(err));
 		if (result.length == 0) return callback(new Error('map with id ' + mapId + ' not found'));
 		map.name = result[0].title;
 		db.query().select('lat, lon').from('points').where('map_id = ?', [mapId]).order('seq').execute(function(err, res){
 			if (err) return callback(new Error(err));
 			map.setPoints(res);
+			BGTMap.loadedMaps[mapId] = map;
 			callback(map);
-		})
+		});
 	});
 };
 

@@ -9,11 +9,6 @@ BGTEngine = function(){
 	var me = this;
 	this.users = [];
 	this.connections = [];
-	// load a default map
-	BGTMap.getMap(1, function(map){
-		if (util.isError(map)) throw map;
-		me.setMap(map);
-	});
 	this.stats = new BGTStatsEngine(this);
 	this.stats.on('stats', function(stats) {
 		me.sendUpdates(new BGTStatsUpdate(stats));
@@ -58,16 +53,6 @@ BGTEngine.prototype.removeUser = function(user){
 
 BGTEngine.prototype.getMap = function() {
 	return this.map;
-}
-
-BGTEngine.prototype.loadModule = function(request) {
-	var module
-	try {
-		module = require('./modules/' + request.module);
-	} catch (e) {
-		module = require('./modules/error');
-	}
-	return module;
 }
 
 BGTEngine.prototype.updateUserLocation = function(user, location) {
