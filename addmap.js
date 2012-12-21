@@ -1,7 +1,7 @@
 var xml2js = require('xml2js'),
     fs = require('fs'),
-    util = require('util'),
-    db = require('./db');
+    util = require('util');
+var db = new (require('db-mysql').Database)(require('./config/db.json'));
 
 var args = process.argv.splice(2);
 
