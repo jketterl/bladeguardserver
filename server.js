@@ -9,7 +9,7 @@ require('./session');
 var WebSocketServer = require('websocket').server;
 require('./socketconnection');
 require('./event.js');
-db = require('./db');
+db = new (require('db-mysql').Database)(require('./config/db.json'));
 BGT = {};
 require('./gcm');
 BGT.messenger = new BGT.GCM.Service(require('./config/gcm.json'));
