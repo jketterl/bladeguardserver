@@ -247,20 +247,12 @@ BGTSocketConnection.prototype.processGetEvents = function(data){
 BGTSocketConnection.prototype.processEnableControl = function(data){
 	util.log("incoming control request");
 	var me = this;
-	try {
-		BGTEvent.get(data.eventId).registerConnection(me);
-		this.controlled = true;
-	} catch (e) {
-		return e;
-	}
+	this._event.registerConnection(me);
+	this.controlled = true;
 };
 
 BGTSocketConnection.prototype.processDisableControl = function(data){
-	try {
-		BGTEvent.get(data.eventId).unregisterConnection(this);
-	} catch (e) {
-		return e;
-	}
+	this._event.unregisterConnection(this);
 	util.log("control session ended");
 	this.controlled = false;
 };
@@ -291,6 +283,12 @@ BGTSocketConnection.prototype.processDisableBridges = function(data){
 BGTSocketConnection.prototype.processEnableBridges = function(data){
 	if (!this.getUser().isAdmin()) return new Error('only admin users are allowed to start events');
 	engine.enableBridges();
+};
+
+BGTSocketConnection.prototype.processSelectEvent = function(data){
+	if (!data.eventId) return new Error('missing event id');
+	this._event = BGTEvent.get(data.eventId);
+	util.log('event selected');
 };
 
 BGTSocketConnection.prototype.isSubscribed = function(category){
