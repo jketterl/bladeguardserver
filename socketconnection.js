@@ -94,15 +94,14 @@ BGTSocketConnection.prototype.parseMessage = function(message){
 		util.log('unknown command: "' + data.command + '"');
 		return callback(new Error('unknown command: "' + data.command + '"'));
 	}
-	if (fn.length > 1) {
-		return fn.apply(this, [data.data || {}, callback]);
-	} else {
-		try {
-			return callback(fn.apply(this, [data.data || {}]));
-		} catch (e) {
-			util.log('error processing user command:\n' + e.stack);
-			callback(e);
-		}
+	var params = [data.data || {}];
+	if (fn.length > 1) params.push(callback);
+	try {
+		var res = fn.apply(this, params);
+		if (fn.length <= 1) callback(res);
+	} catch (e) {
+		util.log('error processing user command:\n' + e.stack);
+		callback(e);
 	}
 };
 
@@ -201,6 +200,7 @@ BGTSocketConnection.prototype.processGetMaps = function(data, callback){
 BGTSocketConnection.prototype.processSetMap = function(data, callback){
 	if (!this.getUser().isAdmin()) return callback(new Error('only admin users can switch the map'));
 	if (typeof(data.id) == 'undefined') return callback(new Error("Missing map id!"));
+	var engine = this.getEvent(data).getEngine();
 	BGTMap.getMap(data.id, function(map){
 		if (util.isError(map)) {
 			util.log(map);
