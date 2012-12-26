@@ -26,8 +26,8 @@ db.connect(function(err){
 			return;
 		}
 
-		BGT.currentEvent = BGTEvent.getAll()[0];
-		engine = BGT.currentEvent.getEngine();
+		//BGT.currentEvent = BGTEvent.getAll()[0];
+		//engine = BGT.currentEvent.getEngine();
 
 		var startServer = function(options){
 			var httpServer = https.createServer(options, function (req, res) {
@@ -49,7 +49,6 @@ db.connect(function(err){
 
 			wsServer.on('request', function(request){
 				var connection = new BGTSocketConnection(request.accept());
-				engine.addMapConnection(connection);
 			});
 		};
 

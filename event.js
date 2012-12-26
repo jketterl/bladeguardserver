@@ -153,6 +153,10 @@ BGTEvent.prototype.getEngine = function(){
 			if (util.isError(map)) return util.log('Error loading map ' + me.map + ':\n' + map.stack);
 			me._engine.setMap(map);
 		});
+		me._engine.on('stats', function(stats){
+			stats.eventId = me.id;
+			me.emit('stats', stats);
+		})
 	}
 	return me._engine;
 };

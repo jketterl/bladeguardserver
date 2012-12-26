@@ -5,13 +5,15 @@ require('./stats');
 require('./update');
 require('./bridge');
 
+var EventEmitter = require('events').EventEmitter;
+
 BGTEngine = function(){
 	var me = this;
 	this.users = [];
 	this.connections = [];
 	this.stats = new BGTStatsEngine(this);
 	this.stats.on('stats', function(stats) {
-		me.sendUpdates(new BGTStatsUpdate(stats));
+		me.emit('stats', stats)
 	});
 	this.onUserUpdate = function(user, location){
 		me.sendLocationUpdates(user);
@@ -22,7 +24,9 @@ BGTEngine = function(){
 		olivier:new BGTBridge.Olivier()
 	};
 	for (var a in me.bridges) me.addMapConnection(me.bridges[a]);
-}
+};
+
+util.inherits(BGTEngine, EventEmitter);
 
 BGTEngine.prototype.setMap = function(map) {
 	if (map == this.map) return;
