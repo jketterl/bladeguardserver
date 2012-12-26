@@ -307,3 +307,11 @@ BGTSocketConnection.prototype.getUser = function(){
 	}
 	return this.user;
 };
+
+BGTSocketConnection.prototype.getEvent = function(data){
+	if (data.eventId) try {
+		return BGTEvent.get(data.eventId);
+	} catch (e) {}
+	if (this._event) return this._event;
+	throw new Error("Unable to execute command: an event must be selected!")
+}
