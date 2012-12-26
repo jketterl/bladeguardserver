@@ -249,12 +249,12 @@ BGTSocketConnection.prototype.processGetEvents = function(data){
 BGTSocketConnection.prototype.processEnableControl = function(data){
 	util.log("incoming control request");
 	var me = this;
-	this._event.registerConnection(me);
+	this.getEvent(data).registerConnection(me);
 	this.controlled = true;
 };
 
 BGTSocketConnection.prototype.processDisableControl = function(data){
-	this._event.unregisterConnection(this);
+	this.getEvent(data).unregisterConnection(this);
 	util.log("control session ended");
 	this.controlled = false;
 };
