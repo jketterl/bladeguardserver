@@ -106,7 +106,7 @@ BGTSocketConnection.prototype.parseMessage = function(message){
 };
 
 BGTSocketConnection.prototype.processLog = function(data){
-	this.emit('location', new BGTLocation(data));
+	this.getEvent(data).getEngine().updateUserLocation(this.getUser(), new BGTLocation(data));
 };
 
 BGTSocketConnection.prototype.processAuth = function(data, callback){

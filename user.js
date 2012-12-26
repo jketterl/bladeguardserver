@@ -75,7 +75,6 @@ BGTUser.prototype.isAdmin = function() {
 }
 
 BGTUser.prototype.updateLocation = function(location) {
-	if (this.location) this.lastLocation = location;
 	this.location = location;
 	this.emit('locationupdate', this, location);
 	
