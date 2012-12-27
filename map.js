@@ -41,7 +41,6 @@ BGTMap.prototype.getCandidatesForLocation = function(location) {
 			candidates.push({
 				index:i,
 				distance:distance,
-				map:this,
 				location:this.points[i]
 			});
 		}

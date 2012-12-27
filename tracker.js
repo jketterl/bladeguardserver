@@ -78,6 +78,15 @@ BGTTracker.prototype.updatePlausiblePositions = function(ti, selectedCandidates,
 	if (bestCandidate) this.setPosition(bestCandidate); else this.resetPosition();
 };
 
+BGTTracker.prototype.resetPosition = function(){
+	util.log('resetPosition()');
+};
+
+BGTTracker.prototype.setPosition = function(position){
+	util.log('setPosition()');
+	console.info(position);
+};
+
 BGTTracker.prototype.buildCandidateGroups = function(candidates) {
 	var candidateGroups = [];
 	var currentGroup = [];
