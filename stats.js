@@ -33,9 +33,10 @@ BGTStatsEngine.prototype.updateStats = function() {
 			continue;
 		}
 		stats.users++;
-		if (user.hasPosition()) {
+		var position = this.engine.tracker.getPosition(user);
+		if (position) {
 			stats.tracked++;
-			positions.push(user.position.index);
+			positions.push(position.index);
 			if (user.location && user.location.speed) {
 				stats.speeded++;
 				speedSum += parseFloat(user.location.speed);

@@ -1,12 +1,13 @@
 BGTTracker = function(engine){
 	this.engine = engine;
-	this.positions = {};
+	this.purgePositions()
 };
 
 var util = require('util');
 
 BGTTracker.prototype.purgePositions = function(){
 	util.log('purging all positions');
+	this.infos = {};
 	this.positions = {};
 };
 
@@ -20,25 +21,30 @@ BGTTracker.prototype.trackPosition = function(user, location, callback){
 	// select one candidate per group that is closest to the users current position
 	var selectedCandidates = this.selectCandidatesFromGroups(candidateGroups);
 
-	if (!this.positions[user.id]) this.positions[user.id] = {};
-	var trackerInfo = this.positions[user.id];
+	if (!this.infos[user.uid]) this.infos[user.uid] = {};
+	var trackerInfo = this.infos[user.uid];
 
 	// update the list of plausible positions
 	var position = this.updatePlausiblePositions(trackerInfo, selectedCandidates, location);
 
+	this.positions[user.uid] = position;
+
 	if (callback) callback(position);
 };
 
+BGTTracker.prototype.getPosition = function(user){
+	return this.positions[user.uid] || false;
+};
+
 BGTTracker.prototype.updatePlausiblePositions = function(ti, selectedCandidates, location){
+	var me = this;
 	// try to find prevously selected candidates that are in index range
 	if (ti.plausiblePositions) {
-		for (var i in ti.plausiblePositions) {
-			var position = ti.plausiblePositions[i];
+		ti.plausiblePositions.forEach(function(position, i){
 			var updated = false;
-			for (var k = 0; k < selectedCandidates.length; k++) {
-				var candidate = selectedCandidates[k];
+			selectedCandidates.forEach(function(candidate){
 				if (!candidate.considered) {
-					var delta = this.engine.getMap().getIndexDelta(position.index, candidate.index);
+					var delta = me.engine.getMap().getIndexDelta(position.index, candidate.index);
 					if (Math.abs(delta) <= 10) {
 						updated = true;
 						candidate.considered = true;
@@ -48,15 +54,15 @@ BGTTracker.prototype.updatePlausiblePositions = function(ti, selectedCandidates,
 						ti.plausiblePositions[i] = candidate;
 					}
 				}
-			}
+			});
 			if (!updated) {
-				position.error = this.getLocationError(position, location);
+				position.error = me.getLocationError(position, location);
 				if (position.error > .5) {
 					util.log('purging one plausible position (no new location candidates and error too big)');
 					ti.plausiblePositions.splice(i, 1);
 				}
 			}
-		}
+		});
 		// if there are unconsidered candidates, add them to the plausible list
 		for (var i in selectedCandidates) {
 			var candidate = selectedCandidates[i];
