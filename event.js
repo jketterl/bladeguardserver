@@ -1,5 +1,6 @@
 BGTEvent = function(data){
 	var me = this;
+	this.subscribers = {};
 	if (data) for (var a in data) {
 		me[a] = data[a];
 	}
@@ -153,12 +154,26 @@ BGTEvent.prototype.getEngine = function(){
 			if (util.isError(map)) return util.log('Error loading map ' + me.map + ':\n' + map.stack);
 			me._engine.setMap(map);
 		});
-		me._engine.on('stats', function(stats){
-			stats.eventId = me.id;
-			me.emit('stats', stats);
-		})
+		var relayEvent = function(source, name){
+			source.on(name, function(data){
+				data.eventId = me.id;
+				me.emit(name, data);
+			});
+		};
+		['stats', 'movements', 'map', 'quit'].forEach(function(name){
+			relayEvent(me._engine, name);
+		});
 	}
 	return me._engine;
+};
+
+BGTEvent.prototype.emit = function(name){
+	BGTEvent.super_.prototype.emit.apply(this, arguments);
+	var orig = arguments;
+	if (this.subscribers[name]) this.subscribers[name].forEach(function(sub){
+		util.log('sending ' + name + ' event to one subscriber');
+		sub.receiveEvent.apply(sub, orig);
+	});
 };
 
 BGTEvent.prototype.toJSON = function(){
@@ -167,4 +182,27 @@ BGTEvent.prototype.toJSON = function(){
 		res[idx] = me[idx];
 	});
 	return res;
+};
+
+BGTEvent.prototype.subscribe = function(subscriber, category){
+	var me = this;
+	if (category instanceof Array) return category.forEach(function(category){
+		me.subscribe(subscriber, category);
+	});
+	if (!this.subscribers[category]) this.subscribers[category] = [];
+	var subscriptions = this.subscribers[category];
+	if (subscriptions.indexOf(subscriber) >= 0) return;
+	subscriptions.push(subscriber);
+};
+
+BGTEvent.prototype.unsubscribe = function(subscriber, category){
+	var me = this;
+	if (category instanceof Array) return category.forEach(function(category){
+		me.unsubscribe(subscriber, category);
+	});
+	if (!this.subscribers[category]) return;
+	var subscriptions = this.subscribers[category];
+	var index = subscriptions.indexOf(subscriber);
+	if (index < 0) return;
+	subscriptions.splice(index, 1);
 };

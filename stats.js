@@ -77,7 +77,7 @@ BGTStatsEngine.prototype.updateStats = function() {
 
 BGTStatsEngine.prototype.setStats = function(stats) {
 	this.stats = stats;
-	this.emit('stats', stats);
+	this.emit('stats', new BGTStatsUpdate(stats));
 }
 
 BGTStatsEngine.prototype.getLatestStats = function() {

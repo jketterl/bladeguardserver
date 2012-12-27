@@ -108,5 +108,6 @@ BGTUser.prototype.toJSON = function(){
 };
 
 BGTUser.prototype.updateLocation = function(location){
+	this.location = location;
 	this.emit('locationupdate', this, location);
 };

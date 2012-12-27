@@ -13,7 +13,6 @@ BGTSocketConnection = function(socket){
 	me.socket.on('error', function(e){
 		util.log('WebSocket error:\n' + e.stack);
 	});
-	me.subscribed = [];
 }
 
 util.inherits(BGTSocketConnection, require('events').EventEmitter);
@@ -30,7 +29,6 @@ BGTSocketConnection.prototype.sendUpdates = function(updates){
 	for (var i in updates) {
 		var update = updates[i],
 		    category = update.getCategory();
-		if (!this.isSubscribed(category)) continue;
 		if (!update.isApplicable(this)) continue;
 		if (!me.sorted) {
 			me.sorted = {};
@@ -45,6 +43,10 @@ BGTSocketConnection.prototype.sendUpdates = function(updates){
 
 	if (me.handshake) return;
 	send();
+};
+
+BGTSocketConnection.prototype.receiveEvent = function(name, update){
+	this.sendUpdates(update);
 };
 
 BGTSocketConnection.prototype.sendCommand = function(command, data) {
@@ -176,33 +178,13 @@ BGTSocketConnection.prototype.processUpdateEvent = function(data, callback){
 BGTSocketConnection.prototype.processSubscribeUpdates = function(data){
 	if (!data.category) return new Error('missing parameters');
 	var event = this.getEvent(data);
-	return this.subscribe(event, data.category);
-};
-
-BGTSocketConnection.prototype.subscribe = function(event, category) {
-	var me = this;
-	if (category instanceof Array) return category.forEach(function(category){
-		me.subscribe(event, category);
-	});
-	if (this.isSubscribed(category)) return;
-	this.subscribed.push(category);
-	var updates = event.getEngine().getCurrentData(category);
-	if (updates) this.sendUpdates(updates);
+	return event.subscribe(this, data.category);
 };
 
 BGTSocketConnection.prototype.processUnsubscribeUpdates = function(data){
 	if (!data.category) return new Error('missing parameters');
 	var event = this.getEvent(data);
-	return this.unsubscribe(event, data.category);
-};
-
-BGTSocketConnection.prototype.unsubscribe = function(event, category) {
-	var me = this;
-	if (category instanceof Array) return category.forEach(function(category){
-		me.unsubscribe(category);
-	});
-	if (!this.isSubscribed(category)) return;
-	this.subscribed.splice(this.subscribed.indexOf(category), 1);
+	return event.unsubscribe(this, data.category);
 };
 
 BGTSocketConnection.prototype.processGetMaps = function(data, callback){
@@ -301,10 +283,6 @@ BGTSocketConnection.prototype.processEnableBridges = function(data){
 BGTSocketConnection.prototype.processSelectEvent = function(data){
 	if (!data.eventId) return new Error('missing event id');
 	this._event = BGTEvent.get(data.eventId);
-};
-
-BGTSocketConnection.prototype.isSubscribed = function(category){
-	return this.subscribed.indexOf(category) >= 0;
 };
 
 BGTSocketConnection.prototype.setUser = function(user){
