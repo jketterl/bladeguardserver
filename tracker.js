@@ -20,7 +20,8 @@ BGTTracker.prototype.trackPosition = function(user, location, callback){
 	// select one candidate per group that is closest to the users current position
 	var selectedCandidates = this.selectCandidatesFromGroups(candidateGroups);
 
-	var trackerInfo = this.positions[user.id] || {};
+	if (!this.positions[user.id]) this.positions[user.id] = {};
+	var trackerInfo = this.positions[user.id];
 
 	// update the list of plausible positions
 	var position = this.updatePlausiblePositions(trackerInfo, selectedCandidates, location);
@@ -37,14 +38,14 @@ BGTTracker.prototype.updatePlausiblePositions = function(ti, selectedCandidates,
 			for (var k = 0; k < selectedCandidates.length; k++) {
 				var candidate = selectedCandidates[k];
 				if (!candidate.considered) {
-					var delta = engine.getMap().getIndexDelta(position.index, candidate.index);
+					var delta = this.engine.getMap().getIndexDelta(position.index, candidate.index);
 					if (Math.abs(delta) <= 10) {
 						updated = true;
 						candidate.considered = true;
 						candidate.movements = (position.movements ? position.movements : 0) + delta;
 						candidate.fixed = (position.fixed ? position.fixed : false);
 						candidate.direction = (delta != 0 ? delta : position.direction || 0);
-						this.plausiblePositions[i] = candidate;
+						ti.plausiblePositions[i] = candidate;
 					}
 				}
 			}
@@ -52,7 +53,7 @@ BGTTracker.prototype.updatePlausiblePositions = function(ti, selectedCandidates,
 				position.error = this.getLocationError(position, location);
 				if (position.error > .5) {
 					util.log('purging one plausible position (no new location candidates and error too big)');
-					this.plausiblePositions.splice(i, 1);
+					ti.plausiblePositions.splice(i, 1);
 				}
 			}
 		}
@@ -122,7 +123,7 @@ BGTTracker.prototype.selectCandidatesFromGroups = function(candidateGroups) {
 BGTTracker.prototype.getLocationError = function(candidate, location) {
 	var point1 = candidate.location;
 	var offset = typeof(candidate.direction) == 'undefined' || candidate.direction >= 0 ? 1 : -1
-	var point2 = engine.getMap().getIndexAtOffset(candidate.index, offset);
+	var point2 = this.engine.getMap().getIndexAtOffset(candidate.index, offset);
 	var idealDistance = point1.getDistanceTo(point2);
 	var myDistance = point1.getDistanceTo(location) + point2.getDistanceTo(location);
 	var error = myDistance - idealDistance;

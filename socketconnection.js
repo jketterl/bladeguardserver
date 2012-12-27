@@ -106,9 +106,17 @@ BGTSocketConnection.prototype.parseMessage = function(message){
 };
 
 BGTSocketConnection.prototype.processLog = function(data, callback){
-	this.getEvent(data).getEngine().updateUserLocation(this.getUser(), new BGTLocation(data), function(position){
-		if (!position) return callback();
-		callback(position);
+	var location = new BGTLocation(data);
+	this.getUser().updateLocation(location);
+	this.getEvent(data).getEngine().updateUserLocation(this.getUser(), location, function(position){
+		var result = {
+			locked:false
+		}
+		if (position) {
+			result.locked = true;
+			result.index = position.index;
+		}
+		callback(result);
 	});
 };
 

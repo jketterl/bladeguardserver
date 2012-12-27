@@ -74,35 +74,6 @@ BGTUser.prototype.isAdmin = function() {
 	return this.admin && true;
 }
 
-BGTUser.prototype.getLocationError = function(candidate, location) {
-	var point1 = candidate.location;
-	var offset = typeof(candidate.direction) == 'undefined' || candidate.direction >= 0 ? 1 : -1
-	var point2 = engine.getMap().getIndexAtOffset(candidate.index, offset);
-	var idealDistance = point1.getDistanceTo(point2);
-	var myDistance = point1.getDistanceTo(location) + point2.getDistanceTo(location);
-	var error = myDistance - idealDistance;
-	return error;
-}
-
-BGTUser.prototype.setPosition = function(position) {
-	util.log('position fix for ' + this + ': ' + position.index);
-	this.position = position;
-	position.fixed = true;
-	this.emit('position', this, position);
-}
-
-BGTUser.prototype.hasPosition = function() {
-	return typeof(this.position) != 'undefined';
-}
-
-BGTUser.prototype.resetPosition = function() {
-	if (!this.hasPosition()) return;
-	util.log('resetting position for ' + this);
-	this.position.fixed = false;
-	delete this.position;
-	this.emit('position', this, false);
-}
-
 BGTUser.prototype.getName = function() {
 	if (this.name) return this.name;
 	return 'anonymous user #' + this.uid
@@ -134,4 +105,8 @@ BGTUser.prototype.toJSON = function(){
 		res[offset] = me[offset];
 	});
 	return res;
+};
+
+BGTUser.prototype.updateLocation = function(location){
+	this.emit('locationupdate', this, location);
 };
