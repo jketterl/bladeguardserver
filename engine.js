@@ -17,15 +17,6 @@ BGTEngine = function(){
 		me.emit('stats', stats)
 	});
 	this.tracker = new BGTTracker(this);
-	this.onUserUpdate = function(user, location){
-		me.emit('movements', new BGTLocationUpdate(user));
-		me.keepAliveUser(user);
-	};
-	// Bridge to Oliviers server
-	me.bridges = {
-		olivier:new BGTBridge.Olivier()
-	};
-	for (var a in me.bridges) me.addMapConnection(me.bridges[a]);
 };
 
 util.inherits(BGTEngine, EventEmitter);
@@ -47,12 +38,10 @@ BGTEngine.prototype.addUser = function(user) {
 	if (this.users[user.uid] == user) return;
 	var me = this;
 	this.users[user.uid] = user;
-	user.on('locationupdate', this.onUserUpdate);
 }
 
 BGTEngine.prototype.removeUser = function(user){
 	if (!this.users[user.uid]) return;
-	this.users[user.uid].removeListener('locationupdate', this.onUserUpdate);
 	delete this.users[user.uid];
 	if (user.updateTimeout) clearTimeout(user.updateTimeout);
 	this.sendUpdates(new BGTUpdate('quit', {user:{id:user.uid}}));
@@ -64,6 +53,8 @@ BGTEngine.prototype.getMap = function() {
 
 BGTEngine.prototype.updateUserLocation = function(user, location, callback) {
 	this.addUser(user);
+	this.keepAliveUser(user);
+	this.emit('movements', new BGTLocationUpdate(user));
 	this.tracker.trackPosition(user, location, callback);
 }
 
@@ -74,20 +65,6 @@ BGTEngine.prototype.keepAliveUser = function(user) {
 		util.log(user + ': update timeout');
 		me.removeUser(user);
 	}, 60000);
-}
-
-BGTEngine.prototype.addMapConnection = function(conn) {
-	var me = this;
-	if (me.connections.indexOf(conn) >= 0) return;
-	this.connections.push(conn);
-	conn.on('close', function() {
-		conn.close();
-		me.removeMapConnection(conn);
-	});
-	conn.on('quit', function() {
-		me.removeUser(conn.getUser());
-	});
-	//this.sendCurrentLocations(conn);
 }
 
 BGTEngine.prototype.removeMapConnection = function(conn) {
