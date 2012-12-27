@@ -27,6 +27,11 @@ BGTTracker.prototype.trackPosition = function(user, location, callback){
 	// update the list of plausible positions
 	var position = this.updatePlausiblePositions(trackerInfo, selectedCandidates, location);
 
+	if (!this.positions[user.uid] && position) {
+		util.log(user + ' is now on track!');
+	} else if (this.positions[user.uid] && !position) {
+		util.log('we lost ' + user);
+	}
 	this.positions[user.uid] = position;
 
 	if (callback) callback(position);
@@ -43,12 +48,21 @@ BGTTracker.prototype.updatePlausiblePositions = function(ti, selectedCandidates,
 		var updated = false;
 		selectedCandidates.forEach(function(candidate){
 			if (!candidate.considered) {
-				var delta = me.engine.getMap().getIndexDelta(position.index, candidate.index);
+				var map = me.engine.getMap();
+				var delta = map.getIndexDelta(position.index, candidate.index);
+				var distance;
+				if (delta >= 0) {
+					distance = map.getDistanceBetween(position.index, candidate.index);
+				} else {
+					distance = -1 * map.getDistanceBetween(candidate.index, position.index);
+				}
 				if (Math.abs(delta) <= 10) {
 					updated = true;
 					candidate.considered = true;
-					candidate.movements = (position.movements ? position.movements : 0) + delta;
-					candidate.fixed = (position.fixed ? position.fixed : false);
+					// movement calculation is not used in candidate selection any more.
+					//candidate.movements = (position.movements || 0) + delta;
+					candidate.distance = (position.distance || 0) + distance;
+					candidate.fixed = (position.fixed || false);
 					candidate.direction = (delta != 0 ? delta : position.direction || 0);
 					ti[i] = candidate;
 				}
@@ -57,7 +71,7 @@ BGTTracker.prototype.updatePlausiblePositions = function(ti, selectedCandidates,
 		if (!updated) {
 			position.error = me.getLocationError(position, location);
 			if (position.error > .5) {
-				util.log('purging one plausible position (no new location candidates and error too big)');
+				//util.log('purging one plausible position (no new location candidates and error too big)');
 				ti.splice(i, 1);
 			}
 		}
@@ -71,11 +85,11 @@ BGTTracker.prototype.updatePlausiblePositions = function(ti, selectedCandidates,
 	var bestCandidate = false;
 	ti.forEach(function(position){
 		if (position.error > .2) return;
-		if (ti.length > 1 && !position.fixed && (!position.movements || !(position.movements >= 2 || position.movements <= -5))) return;
+		if (ti.length > 1 && !position.fixed && (!position.distance || !(position.distance >= .2 || position.distance <= -.8))) return;
 		if (!bestCandidate) {
 			bestCandidate = position; 
 		} else {
-			if (position.movements > bestCandidate.movements) bestCandidate = position;
+			if (position.distance > bestCandidate.distance) bestCandidate = position;
 		}
 	});
 	return bestCandidate || false;
