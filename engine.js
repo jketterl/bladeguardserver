@@ -44,7 +44,7 @@ BGTEngine.prototype.removeUser = function(user){
 	if (!this.users[user.uid]) return;
 	delete this.users[user.uid];
 	if (user.updateTimeout) clearTimeout(user.updateTimeout);
-	this.sendUpdates(new BGTUpdate('quit', {user:{id:user.uid}}));
+	this.emit('quit', new BGTUpdate('quit', {user:{id:user.uid}}));
 }
 
 BGTEngine.prototype.getMap = function() {
