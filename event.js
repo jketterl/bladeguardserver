@@ -171,7 +171,6 @@ BGTEvent.prototype.emit = function(name){
 	BGTEvent.super_.prototype.emit.apply(this, arguments);
 	var orig = arguments;
 	if (this.subscribers[name]) this.subscribers[name].forEach(function(sub){
-		util.log('sending ' + name + ' event to one subscriber');
 		sub.receiveEvent.apply(sub, orig);
 	});
 };
