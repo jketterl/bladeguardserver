@@ -4,6 +4,7 @@ var util = require('util');
 require('./stats');
 require('./update');
 require('./bridge');
+require('./tracker');
 
 var EventEmitter = require('events').EventEmitter;
 
@@ -15,6 +16,7 @@ BGTEngine = function(){
 	this.stats.on('stats', function(stats) {
 		me.emit('stats', stats)
 	});
+	this.tracker = new BGTTracker(this);
 	this.onUserUpdate = function(user, location){
 		me.sendLocationUpdates(user);
 		me.keepAliveUser(user);
@@ -32,6 +34,7 @@ BGTEngine.prototype.setMap = function(map) {
 	if (map == this.map) return;
 	util.log('setting new map: ' + map.name);
 	this.map = map;
+	this.tracker.purgePositions();
 	var me = this;
 	if (map.loaded) {
 		me.sendUpdates(new BGTUpdate('map', map));
@@ -61,7 +64,7 @@ BGTEngine.prototype.getMap = function() {
 
 BGTEngine.prototype.updateUserLocation = function(user, location) {
 	this.addUser(user);
-	user.updateLocation(location);
+	this.tracker.trackPosition(user, location);
 }
 
 BGTEngine.prototype.keepAliveUser = function(user) {
@@ -80,9 +83,6 @@ BGTEngine.prototype.addMapConnection = function(conn) {
 	conn.on('close', function() {
 		conn.close();
 		me.removeMapConnection(conn);
-	});
-	conn.on('location', function(location) {
-		me.updateUserLocation(conn.getUser(), location);
 	});
 	conn.on('quit', function() {
 		me.removeUser(conn.getUser());
