@@ -21,7 +21,7 @@ BGTTracker.prototype.trackPosition = function(user, location, callback){
 	// select one candidate per group that is closest to the users current position
 	var selectedCandidates = this.selectCandidatesFromGroups(candidateGroups);
 
-	if (!this.infos[user.uid]) this.infos[user.uid] = {};
+	if (!this.infos[user.uid]) this.infos[user.uid] = [];
 	var trackerInfo = this.infos[user.uid];
 
 	// update the list of plausible positions
@@ -39,51 +39,45 @@ BGTTracker.prototype.getPosition = function(user){
 BGTTracker.prototype.updatePlausiblePositions = function(ti, selectedCandidates, location){
 	var me = this;
 	// try to find prevously selected candidates that are in index range
-	if (ti.plausiblePositions) {
-		ti.plausiblePositions.forEach(function(position, i){
-			var updated = false;
-			selectedCandidates.forEach(function(candidate){
-				if (!candidate.considered) {
-					var delta = me.engine.getMap().getIndexDelta(position.index, candidate.index);
-					if (Math.abs(delta) <= 10) {
-						updated = true;
-						candidate.considered = true;
-						candidate.movements = (position.movements ? position.movements : 0) + delta;
-						candidate.fixed = (position.fixed ? position.fixed : false);
-						candidate.direction = (delta != 0 ? delta : position.direction || 0);
-						ti.plausiblePositions[i] = candidate;
-					}
-				}
-			});
-			if (!updated) {
-				position.error = me.getLocationError(position, location);
-				if (position.error > .5) {
-					util.log('purging one plausible position (no new location candidates and error too big)');
-					ti.plausiblePositions.splice(i, 1);
+	ti.forEach(function(position, i){
+		var updated = false;
+		selectedCandidates.forEach(function(candidate){
+			if (!candidate.considered) {
+				var delta = me.engine.getMap().getIndexDelta(position.index, candidate.index);
+				if (Math.abs(delta) <= 10) {
+					updated = true;
+					candidate.considered = true;
+					candidate.movements = (position.movements ? position.movements : 0) + delta;
+					candidate.fixed = (position.fixed ? position.fixed : false);
+					candidate.direction = (delta != 0 ? delta : position.direction || 0);
+					ti[i] = candidate;
 				}
 			}
 		});
-		// if there are unconsidered candidates, add them to the plausible list
-		for (var i in selectedCandidates) {
-			var candidate = selectedCandidates[i];
-			if (!candidate.considered) ti.plausiblePositions.push(candidate);
+		if (!updated) {
+			position.error = me.getLocationError(position, location);
+			if (position.error > .5) {
+				util.log('purging one plausible position (no new location candidates and error too big)');
+				ti.splice(i, 1);
+			}
 		}
-	} else {
-		ti.plausiblePositions = selectedCandidates;
-	}
+	});
+	// if there are unconsidered candidates, add them to the plausible list
+	selectedCandidates.forEach(function(candidate){
+		if (!candidate.considered) ti.push(candidate);
+	});
 
 	// iterate over the plausible positions and try to find one that has collected enough score
 	var bestCandidate = false;
-	for (var i in ti.plausiblePositions) {
-		var position = ti.plausiblePositions[i];
-		if (position.error > .2) continue;
-		if (ti.plausiblePositions.length > 1 && !position.fixed && (!position.movements || !(position.movements >= 2 || position.movements <= -5))) continue;
+	ti.forEach(function(position){
+		if (position.error > .2) return;
+		if (ti.length > 1 && !position.fixed && (!position.movements || !(position.movements >= 2 || position.movements <= -5))) return;
 		if (!bestCandidate) {
 			bestCandidate = position; 
 		} else {
 			if (position.movements > bestCandidate.movements) bestCandidate = position;
 		}
-	}
+	});
 	return bestCandidate || false;
 };
 
