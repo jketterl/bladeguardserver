@@ -142,11 +142,11 @@ BGTSocketConnection.prototype.processAuth = function(data, callback){
 };
 
 BGTSocketConnection.prototype.processQuit = function(data){
-	this.getEngine('data').removeUser(this.getUser());
+	this.getEvent(data).getEngine().removeUser(this.getUser());
 };
 
 BGTSocketConnection.prototype.processGpsUnavailable = function(data){
-	this.processQuit('data');
+	this.processQuit(data);
 };
 
 BGTSocketConnection.prototype.processUpdateRegistration = function(data, callback){
