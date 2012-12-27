@@ -105,8 +105,11 @@ BGTSocketConnection.prototype.parseMessage = function(message){
 	}
 };
 
-BGTSocketConnection.prototype.processLog = function(data){
-	this.getEvent(data).getEngine().updateUserLocation(this.getUser(), new BGTLocation(data));
+BGTSocketConnection.prototype.processLog = function(data, callback){
+	this.getEvent(data).getEngine().updateUserLocation(this.getUser(), new BGTLocation(data), function(position){
+		if (!position) return callback();
+		callback(position);
+	});
 };
 
 BGTSocketConnection.prototype.processAuth = function(data, callback){
@@ -290,7 +293,6 @@ BGTSocketConnection.prototype.processEnableBridges = function(data){
 BGTSocketConnection.prototype.processSelectEvent = function(data){
 	if (!data.eventId) return new Error('missing event id');
 	this._event = BGTEvent.get(data.eventId);
-	util.log('event selected');
 };
 
 BGTSocketConnection.prototype.isSubscribed = function(category){

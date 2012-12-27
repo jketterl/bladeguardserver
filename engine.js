@@ -62,9 +62,9 @@ BGTEngine.prototype.getMap = function() {
 	return this.map;
 }
 
-BGTEngine.prototype.updateUserLocation = function(user, location) {
+BGTEngine.prototype.updateUserLocation = function(user, location, callback) {
 	this.addUser(user);
-	this.tracker.trackPosition(user, location);
+	this.tracker.trackPosition(user, location, callback);
 }
 
 BGTEngine.prototype.keepAliveUser = function(user) {

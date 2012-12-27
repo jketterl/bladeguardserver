@@ -10,7 +10,7 @@ BGTTracker.prototype.purgePositions = function(){
 	this.positions = {};
 };
 
-BGTTracker.prototype.trackPosition = function(user, location){
+BGTTracker.prototype.trackPosition = function(user, location, callback){
 	// get a list of candidate route points from the map that the user is close to
 	var candidates = this.engine.getMap().getCandidatesForLocation(location);
 
@@ -23,7 +23,9 @@ BGTTracker.prototype.trackPosition = function(user, location){
 	var trackerInfo = this.positions[user.id] || {};
 
 	// update the list of plausible positions
-	this.updatePlausiblePositions(trackerInfo, selectedCandidates, location);
+	var position = this.updatePlausiblePositions(trackerInfo, selectedCandidates, location);
+
+	if (callback) callback(position);
 };
 
 BGTTracker.prototype.updatePlausiblePositions = function(ti, selectedCandidates, location){
@@ -75,16 +77,7 @@ BGTTracker.prototype.updatePlausiblePositions = function(ti, selectedCandidates,
 			if (position.movements > bestCandidate.movements) bestCandidate = position;
 		}
 	}
-	if (bestCandidate) this.setPosition(bestCandidate); else this.resetPosition();
-};
-
-BGTTracker.prototype.resetPosition = function(){
-	util.log('resetPosition()');
-};
-
-BGTTracker.prototype.setPosition = function(position){
-	util.log('setPosition()');
-	console.info(position);
+	return bestCandidate || false;
 };
 
 BGTTracker.prototype.buildCandidateGroups = function(candidates) {
