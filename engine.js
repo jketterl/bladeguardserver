@@ -73,15 +73,6 @@ BGTEngine.prototype.removeMapConnection = function(conn) {
 	}
 }
 
-BGTEngine.prototype.sendUpdates = function(updates) {
-	util.log('WARN: BGTEngine.sendUpdates is deprecated');
-	/*
-	for (var i = 0; i < this.connections.length; i++) {
-		this.connections[i].sendUpdates(updates);
-	}
-	*/
-}
-
 BGTEngine.prototype.getLocationXML = function(users) {
 	outputArray = [];
 	for (var i in users) {
