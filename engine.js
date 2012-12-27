@@ -37,9 +37,9 @@ BGTEngine.prototype.setMap = function(map) {
 	this.tracker.purgePositions();
 	var me = this;
 	if (map.loaded) {
-		me.sendUpdates(new BGTUpdate('map', map));
+		me.emit('map', new BGTUpdate('map', map));
 	} else map.on('load', function(){
-		me.sendUpdates(new BGTUpdate('map', map));
+		me.emit('map', new BGTUpdate('map', map));
 	});
 }
 
