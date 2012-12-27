@@ -104,19 +104,17 @@ BGTTracker.prototype.buildCandidateGroups = function(candidates) {
 
 BGTTracker.prototype.selectCandidatesFromGroups = function(candidateGroups) {
 	var selectedCandidates = [];
-        for (var i = 0; i < candidateGroups.length; i++) {
-                var group = candidateGroups[i];
+        candidateGroups.forEach(function(group){
                 var selected = null;
-                for (var k = 0; k < group.length; k++) {
-                        var candidate = group[k];
+		group.forEach(function(candidate){
                         if (selected == null) {
                                 selected = candidate;
                         } else {
                                 if (candidate.distance < selected.distance) selected = candidate;
                         }
-                }
+                });
 		selectedCandidates.push(selected);
-        }
+        });
 	return selectedCandidates;
 }
 
