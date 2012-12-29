@@ -31,7 +31,7 @@ BGTTracker.prototype.trackPosition = function(user, location, callback){
 
 		// just some logging
 		if (!me.positions[user.uid] && position) {
-			util.log(user + ' is now on track on position: ' + position + '!');
+			util.log(user + ' is now on track on position: ' + position.index + '!');
 		} else if (me.positions[user.uid] && !position) {
 			util.log('we lost ' + user);
 		}
