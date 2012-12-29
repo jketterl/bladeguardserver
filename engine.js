@@ -43,8 +43,13 @@ BGTEngine.prototype.removeUser = function(user){
 	this.emit('quit', new BGTUpdate('quit', {user:{id:user.uid}}));
 }
 
-BGTEngine.prototype.getMap = function() {
-	return this.map;
+BGTEngine.prototype.getMap = function(callback) {
+	var me = this;
+	if (me.map) process.nextTick(function(){
+		callback(me.map);
+	}); else me.once('map', function(){
+		callback(me.map);
+	});
 }
 
 BGTEngine.prototype.updateUserLocation = function(user, location, callback) {
@@ -77,20 +82,22 @@ BGTEngine.prototype.getLocationXML = function(users) {
 	return outputArray;
 }
 
-BGTEngine.prototype.getCurrentData = function(category) {
+BGTEngine.prototype.getCurrentData = function(category, callback) {
 	var me = this;
 	switch (category) {
 		case 'movements':
-			return me.getLocationXML(me.users);
+			return callback(me.getLocationXML(me.users));
 		case 'map':
-			if (!me.map) return false;
-			return new BGTUpdate('map', me.getMap());
+			return me.getMap(function(map){
+				callback(new BGTUpdate('map', map));
+			});
 		case 'stats':
-			return new BGTStatsUpdate(me.stats.getLatestStats());
+			return callback(new BGTStatsUpdate(me.stats.getLatestStats()));
 		case 'quit':
-			return false;
+			return callback(false);
 		default:
 			util.log('unable to get current status data for category "' + category + '"');
+			return callback(new Error('unable to get current status data for category "' + category + '"'));
 	}
 };
 

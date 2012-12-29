@@ -192,8 +192,9 @@ BGTEvent.prototype.subscribe = function(subscriber, category){
 	var subscriptions = this.subscribers[category];
 	if (subscriptions.indexOf(subscriber) >= 0) return;
 	subscriptions.push(subscriber);
-	var current = me.getEngine().getCurrentData(category);
-	if (current) subscriber.receiveEvent(category, current);
+	me.getEngine().getCurrentData(category, function(current){
+		if (current) subscriber.receiveEvent(category, current);
+	});
 };
 
 BGTEvent.prototype.unsubscribe = function(subscriber, category){

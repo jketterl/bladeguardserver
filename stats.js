@@ -5,19 +5,21 @@ BGTStatsEngine = function(engine) {
 	this.stats = {};
 	var me = this;
 	setInterval(function(){
-		try {
-			me.updateStats();
-		} catch (e) {
-			me.setStats({});
-			util.log(e);
-		}
+		me.engine.getMap(function(map){
+			try {
+				me.updateStats(map);
+			} catch (e) {
+				me.setStats({});
+				util.log(e.stack);
+			}
+		});
 	}, 10000);
 }
 
 var EventEmitter = require('events').EventEmitter;
 BGTStatsEngine.prototype = new EventEmitter;
 
-BGTStatsEngine.prototype.updateStats = function() {
+BGTStatsEngine.prototype.updateStats = function(map) {
 	var stats = {
 		users:0,
 		tracked:0,
@@ -50,7 +52,7 @@ BGTStatsEngine.prototype.updateStats = function() {
 			var nextIndex = i + 1;
 			if (nextIndex >= positions.length) nextIndex = 0;
 			try {
-				var distance = this.engine.getMap().getDistanceBetween(positions[i], positions[nextIndex]);
+				var distance = map.getDistanceBetween(positions[i], positions[nextIndex]);
 				if (!longest || longest.distance < distance) {
 					longest = {
 						distance:distance,
@@ -69,7 +71,7 @@ BGTStatsEngine.prototype.updateStats = function() {
 				longest.i2,
 				longest.i1	
 			];
-			stats.bladeNightLength = this.engine.getMap().getDistanceBetween(longest.i2, longest.i1);
+			stats.bladeNightLength = map.getDistanceBetween(longest.i2, longest.i1);
 		}
 	}
 	if (stats.speeded > 0) stats.bladeNightSpeed = speedSum / stats.speeded;

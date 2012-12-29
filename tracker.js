@@ -12,43 +12,47 @@ BGTTracker.prototype.purgePositions = function(){
 };
 
 BGTTracker.prototype.trackPosition = function(user, location, callback){
-	// get a list of candidate route points from the map that the user is close to
-	var candidates = this.engine.getMap().getCandidatesForLocation(location);
+	var me = this;
+	this.engine.getMap(function(map){
+		// get a list of candidate route points from the map that the user is close to
+		var candidates = map.getCandidatesForLocation(location);
 
-	// split candidates into groups that are index-wise close to each other
-	var candidateGroups = this.buildCandidateGroups(candidates);
+		// split candidates into groups that are index-wise close to each other
+		var candidateGroups = me.buildCandidateGroups(candidates, map);
 
-	// select one candidate per group that is closest to the users current position
-	var selectedCandidates = this.selectCandidatesFromGroups(candidateGroups);
+		// select one candidate per group that is closest to the users current position
+		var selectedCandidates = me.selectCandidatesFromGroups(candidateGroups);
 
-	if (!this.infos[user.uid]) this.infos[user.uid] = [];
-	var trackerInfo = this.infos[user.uid];
+		if (!me.infos[user.uid]) me.infos[user.uid] = [];
+		var trackerInfo = me.infos[user.uid];
 
-	// update the list of plausible positions
-	var position = this.updatePlausiblePositions(trackerInfo, selectedCandidates, location);
+		// update the list of plausible positions
+		var position = me.updatePlausiblePositions(trackerInfo, selectedCandidates, location, map);
 
-	if (!this.positions[user.uid] && position) {
-		util.log(user + ' is now on track!');
-	} else if (this.positions[user.uid] && !position) {
-		util.log('we lost ' + user);
-	}
-	this.positions[user.uid] = position;
+		// just some logging
+		if (!me.positions[user.uid] && position) {
+			util.log(user + ' is now on track on position: ' + position + '!');
+		} else if (me.positions[user.uid] && !position) {
+			util.log('we lost ' + user);
+		}
 
-	if (callback) callback(position);
+		me.positions[user.uid] = position;
+
+		if (callback) callback(position);
+	});
 };
 
 BGTTracker.prototype.getPosition = function(user){
 	return this.positions[user.uid] || false;
 };
 
-BGTTracker.prototype.updatePlausiblePositions = function(ti, selectedCandidates, location){
+BGTTracker.prototype.updatePlausiblePositions = function(ti, selectedCandidates, location, map){
 	var me = this;
 	// try to find prevously selected candidates that are in index range
 	ti.forEach(function(position, i){
 		var updated = false;
 		selectedCandidates.forEach(function(candidate){
 			if (!candidate.considered) {
-				var map = me.engine.getMap();
 				var delta = map.getIndexDelta(position.index, candidate.index);
 				var distance;
 				if (delta >= 0) {
@@ -69,7 +73,7 @@ BGTTracker.prototype.updatePlausiblePositions = function(ti, selectedCandidates,
 			}
 		});
 		if (!updated) {
-			position.error = me.getLocationError(position, location);
+			position.error = me.getLocationError(position, location, map);
 			if (position.error > .5) {
 				//util.log('purging one plausible position (no new location candidates and error too big)');
 				ti.splice(i, 1);
@@ -95,13 +99,13 @@ BGTTracker.prototype.updatePlausiblePositions = function(ti, selectedCandidates,
 	return bestCandidate || false;
 };
 
-BGTTracker.prototype.buildCandidateGroups = function(candidates) {
+BGTTracker.prototype.buildCandidateGroups = function(candidates, map) {
 	var candidateGroups = [];
 	var currentGroup = [];
 	var lastCandidate;
 	for (var i = 0; i < candidates.length; i++) {
 		if (typeof(lastCandidate) != 'undefined') {
-			var delta = this.engine.getMap().getIndexDelta(lastCandidate.index, candidates[i].index);
+			var delta = map.getIndexDelta(lastCandidate.index, candidates[i].index);
 			if (Math.abs(delta) >= 10) {
 				if (currentGroup.length > 0) {
 					candidateGroups.push(currentGroup);
@@ -132,10 +136,10 @@ BGTTracker.prototype.selectCandidatesFromGroups = function(candidateGroups) {
 	return selectedCandidates;
 }
 
-BGTTracker.prototype.getLocationError = function(candidate, location) {
+BGTTracker.prototype.getLocationError = function(candidate, location, map) {
 	var point1 = candidate.location;
 	var offset = typeof(candidate.direction) == 'undefined' || candidate.direction >= 0 ? 1 : -1
-	var point2 = this.engine.getMap().getIndexAtOffset(candidate.index, offset);
+	var point2 = map.getIndexAtOffset(candidate.index, offset);
 	var idealDistance = point1.getDistanceTo(point2);
 	var myDistance = point1.getDistanceTo(location) + point2.getDistanceTo(location);
 	var error = myDistance - idealDistance;
