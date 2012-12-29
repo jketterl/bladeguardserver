@@ -27,11 +27,7 @@ BGTEngine.prototype.setMap = function(map) {
 	this.map = map;
 	this.tracker.purgePositions();
 	var me = this;
-	if (map.loaded) {
-		me.emit('map', new BGTUpdate('map', map));
-	} else map.on('load', function(){
-		me.emit('map', new BGTUpdate('map', map));
-	});
+	me.emit('map', new BGTUpdate('map', map));
 }
 
 BGTEngine.prototype.addUser = function(user) {
@@ -87,6 +83,7 @@ BGTEngine.prototype.getCurrentData = function(category) {
 		case 'movements':
 			return me.getLocationXML(me.users);
 		case 'map':
+			if (!me.map) return false;
 			return new BGTUpdate('map', me.getMap());
 		case 'stats':
 			return new BGTStatsUpdate(me.stats.getLatestStats());

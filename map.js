@@ -116,6 +116,4 @@ BGTMap.prototype.setPoints = function(points){
 	length += distance;
 
 	util.log('route length is ' + length);
-	me.loaded = true;
-	me.emit('load');
 };
