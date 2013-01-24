@@ -9,8 +9,8 @@ BGTStatsEngine = function(engine) {
 			try {
 				me.updateStats(map);
 			} catch (e) {
-				me.setStats({});
 				util.log(e.stack);
+				me.setStats({});
 			}
 		});
 	}, 10000);

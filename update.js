@@ -5,12 +5,9 @@ BGTUpdate = function(category, data) {
 	this.data = data;
 }
 
-BGTUpdate.prototype.getData = function() {
-	return this.data;
-}
-
 BGTUpdate.prototype.toJSON = function() {
-	return this.getData();
+	this.data.eventId = this.event.id;
+	return this.data;
 }
 
 BGTUpdate.prototype.toString = function() {
@@ -25,6 +22,10 @@ BGTUpdate.prototype.getCategory = function() {
 	return this.category;
 }
 
+BGTUpdate.prototype.setEvent = function(event) {
+	this.event = event;
+}
+
 
 
 BGTLocationUpdate = function(user) {
@@ -32,7 +33,7 @@ BGTLocationUpdate = function(user) {
 	this.category = 'movements';
 }
 
-BGTLocationUpdate.prototype = new BGTUpdate;
+util.inherits(BGTLocationUpdate, BGTUpdate);
 
 BGTLocationUpdate.prototype.isApplicable = function(conn) {
 	if (!this.user.location) return false;
@@ -42,7 +43,7 @@ BGTLocationUpdate.prototype.isApplicable = function(conn) {
 	return true;
 }
 
-BGTLocationUpdate.prototype.getData = function() {
+BGTLocationUpdate.prototype.toJSON = function() {
 	return {
 		user:{
 			id:this.user.uid,
@@ -52,7 +53,8 @@ BGTLocationUpdate.prototype.getData = function() {
 		location:{
 			lat:this.user.location.lat,
 			lon:this.user.location.lon
-		}
+		},
+		eventId:this.event.id
 	}
 }
 
@@ -63,6 +65,7 @@ BGTStatsUpdate = function(stats) {
 
 util.inherits(BGTStatsUpdate, BGTUpdate);
 
-BGTStatsUpdate.prototype.getData = function() {
+BGTStatsUpdate.prototype.toJSON = function() {
+	this.stats.eventId = this.event.id;
 	return this.stats;
 }

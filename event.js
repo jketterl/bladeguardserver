@@ -155,9 +155,9 @@ BGTEvent.prototype.getEngine = function(){
 			me._engine.setMap(map);
 		});
 		var relayEvent = function(source, name){
-			source.on(name, function(data){
-				data.eventId = me.id;
-				me.emit(name, data);
+			source.on(name, function(update){
+				update.setEvent(me);
+				me.emit(name, update);
 			});
 		};
 		['stats', 'movements', 'map', 'quit'].forEach(function(name){
@@ -193,7 +193,15 @@ BGTEvent.prototype.subscribe = function(subscriber, category){
 	if (subscriptions.indexOf(subscriber) >= 0) return;
 	subscriptions.push(subscriber);
 	me.getEngine().getCurrentData(category, function(current){
-		if (current) subscriber.receiveEvent(category, current);
+		if (!current) return;
+		if (Array.isArray(current)) {
+			current.forEach(function(current){
+				current.setEvent(me);
+			});
+		} else {
+			current.setEvent(me);
+		}
+		subscriber.receiveEvent(category, current);
 	});
 };
 
