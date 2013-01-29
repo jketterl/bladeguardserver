@@ -1,0 +1,6 @@
+{
+	"host":"gateway.sandbox.push.apple.com",
+	"port":2195,
+	"cert":"config/keys/BGTPushDev.crt",
+	"key":"config/keys/BGTPushDev.key"
+}
