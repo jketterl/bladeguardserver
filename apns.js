@@ -1,5 +1,6 @@
 var tls = require('tls'),
-    fs = require('fs');
+    fs = require('fs'),
+    util = require('util');
 var options = require('./config/apns.json');
 
 BGT.APNS = {};
@@ -35,7 +36,7 @@ BGT.APNS.Service.prototype = {
 			aps:{
 				'badge':1,
 				'sound':'default',
-				'alert':'blablabla'
+				'alert':message.title + ' ' + (message.weather == 1 ? 'findet statt' : 'findet nicht statt')
 			},
 			bgt:message
 		};
@@ -97,13 +98,24 @@ BGT.APNS.Service.prototype = {
 		if (me.stream) process.nextTick(function(){
 			callback(me.stream);
 		}); else {
+			util.log('connecting to APNS TLS stream');
 			var stream = tls.connect(options, function(){
 				me.stream = stream;
 				callback(stream);
 				stream.on('data', function(chunk){
-					console.info('incoming:');
-					console.info(chunk);
+					util.log('APNS incoming:');
+					util.log(chunk);
 				});
+				stream.on('end', function(){
+					util.log('APNS stream closed.');
+					delete(me.stream);
+				});
+				setTimeout(function(){
+					stream.end();
+				}, 3600000);
+			});
+			stream.on('error', function(err){
+				util.log('error on apns stream:\n' + err.stack);
 			});
 		}
 	}
