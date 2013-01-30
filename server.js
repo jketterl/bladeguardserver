@@ -12,7 +12,19 @@ require('./event.js');
 db = new (require('db-mysql').Database)(require('./config/db.json'));
 BGT = {};
 require('./gcm');
-BGT.messenger = new BGT.GCM.Service(require('./config/gcm.json'));
+require('./apns');
+BGT.messenger = {
+	messengers:[
+		new BGT.GCM.Service(require('./config/gcm.json')),
+		new BGT.APNS.Service(require('./config/apns.json'))
+	],
+	sendBroadcastMessage:function(){
+		var a = arguments;
+		this.messengers.forEach(function(messenger){
+			messenger.sendBroadcastMessage.apply(messenger, a);
+		});
+	}
+};
 
 db.connect(function(err){
 	if (err) {
