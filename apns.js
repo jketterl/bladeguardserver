@@ -36,7 +36,10 @@ BGT.APNS.Service.prototype = {
 			aps:{
 				'badge':1,
 				'sound':'default',
-				'alert':message.title + ' ' + (message.weather == 1 ? 'findet statt' : 'findet nicht statt')
+				'alert':{
+					'loc-key':message.weather == 1 ? 'yes_rolling' : 'no_cancelled',
+					'loc-args':[message.title]
+				}
 			},
 			bgt:message
 		};
