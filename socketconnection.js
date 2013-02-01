@@ -11,7 +11,8 @@ BGTSocketConnection = function(socket){
 		me.parseMessage(message);
 	});
 	me.socket.on('error', function(e){
-		util.log('WebSocket error:\n' + e.stack);
+		util.log('WebSocket error:\n' + e);
+		me.socket.close();
 	});
 }
 
