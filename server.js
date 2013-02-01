@@ -25,6 +25,7 @@ BGT.messenger = {
 		});
 	}
 };
+require('./facebook');
 
 db.connect(function(err){
 	if (err) {

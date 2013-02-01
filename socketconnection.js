@@ -306,3 +306,12 @@ BGTSocketConnection.prototype.getEvent = function(data){
 	if (this._event) return this._event;
 	throw new Error("Unable to execute command: an event must be selected!")
 }
+
+BGTSocketConnection.prototype.processFacebookLogin = function(data, callback){
+	var me = this;
+	BGT.Facebook.getUserInfo('jakob.ketterl', function(data){
+		var user = BGTUser.getFacebookUser(data);
+		me.setUser(user);
+		callback();
+	});
+}

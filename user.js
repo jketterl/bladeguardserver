@@ -57,6 +57,11 @@ BGTUser.getOlivierUser = function() {
 	return user;
 };
 
+BGTUser.getFacebookUser = function(data){
+	var user = new BGTFacebookUser(data);
+	return BGTUser.addUser(user);
+}
+
 BGTUser.hasUser = function(uid) {
         return typeof(BGTUser.users[uid]) != 'undefined';
 }
@@ -110,3 +115,13 @@ BGTUser.prototype.toJSON = function(){
 BGTUser.prototype.updateLocation = function(location){
 	this.location = location;
 };
+
+BGTFacebookUser = function(data){
+	//'users.id as uid, users.name, team.name as team_name, users.admin, team.stats as stats'
+	BGTFacebookUser.super_.call(this, {
+		uid:data.id,
+		name:data.name
+	});
+};
+
+util.inherits(BGTFacebookUser, BGTUser);
