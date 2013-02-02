@@ -128,7 +128,7 @@ BGTSocketConnection.prototype.processAuth = function(data, callback){
 	if (!data.user || !data.pass) {
 		util.log('login attempt with missing credentials - denied');
 		return process.nextTick(function(){
-			callback(false);
+			callback(new Error("missing credentials"));
 		});
 	}
 	BGTUser.login(data.user, data.pass, function(err, user){
