@@ -120,7 +120,10 @@ BGTFacebookUser = function(data){
 	//'users.id as uid, users.name, team.name as team_name, users.admin, team.stats as stats'
 	BGTFacebookUser.super_.call(this, {
 		uid:data.id,
-		name:data.name
+		name:data.name,
+		admin:data.admin,
+		// this is fake for now...
+		team_name:''
 	});
 };
 

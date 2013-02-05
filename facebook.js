@@ -62,9 +62,44 @@ BGT.Facebook.Service.prototype = {
 				});
 				res.on('end', function(){
 					data = JSON.parse(data);
-					callback(data);
+					me.isAdmin(userId, function(isAdmin){
+						data.admin = isAdmin;
+						callback(data);
+					});
 				});
 			});
+		});
+	},
+	getRoles:function(callback){
+		var me = this;
+		me.getAccessToken(function(token){
+			https.get({
+				host:'graph.facebook.com',
+				path:'/' + me.config.appId + '/roles?' + querystring.stringify({
+					'access_token':token
+				}),
+				method:'GET'
+			}, function(res){
+				var data = '';
+				res.on('data', function(chunk){
+					data += chunk.toString();
+				});
+				res.on('end', function(){
+					data = JSON.parse(data);
+					var roles = {};
+					data.data.forEach(function(entry){
+						if (!roles[entry.role]) roles[entry.role] = [];
+						roles[entry.role].push(entry.user);
+					});
+					callback(roles);
+				});
+			});
+		});
+	},
+	isAdmin:function(userId, callback){
+		var me = this;
+		me.getRoles(function(roles){
+			callback(roles.administrators && roles.administrators.indexOf(userId) >= 0);
 		});
 	}
 };

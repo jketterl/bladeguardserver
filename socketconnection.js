@@ -309,9 +309,10 @@ BGTSocketConnection.prototype.getEvent = function(data){
 
 BGTSocketConnection.prototype.processFacebookLogin = function(data, callback){
 	var me = this;
-	BGT.Facebook.getUserInfo('jakob.ketterl', function(data){
+	if (typeof(data.userId) == 'undefined') return callback(new Error('userId must be set'));
+	BGT.Facebook.getUserInfo(data.userId, function(data){
 		var user = BGTUser.getFacebookUser(data);
 		me.setUser(user);
-		callback();
+		callback(user);
 	});
 }
