@@ -57,10 +57,12 @@ BGTUser.getOlivierUser = function() {
 	return user;
 };
 
-BGTUser.getFacebookUser = function(data){
-	var user = new BGTFacebookUser(data);
-	return BGTUser.addUser(user);
-}
+BGTUser.facebookLogin = function(userId, callback){
+	BGT.Facebook.getUserInfo(userId, function(data){
+		var user = new BGTFacebookUser(data);
+		callback(BGTUser.addUser(user));
+	});
+};
 
 BGTUser.hasUser = function(uid) {
         return typeof(BGTUser.users[uid]) != 'undefined';

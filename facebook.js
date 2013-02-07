@@ -42,7 +42,6 @@ BGT.Facebook.Service.prototype = {
 		});
 	},
 	getUserInfo:function(userId, callback){
-		util.log('getting info for user "' + userId + '"');
 		var me = this;
 		me.getAccessToken(function(token){
 			if (util.isError(token)) return util.log('Error getting facebook access token:\n' + token.stack);

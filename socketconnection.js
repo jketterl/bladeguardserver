@@ -310,8 +310,8 @@ BGTSocketConnection.prototype.getEvent = function(data){
 BGTSocketConnection.prototype.processFacebookLogin = function(data, callback){
 	var me = this;
 	if (typeof(data.userId) == 'undefined') return callback(new Error('userId must be set'));
-	BGT.Facebook.getUserInfo(data.userId, function(data){
-		var user = BGTUser.getFacebookUser(data);
+	BGTUser.facebookLogin(data.userId, function(user){
+		util.log('Facebook user login: ' + user);
 		me.setUser(user);
 		callback(user);
 	});
