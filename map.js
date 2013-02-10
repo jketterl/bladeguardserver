@@ -74,6 +74,7 @@ BGTMap.prototype.getDistanceBetween = function(i1, i2) {
 	var len = this.points.length,
 	    index = i1,
 	    distance = 0;
+	if (typeof(i1) != 'number' || typeof(i2) != 'number') throw new Error('only numbers allowed here');
 	if (i1 > len || i2 > len) throw new Error('point index too big');
 	while (index != i2) {
 		distance += this.points[index].distanceToPrevious;
