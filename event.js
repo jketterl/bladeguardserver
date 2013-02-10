@@ -93,9 +93,14 @@ BGTEvent.prototype.doStart = function(){
 	this.emit('start');
 	var me = this;
 	var date = new Date();
+	var wait = this.end - date;
+	// setTimeout will only work with 32bit integers. this is a very unlikely case, i'm only handling it
+	// since i stumbled across it in development.
+	if (wait >= Math.pow(2, 31)) return;
+
 	setTimeout(function(){
 		me.doEnd();
-	}, this.end - date);
+	}, wait);
 };
 
 BGTEvent.prototype.doEnd = function(){
