@@ -111,13 +111,22 @@ BGTSocketConnection.prototype.parseMessage = function(message){
 BGTSocketConnection.prototype.processLog = function(data, callback){
 	var location = new BGTLocation(data);
 	this.getUser().updateLocation(location);
-	this.getEvent(data).getEngine().updateUserLocation(this.getUser(), location, function(position){
+	var engine = this.getEvent(data).getEngine();
+	engine.updateUserLocation(this.getUser(), location, function(position){
 		var result = {
 			locked:false
 		}
 		if (position) {
-			result.locked = true;
-			result.index = position.index;
+			return engine.getMap(function(map){
+				var stats = engine.stats.getLatestStats();
+				if (stats.between) {
+					result.distanceToEnd = map.getDistanceBetween(stats.between[0], position.index);
+					result.distanceToFront = map.getDistanceBetween(position.index, stats.between[1]);
+				}
+				result.locked = true;
+				result.index = position.index;
+				callback(result);
+			});
 		}
 		callback(result);
 	});
