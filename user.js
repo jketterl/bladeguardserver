@@ -73,14 +73,23 @@ BGTUser.prototype.toString = function() {
 
 BGTUser.prototype.setTeam = function(id, callback) {
 	var me = this;
-	db.query().select('name').from('team').where('id = ?', [id]).execute(function(err, result){
+	db.query().select('id, name').from('team').where('id = ?', [id]).execute(function(err, result){
 		if (err) return callback(err);
 		if (result.length == 0) return callback(new Error("Team not found."));
-		me.team_name = result[0].name;
+		var team = result[0];
+		me.team_name = team.name;
 		db.query().update('users').set({team_id:id}).where('id = ?', [me.id]).execute(function(err, result){
-			return callback(err ? err : true);
+			return callback(err ? err : team);
 		});
 	});
+};
+
+BGTUser.prototype.setPassword = function(pass, callback) {
+	var me = this;
+	var hash = crypto.createHash('md5').update(pass).digest('hex');
+	db.query().update('users').set({pass:hash}).where('id = ?', [me.id]).execute(function(err, result){
+		return callback(err ? err : true);
+	});	
 };
 
 BGTUser.prototype.toJSON = function(){
@@ -118,14 +127,17 @@ BGTFacebookUser.login = function(userId, callback){
 		callback(BGTFacebookUser.users[userId]);
 	});
 	db.query().
-		select('fbuser.fbId as id, fbuser.name, team.name as team_name, fbuser.admin, team.stats as stats').
+		select('fbuser.fbId as id, fbuser.name, team.name as team_name, fbuser.admin, team.stats as stats, fbuser.lastupdated as lastupdated').
 		from('fbuser').
 		join({table:'team', type:'left', conditions:'fbuser.team_id = team.id'}).
 		where('fbuser.fbId = ?', [userId]).
 		execute(function(err, rows){
 			if (err) return callback(err);
+			var now = new Date();
 			// did we find the user in the database? good :)
-			if (rows.length > 0) return callback(BGTFacebookUser.addUser(new BGTFacebookUser(rows[0])));
+			if (rows.length > 0) {
+				return callback(BGTFacebookUser.addUser(new BGTFacebookUser(rows[0])));
+			}
 
 			// not in the database? get user info from the facebook graph
 			BGT.Facebook.getUserInfo(userId, function(data){
@@ -133,8 +145,8 @@ BGTFacebookUser.login = function(userId, callback){
 				callback(user);
 
 				db.query().insert('fbuser',
-					['fbId', 'name', 'admin'],
-					[data.id, data.name, data.admin]).execute(function(err, res){
+					['fbId', 'name', 'admin', 'lastupdated'],
+					[data.id, data.name, data.admin, new Date()]).execute(function(err, res){
 						if (err) util.log('error caching facebook data:\n' + err.stack);
 					}
 				);
@@ -144,13 +156,18 @@ BGTFacebookUser.login = function(userId, callback){
 
 BGTFacebookUser.prototype.setTeam = function(id, callback) {
 	var me = this;
-	db.query().select('name').from('team').where('id = ?', [id]).execute(function(err, result){
+	db.query().select('id, name').from('team').where('id = ?', [id]).execute(function(err, result){
 		if (err) return callback(err);
 		if (result.length == 0) return callback(new Error("Team not found."));
-		me.team_name = result[0].name;
+		var team = result[0];
+		me.team_name = team.name;
 		db.query().update('fbuser').set({team_id:id}).where('fbId = ?', [me.id]).execute(function(err, result){
-			return callback(err ? err : true);
+			return callback(err ? err : team);
 		});
 	});
+};
+
+BGTFacebookUser.prototype.setPassword = function(pass, callback) {
+	return callback(new Error('changing facebook user passwords is not supported.'));
 };
 
