@@ -26,6 +26,8 @@ BGT.messenger = {
 	}
 };
 require('./facebook');
+var express = require('express');
+
 
 db.connect(function(err){
 	if (err) {
@@ -39,22 +41,28 @@ db.connect(function(err){
 			return;
 		}
 
-		//BGT.currentEvent = BGTEvent.getAll()[0];
-		//engine = BGT.currentEvent.getEngine();
-
 		var startServer = function(options){
-			var httpServer = https.createServer(options, function (req, res) {
-				//util.log('connect: ' + req.connection.socket.remoteAddress + ' requests ' + req.url + ' (' + req.headers['user-agent'] + ')');
-				var request = router.parse(req.url);
-				request.req = req; request.res = res;
-				// automatic session reconnect (!)
-				BGTSession.processRequest(request);
-				var module = require('./modules/error');
-				try {
-					module = require('./modules/' + request.module);
-				} catch (e) {}
-				module.process(request);
-			}).listen(443);
+			var app = express();
+			app.set('view engine', 'ejs');
+			app.get('/', function(req, res){
+				res.render('index');
+			});
+			app.use('/static', express.static(__dirname + '/ws'));
+			app.get('/event.html', function(req, res){
+				res.render('event/list', {events:BGTEvent.getAll()});
+			});
+			app.get('/event/:id.html', function(req, res){
+				res.render('event/event', {
+					event:BGTEvent.get(req.params.id),
+					url:'https://' + req.headers.host + '/event/' + req.params.id + '.html'
+				});
+			});
+			app.get('/admin', function(req, res){
+				res.render('admin/index');
+			});
+			app.use('/admin/static', express.static(__dirname + '/admin/ws'));
+
+			var httpServer = https.createServer(options, app).listen(443)
 
 			var wsServer = new WebSocketServer({
 				httpServer:httpServer
