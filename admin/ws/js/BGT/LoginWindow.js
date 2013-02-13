@@ -6,29 +6,42 @@ Ext.define('BGT.LoginWindow', {
 	success:Ext.emptyFn,
 	initComponent:function(){
 		var me = this;
+
+		var message = Ext.create('Ext.panel.Panel', {
+			border:false
+		});
+
 		var form = Ext.create('Ext.form.Panel', {
 			border:false,
 			bodyStyle:{
 				padding:'5px'
 			},
-			items:[{
-				xtype:'textfield',
-				fieldLabel:'Benutzername',
-				name:'user'
-			},{
-				xtype:'textfield',
-				fieldLabel:'Password',
-				inputType:'password',
-				name:'pass'
-			}]
+			items:[
+				{
+					xtype:'textfield',
+					fieldLabel:'Benutzername',
+					name:'user'
+				},{
+					xtype:'textfield',
+					fieldLabel:'Password',
+					inputType:'password',
+					name:'pass'
+				},
+				message
+			]
 		});
 		me.items = [form];
 
 		var handler = function(){
 			var socket = BGT.socket.Socket.getInstance();
-			socket.sendCommand({'command':'auth','data':form.getForm().getValues()});
-			me.hide();
-			me.success();
+			socket.sendCommand(Ext.create('BGT.socket.Command', 'auth', form.getForm().getValues(), function(command){
+				if (command.wasSuccessful()) {
+					me.hide();
+					me.success();
+					return;
+				}
+				message.update(command.getResult().message);
+			}));
 		};
 
 		me.buttons = [{

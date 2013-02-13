@@ -8,6 +8,8 @@ Ext.define('BGT.socket.Socket', {
 	},
 	constructor:function(){
 		this.queue = [];
+		this.requestCount = 0;
+		this.requests = [];
 	},
 	connect:function(){
 		var me = this;
@@ -16,6 +18,13 @@ Ext.define('BGT.socket.Socket', {
 			me.socket.onopen = function(){
 				console.info('socket is now open!');
 				me.onConnect();
+				me.socket.onmessage = function(event){
+					if (event.type != 'message') return;
+					var data = JSON.parse(event.data);
+					if (typeof(data.requestId) == 'undefined' || !me.requests[data.requestId]) return;
+					var command = me.requests[data.requestId];
+					command.updateResult(data);
+				};
 			};
 		};
 	},
@@ -28,7 +37,9 @@ Ext.define('BGT.socket.Socket', {
 			this.queue.push(command);
 			return;
 		}
-		this.socket.send(JSON.stringify(command));
+		this.requests[this.requestCount] = command;
+		command.setRequestId(this.requestCount++);
+		this.socket.send(command.getJSON());
 	},
 	onConnect:function(){
 		var me = this;
