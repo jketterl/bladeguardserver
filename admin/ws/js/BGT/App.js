@@ -35,7 +35,6 @@ Ext.define('BGT.App', {
 					rootVisible:false,
 					listeners:{
 						itemclick:function(tree, record){
-							console.info(record.get('cls'));
 							var cls = record.get('cls');
 							if (panels[cls]){
 								return content.setActiveTab(panels[cls]);
