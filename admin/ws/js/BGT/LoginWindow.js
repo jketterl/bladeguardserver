@@ -39,6 +39,7 @@ Ext.define('BGT.LoginWindow', {
 			socket.sendCommand(Ext.create('BGT.socket.commands.AuthCommand', data.user, data.pass, function(command){
 				me.setLoading(false);
 				if (command.wasSuccessful()) {
+					if (!command.getResult().admin) return message.update("Login nur f&uuml;r Administratoren");
 					me.hide();
 					me.success();
 					return;
