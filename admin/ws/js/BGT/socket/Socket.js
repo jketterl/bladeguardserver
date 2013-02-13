@@ -1,4 +1,4 @@
-Ext.define('BGT.Socket', {
+Ext.define('BGT.socket.Socket', {
 	statics:{
 		instance:null,
 		getInstance:function(){

@@ -7,6 +7,10 @@ Ext.onReady(function(){
 		}
 	});
 
-	var login = Ext.create('BGT.LoginWindow');
+	var login = Ext.create('BGT.LoginWindow', {
+		success:function(){
+			var app = Ext.create('BGT.App');
+		}
+	});
 	login.show();
 });
