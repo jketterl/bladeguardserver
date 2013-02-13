@@ -12,7 +12,8 @@ Ext.define('BGT.App', {
 					cls:'BGT.admin.events.Grid'
 				},{
 					text:'Benutzer',
-					leaf:true
+					leaf:true,
+					cls:'BGT.admin.users.Grid'
 				}]
 			}
 		});
@@ -36,12 +37,12 @@ Ext.define('BGT.App', {
 					listeners:{
 						itemclick:function(tree, record){
 							var cls = record.get('cls');
-							if (panels[cls]){
-								return content.setActiveTab(panels[cls]);
+							if (!panels[cls]){
+								var panel = Ext.create(cls);
+								panels[cls] = panel;
+								content.add(panel);
 							}
-							var panel = Ext.create(cls);
-							panels[cls] = panel;
-							content.add(panel);
+							return content.setActiveTab(panels[cls]);
 						}
 					}
 				}]

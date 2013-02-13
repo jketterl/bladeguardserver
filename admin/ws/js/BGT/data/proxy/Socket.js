@@ -6,9 +6,10 @@ Ext.define('BGT.data.proxy.Socket', {
 		    command = Ext.create(me.commands.read, function(command){
 			operation.setCompleted();
 			if (command.wasSuccessful()){
-				console.info(command.getResult());
-				operation.resultSet = me.getReader().read(command.getResult());
-				operation.setSuccessful();
+				var result = operation.resultSet = me.getReader().read(command.getResult());
+				if (result.success) operation.setSuccessful();
+			} else {
+				me.fireEvent('exception', me, null, operation);
 			}
 			Ext.callback(callback, scope || me, [operation]);
 		});
