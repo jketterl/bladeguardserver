@@ -33,8 +33,11 @@ Ext.define('BGT.LoginWindow', {
 		me.items = [form];
 
 		var handler = function(){
+			me.setLoading();
 			var socket = BGT.socket.Socket.getInstance();
-			socket.sendCommand(Ext.create('BGT.socket.Command', 'auth', form.getForm().getValues(), function(command){
+			var data = form.getForm().getValues();
+			socket.sendCommand(Ext.create('BGT.socket.commands.AuthCommand', data.user, data.pass, function(command){
+				me.setLoading(false);
 				if (command.wasSuccessful()) {
 					me.hide();
 					me.success();
