@@ -23,6 +23,7 @@ Ext.define('BGT.admin.team.Team', {
 Ext.define('BGT.admin.team.Grid', {
 	extend:'Ext.grid.Panel',
 	title:'Teams',
+	closable:true,
 	columns:[
 		{'header':'ID', dataIndex:'id', hidden:true},
 		{'header':'Name', dataIndex:'name', flex:1}

@@ -25,6 +25,7 @@ Ext.define('BGT.admin.users.User', {
 Ext.define('BGT.admin.users.Grid', {
 	extend:'Ext.grid.Panel',
 	title:'Benutzerverwaltung',
+	closable:true,
 	columns:[
 		{header:'ID', dataIndex:'id', hidden:true},
 		{header:'Name', dataIndex:'name', flex:2},

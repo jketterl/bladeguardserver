@@ -27,6 +27,7 @@ Ext.define('BGT.admin.events.Event', {
 
 Ext.define('BGT.admin.events.Grid', {
 	extend:'Ext.grid.Panel',
+	closable:true,
 	columns:[
 		{header:'ID', dataIndex:'id', hidden:true},
 		{header:'Name', dataIndex:'title', flex:1},

@@ -45,6 +45,9 @@ Ext.define('BGT.App', {
 								var panel = Ext.create(cls);
 								panels[cls] = panel;
 								content.add(panel);
+								panel.on('close', function(){
+									delete panels[cls];
+								});
 							}
 							return content.setActiveTab(panels[cls]);
 						}
