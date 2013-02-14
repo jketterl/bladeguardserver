@@ -36,7 +36,27 @@ BGTUser.login = function(user, pass, callback) {
 				callback(null, BGTUser.addUser(new BGTUser(rows[0])));
 			}
 		});
-}
+};
+
+BGTUser.getAll = function(callback){
+	var me = this;
+	db.query().
+		select('users.id as id, users.name, team.name as team_name, users.admin, team.stats as stats').
+		from('users').
+		join({table:'team', type:'left', conditions:'users.team_id = team.id'}).
+		execute(function(err, rows){
+			if (err) return callback(err);
+			var result = [];
+			rows.forEach(function(row){
+				if (typeof(BGTUser.users[row.id]) != 'undefined') {
+					result.push(BGTUser.users[row.id]);
+				} else {
+					result.push(BGTUser.addUser(new BGTUser(row)));
+				}
+			});
+			callback(null, result);
+		});
+};
 
 BGTUser.generateUid = function(){
 	if (!BGTUser.uidOffset) BGTUser.uidOffset = 0;

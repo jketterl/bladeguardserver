@@ -334,3 +334,10 @@ BGTSocketConnection.prototype.processChangePassword = function(data, callback){
 	if (typeof(data.pass) == 'undefined') return callback(new Error('pass must be set'));
 	this.getUser().setPassword(data.pass, callback);
 };
+
+BGTSocketConnection.prototype.processGetUsers = function(data, callback){
+	if (!this.getUser().isAdmin()) return callback(new Error('only admin users are allowed to start events'));
+	BGTUser.getAll(function(err, users){
+		callback(err ? err : users);
+	});
+};

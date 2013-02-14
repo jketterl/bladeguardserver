@@ -5,7 +5,10 @@ Ext.define('BGT.admin.users.User', {
 		'BGT.data.proxy.Socket'
 	],
 	fields:[
-		{name:'id', type:'integer'}
+		{name:'id', type:'integer'},
+		{name:'name', type:'string'},
+		{name:'team_name', type:'string'},
+		{name:'admin', type:'boolean'}
 	],
 	proxy:{
 		type:'socket',
@@ -23,7 +26,10 @@ Ext.define('BGT.admin.users.Grid', {
 	extend:'Ext.grid.Panel',
 	title:'Benutzerverwaltung',
 	columns:[
-		{header:'ID', dataIndex:'id'}
+		{header:'ID', dataIndex:'id', hidden:true},
+		{header:'Name', dataIndex:'name', flex:2},
+		{header:'Team', dataIndex:'team_name', flex:1},
+		{header:'Admin', dataIndex:'admin', xtype:'booleancolumn', trueText:'Ja', falseText:'Nein'}
 	],
 	store:{
 		model:'BGT.admin.users.User',
