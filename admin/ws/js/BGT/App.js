@@ -18,6 +18,10 @@ Ext.define('BGT.App', {
 					text:'Teams',
 					leaf:true,
 					cls:'BGT.admin.team.Grid'
+				},{
+					text:'Strecken',
+					leaf:true,
+					cls:'BGT.admin.map.Grid'
 				}]
 			}
 		});
