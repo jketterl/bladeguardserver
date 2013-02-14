@@ -32,23 +32,36 @@ Ext.define('BGT.LoginWindow', {
 		});
 		me.items = [form];
 
+		var socketCallback = function(command){
+			me.setLoading(false);
+			if (command.wasSuccessful()) {
+				if (!command.getResult().admin) return message.update("Login nur f&uuml;r Administratoren");
+				me.hide();
+				me.success();
+				return;
+			}
+			message.update(command.getResult().message);
+		};
+
 		var handler = function(){
 			me.setLoading();
 			var socket = BGT.socket.Socket.getInstance();
 			var data = form.getForm().getValues();
-			socket.sendCommand(Ext.create('BGT.socket.commands.AuthCommand', data.user, data.pass, function(command){
-				me.setLoading(false);
-				if (command.wasSuccessful()) {
-					if (!command.getResult().admin) return message.update("Login nur f&uuml;r Administratoren");
-					me.hide();
-					me.success();
-					return;
-				}
-				message.update(command.getResult().message);
-			}));
+			socket.sendCommand(Ext.create('BGT.socket.commands.AuthCommand', data.user, data.pass, socketCallback));
+		};
+
+		var fbHandler = function(){
+			FB.login(function(res){
+				if (res.authResponse) fbLogin();
+			});
 		};
 
 		me.buttons = [{
+			text:'Mit Facebook anmelden',
+			handler:function(){
+				if (typeof(FB) != 'undefined') fbHandler(); else window.fbQueue.push(fbHandler);
+			}
+		},{
 			text:'Anmelden',
 			handler:handler
 		}];
@@ -62,6 +75,26 @@ Ext.define('BGT.LoginWindow', {
 				enter:handler
 			});
 		});
+
+		var fbLogin = function(){
+			me.setLoading('Facebook Auto-Login');
+			FB.api('/me', function(res){
+				var socket = BGT.socket.Socket.getInstance();
+				socket.sendCommand(Ext.create('BGT.socket.commands.FacebookLoginCommand', res.id, socketCallback));
+			});
+		};
+
+		var fbCheck = function(){
+			FB.getLoginStatus(function(res){
+				me.setLoading(false);
+				if (res.status == 'connected') fbLogin();
+			});
+		};
+
+		me.on('afterrender', function(){
+			me.setLoading();
+			if (typeof(FB) != 'undefined') fbCheck(); else window.fbQueue.push(fbCheck);
+		})
 
 		me.callParent(arguments);
 	}
