@@ -14,6 +14,10 @@ Ext.define('BGT.App', {
 					text:'Benutzer',
 					leaf:true,
 					cls:'BGT.admin.users.Grid'
+				},{
+					text:'Teams',
+					leaf:true,
+					cls:'BGT.admin.team.Grid'
 				}]
 			}
 		});
