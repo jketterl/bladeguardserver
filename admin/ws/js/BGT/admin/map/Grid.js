@@ -20,6 +20,9 @@ Ext.define('BGT.admin.map.Map', {
 
 Ext.define('BGT.admin.map.Grid', {
 	extend:'Ext.grid.Panel',
+	requires:[
+		'BGT.socket.Socket'
+	],
 	title:'Strecken',
 	closable:true,
 	columns:[
@@ -29,5 +32,48 @@ Ext.define('BGT.admin.map.Grid', {
 	store:{
 		model:'BGT.admin.map.Map',
 		autoLoad:true
-	}
+	},
+	dockedItems:[{
+		xtype:'toolbar',
+		dock:'top',
+		items:[{
+			text:'Neue Strecke hochladen (GPX-Datei)',
+			handler:function(){
+				var window = Ext.create('Ext.window.Window', {
+					title:'Dateiupload',
+					layout:'fit',
+					items:[{
+						xtype:'form',
+						border:false,
+						bodyStyle:{
+							padding:'5px'
+						},
+						items:[{
+							xtype:'filefield',
+							name:'file',
+							fieldLabel:'Datei'
+						}]
+					}],
+					buttons:[{
+						text:'OK',
+						handler:function(){
+							window.setLoading();
+							var reader = new FileReader();
+							reader.onload = function(e){
+								var gpx = e.target.result;
+								var command = Ext.create('BGT.socket.commands.UploadMapCommand', gpx, function(command){
+									console.info('got response');
+									window.close();
+								});
+								console.info('sending command');
+								BGT.socket.Socket.getInstance().sendCommand(command);
+							};
+							reader.readAsText(window.down('form').down('[name=file]').extractFileInput().files[0]);
+						}
+					}]
+				});
+				window.show();
+			}
+		}]
+	}]
 });
