@@ -65,7 +65,8 @@ db.connect(function(err){
 			var httpServer = https.createServer(options, app).listen(443)
 
 			var wsServer = new WebSocketServer({
-				httpServer:httpServer
+				httpServer:httpServer,
+				maxReceivedFrameSize:1024*1024
 			});
 
 			wsServer.on('request', function(request){
