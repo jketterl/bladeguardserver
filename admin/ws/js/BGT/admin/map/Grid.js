@@ -62,10 +62,14 @@ Ext.define('BGT.admin.map.Grid', {
 							reader.onload = function(e){
 								var gpx = e.target.result;
 								var command = Ext.create('BGT.socket.commands.UploadMapCommand', gpx, function(command){
-									console.info('got response');
 									window.close();
+									if (!command.wasSuccessful()) return Ext.Msg.show({
+										title:'Error',
+										msg:command.getResult().message,
+										buttons:Ext.Msg.OK,
+										icon:Ext.Msg.Error
+									});
 								});
-								console.info('sending command');
 								BGT.socket.Socket.getInstance().sendCommand(command);
 							};
 							reader.readAsText(window.down('form').down('[name=file]').extractFileInput().files[0]);

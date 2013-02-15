@@ -96,7 +96,11 @@ BGTSocketConnection.prototype.parseMessage = function(message){
 		util.log('message could not be parsed (command is of type "' + typeof(data.command) + '", string expected)');
 		return callback(new Error('message could not be parsed (command is of type "' + typeof(data.command) + '", string expected)'));
 	}
-	var fn = this['process' + data.command.charAt(0).toUpperCase() + data.command.slice(1)];
+	try {
+		fn = require(__dirname + '/commands/' + data.command);
+	} catch (e) {
+		var fn = this['process' + data.command.charAt(0).toUpperCase() + data.command.slice(1)];
+	}
 	if (typeof(fn) != 'function') {
 		util.log('unknown command: "' + data.command + '"');
 		return callback(new Error('unknown command: "' + data.command + '"'));
