@@ -25,6 +25,13 @@ Ext.define('BGT.socket.Socket', {
 					var command = me.requests[data.requestId];
 					command.updateResult(data);
 				};
+				me.socket.onclose = function(){
+					console.info('socket closed');
+					console.info(arguments);
+				};
+				me.socket.onerror = function(){
+					console.info(arguments);
+				}
 			};
 		};
 	},
