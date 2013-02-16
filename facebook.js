@@ -41,6 +41,29 @@ BGT.Facebook.Service.prototype = {
 			});
 		});
 	},
+	verifyUserSession:function(accessToken, callback){
+		var me = this;
+		var req = {
+			host:'graph.facebook.com',
+			path:'/me?' + querystring.stringify({
+				'fields':'installed',
+				'access_token':accessToken,
+			}),
+			method:'GET'
+		};
+		https.get(req, function(res){
+			if (res.statusCode != 200) return callback(new Error('user session invalid; http response code: ' + res.statusCode));
+			var data = '';
+			res.on('data', function(chunk){
+				data += chunk.toString();
+			});
+			res.on('end', function(){
+				data = JSON.parse(data);
+				if (!data.installed) return callback(new Error('you must allow this app to access your facebook information'));
+				callback(data);
+			});
+		});
+	},
 	getUserInfo:function(userId, callback){
 		var me = this;
 		me.getAccessToken(function(token){

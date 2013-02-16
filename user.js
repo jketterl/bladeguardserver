@@ -142,36 +142,39 @@ BGTFacebookUser.addUser = function(user){
 	return user;
 };
 
-BGTFacebookUser.login = function(userId, callback){
-	if (BGTFacebookUser.users[userId]) return process.nextTick(function(){
-		callback(BGTFacebookUser.users[userId]);
-	});
-	db.query().
-		select('fbuser.fbId as id, fbuser.name, team.name as team_name, fbuser.admin, team.stats as stats, fbuser.lastupdated as lastupdated').
-		from('fbuser').
-		join({table:'team', type:'left', conditions:'fbuser.team_id = team.id'}).
-		where('fbuser.fbId = ?', [userId]).
-		execute(function(err, rows){
-			if (err) return callback(err);
-			var now = new Date();
-			// did we find the user in the database? good :)
-			if (rows.length > 0) {
-				return callback(BGTFacebookUser.addUser(new BGTFacebookUser(rows[0])));
-			}
-
-			// not in the database? get user info from the facebook graph
-			BGT.Facebook.getUserInfo(userId, function(data){
-				var user = BGTFacebookUser.addUser(new BGTFacebookUser(data));
-				callback(user);
-
-				db.query().insert('fbuser',
-					['fbId', 'name', 'admin', 'lastupdated'],
-					[data.id, data.name, data.admin, new Date()]).execute(function(err, res){
-						if (err) util.log('error caching facebook data:\n' + err.stack);
-					}
-				);
-			});
+BGTFacebookUser.login = function(accessToken, callback){
+	BGT.Facebook.verifyUserSession(accessToken, function(data){
+		if (util.isError(data)) return callback(data);
+		if (BGTFacebookUser.users[data.id]) return process.nextTick(function(){
+			callback(BGTFacebookUser.users[data.id]);
 		});
+		db.query().
+			select('fbuser.fbId as id, fbuser.name, team.name as team_name, fbuser.admin, team.stats as stats, fbuser.lastupdated as lastupdated').
+			from('fbuser').
+			join({table:'team', type:'left', conditions:'fbuser.team_id = team.id'}).
+			where('fbuser.fbId = ?', [data.id]).
+			execute(function(err, rows){
+				if (err) return callback(err);
+				var now = new Date();
+				// did we find the user in the database? good :)
+				if (rows.length > 0) {
+					return callback(BGTFacebookUser.addUser(new BGTFacebookUser(rows[0])));
+				}
+
+				// not in the database? get user info from the facebook graph
+				BGT.Facebook.getUserInfo(data.id, function(data){
+					var user = BGTFacebookUser.addUser(new BGTFacebookUser(data));
+					callback(user);
+
+					db.query().insert('fbuser',
+						['fbId', 'name', 'admin', 'lastupdated'],
+						[data.id, data.name, data.admin, new Date()]).execute(function(err, res){
+							if (err) util.log('error caching facebook data:\n' + err.stack);
+						}
+					);
+				});
+			});
+	});
 };
 
 BGTFacebookUser.prototype.setTeam = function(id, callback) {

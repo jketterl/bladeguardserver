@@ -324,16 +324,6 @@ BGTSocketConnection.prototype.getEvent = function(data){
 	throw new Error("Unable to execute command: an event must be selected!")
 }
 
-BGTSocketConnection.prototype.processFacebookLogin = function(data, callback){
-	var me = this;
-	if (typeof(data.userId) == 'undefined') return callback(new Error('userId must be set'));
-	BGTFacebookUser.login(data.userId, function(user){
-		util.log('Facebook user login: ' + user);
-		me.setUser(user);
-		callback(user);
-	});
-};
-
 BGTSocketConnection.prototype.processChangePassword = function(data, callback){
 	if (typeof(data.pass) == 'undefined') return callback(new Error('pass must be set'));
 	this.getUser().setPassword(data.pass, callback);
