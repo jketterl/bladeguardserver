@@ -52,7 +52,7 @@ Ext.define('BGT.LoginWindow', {
 
 		var fbHandler = function(){
 			FB.login(function(res){
-				if (res.authResponse) fbLogin();
+				if (res.authResponse) fbLogin(res.authResponse);
 			});
 		};
 
@@ -76,18 +76,16 @@ Ext.define('BGT.LoginWindow', {
 			});
 		});
 
-		var fbLogin = function(){
+		var fbLogin = function(auth){
 			me.setLoading('Facebook Auto-Login');
-			FB.api('/me', function(res){
-				var socket = BGT.socket.Socket.getInstance();
-				socket.sendCommand(Ext.create('BGT.socket.commands.FacebookLoginCommand', res.id, socketCallback));
-			});
+			var socket = BGT.socket.Socket.getInstance();
+			socket.sendCommand(Ext.create('BGT.socket.commands.FacebookLoginCommand', auth.accessToken, socketCallback));
 		};
 
 		var fbCheck = function(){
 			FB.getLoginStatus(function(res){
 				me.setLoading(false);
-				if (res.status == 'connected') fbLogin();
+				if (res.status == 'connected') fbLogin(res.authResponse);
 			});
 		};
 
