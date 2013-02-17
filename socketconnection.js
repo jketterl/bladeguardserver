@@ -187,12 +187,6 @@ BGTSocketConnection.prototype.processUpdateRegistration = function(data, callbac
 	});
 };
 
-BGTSocketConnection.prototype.processUpdateEvent = function(data, callback){
-	if (!this.getUser().isAdmin()) return callback(new Error('only admin users are allowed to start events'));
-	if (typeof(data.eventId) == 'undefined') return callback(new Error('event id missing'));
-	this.getEvent(data).update(data, callback);
-};
-
 BGTSocketConnection.prototype.processSubscribeUpdates = function(data){
 	if (!data.category) return new Error('missing parameters');
 	var event = this.getEvent(data);
