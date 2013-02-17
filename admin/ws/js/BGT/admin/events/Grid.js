@@ -27,6 +27,10 @@ Ext.define('BGT.admin.events.Event', {
 
 Ext.define('BGT.admin.events.Grid', {
 	extend:'Ext.grid.Panel',
+	requires:[
+		'BGT.socket.Socket'
+	],
+	title:'Blade Night Liste',
 	closable:true,
 	columns:[
 		{header:'ID', dataIndex:'id', hidden:true},
@@ -51,5 +55,39 @@ Ext.define('BGT.admin.events.Grid', {
 		model:'BGT.admin.events.Event',
 		autoLoad:true
 	},
-	title:'Blade Night Liste'
+	initComponent:function(){
+		var me = this,
+		    weatherButton = Ext.create('Ext.button.Button', {
+			text:'Wetterentscheidung...',
+			disabled:true,
+			handler:function(){
+				var event = me.getSelectionModel().getSelection()[0];
+				var dialog = Ext.create('BGT.admin.events.WeatherDialog', {
+					callback:function(value){
+						if (typeof(value) == 'undefined') return;
+						me.setLoading();
+						var command = Ext.create('BGT.socket.commands.UpdateEventCommand', event, value, function(){
+							me.setLoading(false);
+							me.store.load();
+						});
+						BGT.socket.Socket.getInstance().sendCommand(command);
+					}
+				});
+				dialog.show();
+			}
+		});
+		me.dockedItems = [{
+			xtype:'toolbar',
+			dock:'top',
+			items:[weatherButton]
+		}];
+		me.selModel = {
+			listeners:{
+				select:function(){
+					weatherButton.enable();
+				}
+			}
+		};
+		this.callParent(arguments);
+	}
 });
