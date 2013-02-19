@@ -11,7 +11,7 @@ Ext.define('BGT.admin.events.Event', {
 		{name:'end', type:'date'},
 		{name:'map', type:'integer'},
 		{name:'mapName', type:'string'},
-		{name:'weather'}
+		{name:'weather', defaultValue:null}
 	],
 	proxy:{
 		type:'socket',
@@ -79,7 +79,41 @@ Ext.define('BGT.admin.events.Grid', {
 		me.dockedItems = [{
 			xtype:'toolbar',
 			dock:'top',
-			items:[weatherButton]
+			items:[
+				{
+					xtype:'button',
+					text:'Neue Blade Night',
+					handler:function(){
+						var form = Ext.create('BGT.admin.events.Form', {
+							border:false,
+							bodyStyle:{
+								padding:'10px'
+							},
+							width:500
+						});
+						var window = Ext.create('Ext.window.Window', {
+							title:'Neuen Termin anlegen',
+							layout:'fit',
+							items:[form],
+							buttons:[{
+								text:'Abbrechen',
+								handler:function(){
+									window.close();
+								}
+							},{
+								text:'OK',
+								handler:function(){
+									var event = Ext.create('BGT.admin.events.Event');
+									form.getForm().updateRecord(event);
+									console.info(event);
+								}
+							}]
+						});
+						window.show();
+					}
+				},
+				weatherButton
+			]
 		}];
 		me.selModel = {
 			listeners:{

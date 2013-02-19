@@ -3,7 +3,8 @@ Ext.onReady(function(){
 	Ext.Loader.setConfig({
 		enabled:true,
 		paths:{
-			'BGT':'/admin/static/js/BGT'
+			'BGT':'/admin/static/js/BGT',
+			'Ext.ux':'/static/js/ext-ux'
 		}
 	});
 
