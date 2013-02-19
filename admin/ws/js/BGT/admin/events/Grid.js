@@ -17,7 +17,8 @@ Ext.define('BGT.admin.events.Event', {
 		type:'socket',
 		socket:BGT.socket.Socket.getInstance(),
 		commands:{
-			read:'BGT.socket.commands.GetEventsCommand'
+			read:'BGT.socket.commands.GetEventsCommand',
+			create:'BGT.socket.commands.CreateEventCommand'
 		},
 		reader:{
 			type:'json'
@@ -103,9 +104,15 @@ Ext.define('BGT.admin.events.Grid', {
 							},{
 								text:'OK',
 								handler:function(){
+									window.setLoading();
 									var event = Ext.create('BGT.admin.events.Event');
 									form.getForm().updateRecord(event);
-									console.info(event);
+									event.save({
+										callback:function(){
+											window.close();
+											me.store.load();
+										}
+									});
 								}
 							}]
 						});

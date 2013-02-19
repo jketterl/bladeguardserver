@@ -14,5 +14,18 @@ Ext.define('BGT.data.proxy.Socket', {
 			Ext.callback(callback, scope || me, [operation]);
 		});
 		me.socket.sendCommand(command);
+	},
+	create:function(operation, callback, scope){
+		var me = this,
+		    record = operation.getRecords()[0],
+		    command = Ext.create(me.commands.create, record, function(command){
+			operation.setSuccessful(command.wasSuccessful());
+			operation.setCompleted();
+			if (command.wasSuccessful()){
+				record.set(command.getResult());
+			}
+			Ext.callback(callback, scope || me, [operation]);
+		});
+		me.socket.sendCommand(command);
 	}
 });
