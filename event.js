@@ -80,6 +80,35 @@ BGTEvent.getAll = function() {
 	return result;
 };
 
+BGTEvent.addEvent = function(event, callback) {
+	event.store(function(event){
+		BGTEvent.events[event.id] = event;
+		callback(event);
+	});
+};
+
+BGTEvent.prototype.store = function(callback){
+	var me = this,
+	    query = db.query();
+	if (me.id) {
+		throw new Error("TODO: implement event update");
+	} else {
+		query.insert('event',
+			['title', 'start', 'end', 'map', 'weather'],
+			[me.title, me.start, me.end, me.map, me.weather]
+		);
+	}
+	query.execute(function(err, result){
+		if (err) return callback(err);
+		if (!me.id) me.id = result.id;
+		db.query().select('title').from('map').where('id = ?', [me.map]).execute(function(err, result){
+			if (err) return callback(err);
+			me.mapName = result[0].title;
+			if (callback) callback(me);
+		});
+	});
+};
+
 BGTEvent.prototype.isActive = function(){
 	return this.active == true;
 }
