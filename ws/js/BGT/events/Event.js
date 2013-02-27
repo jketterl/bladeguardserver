@@ -23,6 +23,37 @@ Ext.define('BGT.events.Event', {
 		reader:{
 			type:'json'
 		}
+	},
+	receiveUpdate:function(update){
+		var me = this;
+		for (category in update) {
+			update[category].forEach(function(up){
+				if (up.eventId != me.get('id')) return;
+				me.fireEvent(category, up);
+			});
+		}
+	},
+	on:function(ev){
+		var me = this;
+		if (!me.hasListener(ev)) {
+			var socket = BGT.socket.Socket.getInstance();
+			if (!me.bound) {
+				socket.on('update', Ext.bind(me.receiveUpdate, me));
+				me.bound = true;
+			}
+			var command = Ext.create('BGT.socket.commands.SubscribeUpdatesCommand', me, [ev], function(command){});
+			socket.sendCommand(command);
+		}
+		return me.callParent(arguments);
+	},
+	un:function(ev){
+		var me = this;
+		me.callParent(arguments);
+		if (!me.hasListener(ev)) {
+			var socket = BGT.socket.Socket.getInstance();
+			var command = Ext.create('BGT.socket.commands.UnsubscribeUpdatesCommand', me, [ev], function(command){});
+			socket.sendCommand(command);
+		}
 	}
 });
 

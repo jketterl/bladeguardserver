@@ -11,7 +11,7 @@ Ext.define('BGT.socket.Socket', {
 		this.queue = [];
 		this.requestCount = 0;
 		this.requests = [];
-		this.addEvents('connect');
+		this.addEvents('connect', 'update');
 		this.callParent(arguments);
 	},
 	connect:function(){
@@ -24,9 +24,12 @@ Ext.define('BGT.socket.Socket', {
 				me.socket.onmessage = function(event){
 					if (event.type != 'message') return;
 					var data = JSON.parse(event.data);
-					if (typeof(data.requestId) == 'undefined' || !me.requests[data.requestId]) return;
-					var command = me.requests[data.requestId];
-					command.updateResult(data);
+					if (typeof(data.requestId) != 'undefined' && me.requests[data.requestId]) {
+						var command = me.requests[data.requestId];
+						command.updateResult(data);
+					} else if (data.event && data.event == 'update') {
+						me.fireEvent('update', data.data);
+					}
 				};
 				me.socket.onclose = function(){
 					console.info('socket closed');

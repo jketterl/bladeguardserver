@@ -98,7 +98,6 @@ Ext.define('BGT.admin.events.Grid', {
 					handler:function(){
 						var event = me.getSelectionModel().getSelection()[0];
 						BGT.App.instance.showPanel(Ext.create('BGT.map.Panel', {
-							socket:BGT.socket.Socket.getInstance(),
 							title:event.get('title'),
 							closable:true,
 							event:event

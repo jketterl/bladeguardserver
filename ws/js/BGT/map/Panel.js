@@ -3,7 +3,7 @@ Ext.define('BGT.map.Panel', {
 	constructor:function(){
 		this.userMarkers = [];
 		this.markerImage = new google.maps.MarkerImage(
-			'img/map_pin.png',
+			'/static/img/map_pin.png',
 			false,
 			false,
 			new google.maps.Point(7, 7)
@@ -40,33 +40,25 @@ Ext.define('BGT.map.Panel', {
 	initComponent:function(){
 		var me = this;
 
-		me.socket.on('connect', function(){
-			me.socket.subscribe(['map', 'movements', 'quit', 'stats']);
-			me.userMarkers.forEach(function(marker){
-				marker.setMap(null);
-			});
-			me.userMarkers = [];
-			if (me.routeOverlay) me.routeOverlay.setPath([]);
-			if (me.trackOverlay) me.trackOverlay.setPath([]);
+		var toSubscribe = ['map', 'movements', 'quit', 'stats'];
+
+		var handlers = {};
+		toSubscribe.forEach(function(cat){
+			handlers[cat] = Ext.bind(me['process' + cat.charAt(0).toUpperCase() + cat.slice(1)], me);
 		});
-		me.socket.on('message', function(data){
-			me.parseIncomingMessage(data);
+
+		me.on('show', function(){
+			for (var cat in handlers) me.event.on(cat, handlers[cat]);
+		});
+
+		me.on('hide', function(){
+			for (var cat in handlers) me.event.un(cat, handlers[cat]);
 		});
 
 		me.callParent(arguments);
 	},
-	parseIncomingMessage:function(data){
-		var me = this;
-		if (!data.event || data.event != 'update') return;
-		for (var a in data.data) {
-			fn = 'process' + a.charAt(0).toUpperCase() + a.slice(1);
-			if (!me[fn] || typeof(me[fn]) != 'function') return;
-			me[fn](data.data[a]);
-		}
-	},
 	processStats:function(stats){
 		var me = this;
-		stats = stats[0];
 		var coordinates = [];
 		if (stats.between) {
 			var i = stats.between[0];
@@ -80,8 +72,6 @@ Ext.define('BGT.map.Panel', {
 	},
 	processMap:function(map){
 		var me = this;
-		map = map[0];
-
 
 		var coordinates = [];
 		var bounds;
@@ -101,31 +91,26 @@ Ext.define('BGT.map.Panel', {
 
 		me.map.fitBounds(bounds);
 	},
-	processMovements:function(movements){
+	processMovements:function(movement){
 		var me = this;
-		movements.forEach(function(movement){
-			var marker = me.userMarkers[movement.user.id];
-			var position = new google.maps.LatLng(movement.location.lat, movement.location.lon)
-			if (!marker) {
-				marker = new google.maps.Marker({
-					position:position,
-					map:me.map,
-					title:movement.user.name,
-					icon:me.markerImage
-				});
-				me.userMarkers[movement.user.id] = marker;
-			} else {
-				marker.setPosition(position);
-			}
-		});
+		var marker = me.userMarkers[movement.user.id];
+		var position = new google.maps.LatLng(movement.location.lat, movement.location.lon)
+		if (!marker) {
+			marker = new google.maps.Marker({
+				position:position,
+				map:me.map,
+				title:movement.user.name,
+				icon:me.markerImage
+			});
+			me.userMarkers[movement.user.id] = marker;
+		} else {
+			marker.setPosition(position);
+		}
 	},
-	processQuit:function(quits){
-		var me = this;
-		quits.forEach(function(quit){
-			var marker = me.userMarkers[quit.user.id];
-			if (!marker) return;
-			marker.setMap(null);
-			delete me.userMarkers[quit.user.id];
-		});
+	processQuit:function(quit){
+		var marker = me.userMarkers[quit.user.id];
+		if (!marker) return;
+		marker.setMap(null);
+		delete me.userMarkers[quit.user.id];
 	}
 });
