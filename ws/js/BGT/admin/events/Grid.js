@@ -1,35 +1,8 @@
-Ext.define('BGT.admin.events.Event', {
-	extend:'Ext.data.Model',
-	requires:[
-		'BGT.socket.Socket',
-		'BGT.data.proxy.Socket'
-	],
-	fields:[
-		{name:'id', type:'integer'},
-		{name:'title', type:'string'},
-		{name:'start', type:'date'},
-		{name:'end', type:'date'},
-		{name:'map', type:'integer'},
-		{name:'mapName', type:'string'},
-		{name:'weather', defaultValue:null}
-	],
-	proxy:{
-		type:'socket',
-		socket:BGT.socket.Socket.getInstance(),
-		commands:{
-			read:'BGT.socket.commands.GetEventsCommand',
-			create:'BGT.socket.commands.CreateEventCommand'
-		},
-		reader:{
-			type:'json'
-		}
-	}
-});
-
 Ext.define('BGT.admin.events.Grid', {
 	extend:'Ext.grid.Panel',
 	requires:[
-		'BGT.socket.Socket'
+		'BGT.socket.Socket',
+		'BGT.events.Event',
 	],
 	title:'Blade Night Liste',
 	closable:true,
@@ -53,7 +26,7 @@ Ext.define('BGT.admin.events.Grid', {
 		}}
 	],
 	store:{
-		model:'BGT.admin.events.Event',
+		model:'BGT.events.Event',
 		autoLoad:true
 	},
 	initComponent:function(){
@@ -105,7 +78,7 @@ Ext.define('BGT.admin.events.Grid', {
 								text:'OK',
 								handler:function(){
 									window.setLoading();
-									var event = Ext.create('BGT.admin.events.Event');
+									var event = Ext.create('BGT.events.Event');
 									form.getForm().updateRecord(event);
 									event.save({
 										callback:function(){
