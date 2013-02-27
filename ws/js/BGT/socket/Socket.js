@@ -1,4 +1,5 @@
 Ext.define('BGT.socket.Socket', {
+	extend:'Ext.util.Observable',
 	statics:{
 		instance:null,
 		getInstance:function(){
@@ -10,6 +11,8 @@ Ext.define('BGT.socket.Socket', {
 		this.queue = [];
 		this.requestCount = 0;
 		this.requests = [];
+		this.addEvents('connect');
+		this.callParent(arguments);
 	},
 	connect:function(){
 		var me = this;
@@ -32,6 +35,8 @@ Ext.define('BGT.socket.Socket', {
 				me.socket.onerror = function(){
 					console.info(arguments);
 				}
+
+				me.fireEvent('connect', me);
 			};
 		};
 	},

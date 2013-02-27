@@ -1,5 +1,9 @@
 Ext.define('BGT.App', {
 	extend:'Ext.container.Viewport',
+	constructor:function(){
+		BGT.App.instance = this;
+		this.callParent(arguments);
+	},
 	initComponent:function(){
 		var me = this;
 
@@ -26,7 +30,7 @@ Ext.define('BGT.App', {
 			}
 		});
 
-		var content = Ext.create('Ext.TabPanel', {
+		me.content = Ext.create('Ext.TabPanel', {
 			region:'center'
 		});
 
@@ -48,19 +52,24 @@ Ext.define('BGT.App', {
 							if (!panels[cls]){
 								var panel = Ext.create(cls);
 								panels[cls] = panel;
-								content.add(panel);
+								me.content.add(panel);
 								panel.on('close', function(){
 									delete panels[cls];
 								});
 							}
-							return content.setActiveTab(panels[cls]);
+							return me.content.setActiveTab(panels[cls]);
 						}
 					}
 				}]
 			},
-			content
+			me.content
 		];
 		me.layout = 'border';
 		me.callParent(arguments);
+	},
+	showPanel:function(panel){
+		var me = this;
+		me.content.add(panel);
+		me.content.setActiveTab(panel);
 	}
 });
