@@ -51,7 +51,7 @@ Ext.onReady(function(){
 	Ext.Loader.setConfig({
 		enabled:true,
 		paths:{
-			'BGT':'js/bgt'
+			'BGT':'js/BGT'
 		}
 	});
 

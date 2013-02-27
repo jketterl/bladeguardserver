@@ -1,13 +1,3 @@
-body {
-	color:#555;
-	font-family:Helvetica;
-}
-
-#events {
-	font-family:Monospace;
-	font-size:8pt;
-	margin:10px;
-	height:400px;
-	width:1000px;
-	overflow:scroll;
+.x-form-time-trigger {
+    background-image: url('../../../static/img/time-trigger.png') !important;
 }

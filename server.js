@@ -60,7 +60,6 @@ db.connect(function(err){
 			app.get('/admin', function(req, res){
 				res.render('admin/index');
 			});
-			app.use('/admin/static', express.static(__dirname + '/admin/ws'));
 
 			var httpServer = https.createServer(options, app).listen(443)
 
