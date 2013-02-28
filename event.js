@@ -91,7 +91,13 @@ BGTEvent.prototype.store = function(callback){
 	var me = this,
 	    query = db.query();
 	if (me.id) {
-		throw new Error("TODO: implement event update");
+		query.update('event').set({
+			title:me.title,
+			start:me.start,
+			end:me.end,
+			map:me.map,
+			weather:me.weather
+		}).where('id = ?', [me.id]);
 	} else {
 		query.insert('event',
 			['title', 'start', 'end', 'map', 'weather'],
@@ -214,7 +220,13 @@ BGTEvent.prototype.setMap = function(mapId, callback){
 	BGTMap.getMap(mapId, function(map){
 		if (util.isError(map)) return callback(map);
 		me._engine.setMap(map);
-		callback();
+		if (me.map == mapId) return callback();
+
+		me.map = mapId;
+		me.mapName = map.name;
+		me.store(function(){
+			callback();
+		});
 	});
 };
 
