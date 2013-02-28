@@ -177,9 +177,15 @@ BGTEvent.prototype.setWeatherDecision = function(decision, callback){
 };
 
 BGTEvent.prototype.update = function(data, callback){
-	for (var a in data) switch (a) {
-		case "weather":
-			return this.setWeatherDecision(data[a], callback);
+	console.info(data);
+	for (var a in data) {
+		var val = data[a];
+		switch (a) {
+			case "weather":
+				return this.setWeatherDecision(val, callback);
+			case "map":
+				return this.setMap(val, callback);
+		}
 	}
 };
 
