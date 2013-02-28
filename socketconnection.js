@@ -127,9 +127,11 @@ BGTSocketConnection.prototype.processLog = function(data, callback){
 		if (position) {
 			return engine.getMap(function(map){
 				var stats = engine.stats.getLatestStats();
-				if (stats.between) {
+				if (stats.between) try {
 					result.distanceToEnd = map.getDistanceBetween(stats.between[0], position.index);
 					result.distanceToFront = map.getDistanceBetween(position.index, stats.between[1]);
+				} catch (e) {
+					util.log('Error calculating user distances:\n' + e.stack);
 				}
 				result.locked = true;
 				result.index = position.index;
@@ -203,20 +205,6 @@ BGTSocketConnection.prototype.processGetMaps = function(data, callback){
 	if (!this.getUser().isAdmin()) return new Error('only admin users are allowed to list maps.');
 	BGTMap.getMaps(callback);
 }
-
-BGTSocketConnection.prototype.processSetMap = function(data, callback){
-	if (!this.getUser().isAdmin()) return callback(new Error('only admin users can switch the map'));
-	if (typeof(data.id) == 'undefined') return callback(new Error("Missing map id!"));
-	var engine = this.getEvent(data).getEngine();
-	BGTMap.getMap(data.id, function(map){
-		if (util.isError(map)) {
-			util.log(map);
-			return callback(map);
-		}
-		engine.setMap(map);
-		callback(true);
-	});
-};
 
 BGTSocketConnection.prototype.processGetTeams = function(data, callback){
 	db.query().select('id, name').from('team').where('active').execute(function(err, rows){

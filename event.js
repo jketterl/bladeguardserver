@@ -187,9 +187,8 @@ BGTEvent.prototype.getEngine = function(){
 	var me = this;
 	if (!me._engine) {
 		me._engine = new BGTEngine()
-		BGTMap.getMap(me.map, function(map){
-			if (util.isError(map)) return util.log('Error loading map ' + me.map + ':\n' + map.stack);
-			me._engine.setMap(map);
+		me.setMap(me.map, function(map){
+			if (util.isError(map)) util.log('Error loading map ' + me.map + ':\n' + map.stack);
 		});
 		var relayEvent = function(source, name){
 			source.on(name, function(update){
@@ -202,6 +201,15 @@ BGTEvent.prototype.getEngine = function(){
 		});
 	}
 	return me._engine;
+};
+
+BGTEvent.prototype.setMap = function(mapId, callback){
+	var me = this;
+	BGTMap.getMap(mapId, function(map){
+		if (util.isError(map)) return callback(map);
+		me._engine.setMap(map);
+		callback();
+	});
 };
 
 BGTEvent.prototype.emit = function(name){
