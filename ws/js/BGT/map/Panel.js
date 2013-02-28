@@ -108,6 +108,7 @@ Ext.define('BGT.map.Panel', {
 		}
 	},
 	processQuit:function(quit){
+		var me = this;
 		var marker = me.userMarkers[quit.user.id];
 		if (!marker) return;
 		marker.setMap(null);
