@@ -262,6 +262,7 @@ BGTEvent.prototype.subscribe = function(subscriber, category){
 
 	me.getEngine().getCurrentData(category, function(current){
 		if (!current) return;
+		if (util.isError(current)) return console.warn(current);
 		if (Array.isArray(current)) {
 			current.forEach(function(current){
 				current.setEvent(me);
