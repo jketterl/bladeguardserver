@@ -115,16 +115,6 @@ BGTSocketConnection.prototype.parseMessage = function(message){
 	}
 };
 
-BGTSocketConnection.prototype.processDisableBridges = function(data){
-	if (!this.getUser().isAdmin()) return new Error('only admin users are allowed to start events');
-	engine.disableBridges();
-};
-
-BGTSocketConnection.prototype.processEnableBridges = function(data){
-	if (!this.getUser().isAdmin()) return new Error('only admin users are allowed to start events');
-	engine.enableBridges();
-};
-
 BGTSocketConnection.prototype.processSelectEvent = function(data){
 	if (!data.eventId) return new Error('missing event id');
 	this._event = BGTEvent.get(data.eventId);
