@@ -1,3 +1,4 @@
 ws/js/ext*
 /node_modules
 config/keys/*
+config/facebook.json
