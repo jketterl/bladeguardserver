@@ -1,5 +1,4 @@
 var util = require('util'),
-    crypto = require('crypto');
 
 BGTSocketConnection = function(socket){
 	var me = this;
@@ -114,40 +113,6 @@ BGTSocketConnection.prototype.parseMessage = function(message){
 		util.log('error processing user command "' + data.command + '":\n' + e.stack);
 		callback(e);
 	}
-};
-
-BGTSocketConnection.prototype.processGetMaps = function(data, callback){
-	if (!this.getUser().isAdmin()) return new Error('only admin users are allowed to list maps.');
-	BGTMap.getMaps(callback);
-}
-
-BGTSocketConnection.prototype.processGetTeams = function(data, callback){
-	db.query().select('id, name').from('team').where('active').execute(function(err, rows){
-		if (err) return callback(err);
-		callback(rows);
-	});
-};
-
-BGTSocketConnection.prototype.processSetTeam = function(data, callback){
-	if (typeof(data.id) == 'undefined') process.nextTick(function(){
-		callback(new Error('no team id provided'));
-	});
-	this.getUser().setTeam(data.id, callback);
-};
-
-BGTSocketConnection.prototype.processSignup = function(data, callback){
-	if (typeof(data.user) == 'undefined') return callback(new Error('missing username'));
-	if (typeof(data.pass) == 'undefined') return callback(new Error('missing password'));
-	var hash = crypto.createHash('md5').update(data.pass).digest('hex');
-	db.query().insert('users', ['name', 'pass'], [data.user, hash]).execute(function(err, result){
-		if (err) {
-			if (/^Duplicate entry .* for key/.test(err)) {
-				return callback(new Error('Username already registered'));
-			}
-			return callback(err);
-		}
-		callback(true);
-	});
 };
 
 BGTSocketConnection.prototype.processGetEvents = function(data){
