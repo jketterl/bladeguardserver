@@ -1,4 +1,4 @@
-var util = require('util'),
+var util = require('util');
 
 BGTSocketConnection = function(socket){
 	var me = this;
@@ -98,9 +98,6 @@ BGTSocketConnection.prototype.parseMessage = function(message){
 	try {
 		fn = require(__dirname + '/commands/' + data.command);
 	} catch (e) {
-		var fn = this['process' + data.command.charAt(0).toUpperCase() + data.command.slice(1)];
-	}
-	if (typeof(fn) != 'function') {
 		util.log('unknown command: "' + data.command + '"');
 		return callback(new Error('unknown command: "' + data.command + '"'));
 	}
