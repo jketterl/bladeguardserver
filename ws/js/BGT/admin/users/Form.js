@@ -1,0 +1,25 @@
+Ext.define('BGT.admin.users.Form', {
+	extend:'Ext.form.Panel',
+	defaults:{
+		anchor:'100%'
+	},
+	items:[{
+		xtype:'textfield',
+		name:'name',
+		fieldLabel:'Benutzername'
+	},{
+		xtype:'textfield',
+		inputType:'password',
+		name:'pass',
+		fieldLabel:'Passwort'
+	},{
+		xtype:'textfield',
+		inputType:'password',
+		name:'confirm',
+		fieldLabel:'Bestätigung'
+	},{
+		xtype:'combobox',
+		name:'team',
+		fieldLabel:'Team'
+	}]
+});

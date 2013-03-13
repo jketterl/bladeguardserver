@@ -35,5 +35,34 @@ Ext.define('BGT.admin.users.Grid', {
 	store:{
 		model:'BGT.admin.users.User',
 		autoLoad:true
-	}
+	},
+	dockedItems:[{
+		dock:'top',
+		xtype:'toolbar',
+		items:[{
+			text:'Neuen Benutzer anlegen...',
+			handler:function(){
+				var window = Ext.create('Ext.window.Window', {
+					layout:'fit',
+					title:'Neuen Benutzer anlegen',
+					items:[Ext.create('BGT.admin.users.Form', {
+						border:false,
+						bodyStyle:{
+							padding:'10px'
+						},
+						width:300
+					})],
+					buttons:[{
+						text:'Abbrechen',
+						handler:function(){
+							window.close();
+						}
+					},{
+						text:'OK'
+					}]
+				});
+				window.show();
+			}
+		}]
+	}]
 });
