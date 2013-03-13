@@ -1,29 +1,8 @@
-Ext.define('BGT.admin.users.User', {
-	extend:'Ext.data.Model',
-	requires:[
-		'BGT.socket.Socket',
-		'BGT.data.proxy.Socket'
-	],
-	fields:[
-		{name:'id', type:'integer'},
-		{name:'name', type:'string'},
-		{name:'team_name', type:'string'},
-		{name:'admin', type:'boolean'}
-	],
-	proxy:{
-		type:'socket',
-		socket:BGT.socket.Socket.getInstance(),
-		commands:{
-			read:'BGT.socket.commands.GetUsersCommand'
-		},
-		reader:{
-			type:'json'
-		}
-	}
-});
-
 Ext.define('BGT.admin.users.Grid', {
 	extend:'Ext.grid.Panel',
+	requires:[
+		'BGT.admin.users.User'
+	],
 	title:'Benutzerverwaltung',
 	closable:true,
 	columns:[
@@ -42,23 +21,50 @@ Ext.define('BGT.admin.users.Grid', {
 		items:[{
 			text:'Neuen Benutzer anlegen...',
 			handler:function(){
+				var form = Ext.create('BGT.admin.users.Form', {
+					border:false,
+					bodyStyle:{
+						padding:'10px'
+					},
+					width:300
+				});
 				var window = Ext.create('Ext.window.Window', {
 					layout:'fit',
 					title:'Neuen Benutzer anlegen',
-					items:[Ext.create('BGT.admin.users.Form', {
-						border:false,
-						bodyStyle:{
-							padding:'10px'
-						},
-						width:300
-					})],
+					items:[form],
 					buttons:[{
 						text:'Abbrechen',
 						handler:function(){
 							window.close();
 						}
 					},{
-						text:'OK'
+						text:'OK',
+						handler:function(){
+							var data = form.getForm().getFieldValues();
+							var message = false;
+							if (data.pass == '') message = 'Das Passwort darf nicht leer sein';
+							if (data.pass != data.confirm) message = 'Die eingegebenen Passwörter stimmen nicht überein';
+
+							if (message) {
+								Ext.Msg.show({
+									title:'Fehler',
+									msg:message,
+									buttons:Ext.Msg.OK,
+									icon:Ext.Msg.ERROR
+								});
+								return;
+							}
+
+							window.setLoading();
+							var user = Ext.create('BGT.admin.users.User');
+							form.getForm().updateRecord(user);
+							user.save({
+								callback:function(){
+									window.setLoading(false);
+									window.dismiss();
+								}
+							});
+						}
 					}]
 				});
 				window.show();
