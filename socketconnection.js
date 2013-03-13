@@ -115,41 +115,6 @@ BGTSocketConnection.prototype.parseMessage = function(message){
 	}
 };
 
-BGTSocketConnection.prototype.processGetEvents = function(data){
-	return BGTEvent.getAll();
-};
-
-BGTSocketConnection.prototype.processEnableControl = function(data){
-	util.log("incoming control request");
-	var me = this;
-	this.getEvent(data).registerConnection(me);
-	this.controlled = true;
-};
-
-BGTSocketConnection.prototype.processDisableControl = function(data){
-	this.getEvent(data).unregisterConnection(this);
-	util.log("control session ended");
-	this.controlled = false;
-};
-
-BGTSocketConnection.prototype.processStartEvent = function(data){
-	if (!this.getUser().isAdmin()) return new Error('only admin users are allowed to start events');
-	if (typeof(data.eventId) == 'undefined') return new Error('event id missing');
-	BGTEvent.get(data.eventId).doStart();
-};
-
-BGTSocketConnection.prototype.processPauseEvent = function(data){
-	if (!this.getUser().isAdmin()) return new Error('only admin users are allowed to start events');
-	if (typeof(data.eventId) == 'undefined') return new Error('event id missing');
-	BGTEvent.get(data.eventId).pause();
-};
-
-BGTSocketConnection.prototype.processShutdownEvent = function(data){
-	if (!this.getUser().isAdmin()) return new Error('only admin users are allowed to start events');
-	if (typeof(data.eventId) == 'undefined') return new Error('event id missing');
-	BGTEvent.get(data.eventId).doEnd();
-};
-
 BGTSocketConnection.prototype.processDisableBridges = function(data){
 	if (!this.getUser().isAdmin()) return new Error('only admin users are allowed to start events');
 	engine.disableBridges();
