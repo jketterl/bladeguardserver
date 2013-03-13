@@ -115,11 +115,6 @@ BGTSocketConnection.prototype.parseMessage = function(message){
 	}
 };
 
-BGTSocketConnection.prototype.processSelectEvent = function(data){
-	if (!data.eventId) return new Error('missing event id');
-	this._event = BGTEvent.get(data.eventId);
-};
-
 BGTSocketConnection.prototype.setUser = function(user){
 	this.user = user;
 	return this;
@@ -139,16 +134,4 @@ BGTSocketConnection.prototype.getEvent = function(data){
 	} catch (e) {}
 	if (this._event) return this._event;
 	throw new Error("Unable to execute command: an event must be selected!")
-}
-
-BGTSocketConnection.prototype.processChangePassword = function(data, callback){
-	if (typeof(data.pass) == 'undefined') return callback(new Error('pass must be set'));
-	this.getUser().setPassword(data.pass, callback);
-};
-
-BGTSocketConnection.prototype.processGetUsers = function(data, callback){
-	if (!this.getUser().isAdmin()) return callback(new Error('only admin users are allowed to start events'));
-	BGTUser.getAll(function(err, users){
-		callback(err ? err : users);
-	});
 };
