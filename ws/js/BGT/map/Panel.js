@@ -40,7 +40,7 @@ Ext.define('BGT.map.Panel', {
 	initComponent:function(){
 		var me = this;
 
-		var toSubscribe = ['map', 'movements', 'quit', 'stats'];
+		var toSubscribe = ['map', 'movements', 'quit', 'stats', 'reset'];
 
 		var handlers = {};
 		toSubscribe.forEach(function(cat){
@@ -113,5 +113,14 @@ Ext.define('BGT.map.Panel', {
 		if (!marker) return;
 		marker.setMap(null);
 		delete me.userMarkers[quit.user.id];
+	},
+	processReset:function(){
+		var me = this;
+		me.userMarkers.forEach(function(marker){
+			marker.setMap(null);
+		});
+		me.userMarkers = [];
+		me.trackOverlay.setPath([]);
+		me.routeOverlay.setPath([]);
 	}
 });

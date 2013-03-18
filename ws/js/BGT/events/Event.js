@@ -41,6 +41,9 @@ Ext.define('BGT.events.Event', {
 		var command = Ext.create('BGT.socket.commands.SubscribeUpdatesCommand', me, events, function(command){});
 		BGT.socket.Socket.getInstance().sendCommand(command);
 	},
+	reset:function(){
+		this.fireEvent('reset', this);
+	},
 	on:function(ev){
 		var me = this;
 		if (!me.hasListener(ev)) {
@@ -48,6 +51,7 @@ Ext.define('BGT.events.Event', {
 			if (!me.bound) {
 				socket.on('update', Ext.bind(me.receiveUpdate, me));
 				socket.on('open', Ext.bind(me.reRegisterUpdates, me));
+				socket.on('close', Ext.bind(me.reset, me));
 				me.bound = true;
 			}
 			var command = Ext.create('BGT.socket.commands.SubscribeUpdatesCommand', me, [ev], function(command){});
