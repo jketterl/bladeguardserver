@@ -11,12 +11,13 @@ Ext.define('BGT.socket.Socket', {
 		this.queue = [];
 		this.requestCount = 0;
 		this.requests = [];
-		this.addEvents('connect', 'update');
+		this.addEvents('open', 'close', 'update');
 		this.callParent(arguments);
 	},
 	connect:function(){
 		var me = this;
 		if (!me.socket) {
+			console.info('connecting to server');
 			me.socket = new WebSocket('wss://' + top.location.host + '/socket');
 			me.socket.onopen = function(){
 				console.info('socket is now open!');
@@ -31,17 +32,30 @@ Ext.define('BGT.socket.Socket', {
 						me.fireEvent('update', data.data);
 					}
 				};
-				me.socket.onclose = function(){
-					console.info('socket closed');
-					console.info(arguments);
-				};
 				me.socket.onerror = function(){
 					console.info(arguments);
 				}
 
-				me.fireEvent('connect', me);
+				me.fireEvent('open', me);
+			};
+			me.socket.onclose = function(){
+				me.reconnect();
 			};
 		};
+	},
+	disconnect:function(){
+		var me = this;
+		if (!me.socket) return;
+		me.fireEvent('close', me);
+		me.socket.close();
+		delete me.socket;
+	},
+	reconnect:function(){
+		var me = this;
+		me.disconnect();
+		setTimeout(function(){
+			me.connect();
+		}, 10000);
 	},
 	sendHandshake:function(){
 		this.socket.send(JSON.stringify({handshake:{platform:'bgt-admin',version:'0.0.1',build:1}}));
