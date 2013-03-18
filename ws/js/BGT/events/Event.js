@@ -33,12 +33,21 @@ Ext.define('BGT.events.Event', {
 			});
 		}
 	},
+	reRegisterUpdates:function(){
+		var me = this,
+		    events = [];
+		for (var a in me.events) events.push(a);
+		if (!events.length) return;
+		var command = Ext.create('BGT.socket.commands.SubscribeUpdatesCommand', me, events, function(command){});
+		BGT.socket.Socket.getInstance().sendCommand(command);
+	},
 	on:function(ev){
 		var me = this;
 		if (!me.hasListener(ev)) {
 			var socket = BGT.socket.Socket.getInstance();
 			if (!me.bound) {
 				socket.on('update', Ext.bind(me.receiveUpdate, me));
+				socket.on('open', Ext.bind(me.reRegisterUpdates, me));
 				me.bound = true;
 			}
 			var command = Ext.create('BGT.socket.commands.SubscribeUpdatesCommand', me, [ev], function(command){});
