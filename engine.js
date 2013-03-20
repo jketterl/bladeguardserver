@@ -8,7 +8,7 @@ require('./tracker');
 
 var EventEmitter = require('events').EventEmitter;
 
-BGTEngine = function(){
+BGTEngine = function(event){
 	var me = this;
 	this.users = [];
 	this.connections = [];
@@ -17,6 +17,7 @@ BGTEngine = function(){
 		me.emit('stats', stats)
 	});
 	this.tracker = new BGTTracker(this);
+	this.event = event;
 };
 
 util.inherits(BGTEngine, EventEmitter);

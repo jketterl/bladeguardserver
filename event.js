@@ -198,7 +198,7 @@ BGTEvent.prototype.update = function(data, callback){
 BGTEvent.prototype.getEngine = function(){
 	var me = this;
 	if (!me._engine) {
-		me._engine = new BGTEngine()
+		me._engine = new BGTEngine(me);
 		me.setMap(me.map, function(map){
 			if (util.isError(map)) util.log('Error loading map ' + me.map + ':\n' + map.stack);
 		});

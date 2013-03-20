@@ -1,4 +1,5 @@
-var util = require('util');
+var util = require('util'),
+    graphite = require('graphite');
 
 BGTStatsEngine = function(engine) {
 	this.engine = engine;
@@ -14,6 +15,7 @@ BGTStatsEngine = function(engine) {
 			}
 		});
 	}, 10000);
+	this.graphite = graphite.createClient('plaintext://localhost:2003');
 }
 
 var EventEmitter = require('events').EventEmitter;
@@ -76,6 +78,12 @@ BGTStatsEngine.prototype.updateStats = function(map) {
 	}
 	if (stats.speeded > 0) stats.bladeNightSpeed = speedSum / stats.speeded;
 	this.setStats(stats);
+	var obj = {};
+	obj[this.engine.event.id] = stats;
+	obj = {bgt:{stats:obj}};
+	this.graphite.write(obj, function(err){
+		if (err) util.log('error sending graphite data:\n' + err.stack);
+	});
 }
 
 BGTStatsEngine.prototype.setStats = function(stats) {
