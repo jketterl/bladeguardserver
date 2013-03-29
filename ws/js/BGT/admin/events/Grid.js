@@ -55,7 +55,7 @@ Ext.define('BGT.admin.events.Grid', {
 			disabled:true,
 			handler:function(){
 				var event = me.getSelectionModel().getSelection()[0];
-				BGT.App.instance.showPanel(Ext.create('BGT.map.Panel', {
+				BGT.App.instance.showPanel(Ext.create('BGT.admin.map.Panel', {
 					title:event.get('title'),
 					closable:true,
 					event:event
