@@ -14,7 +14,8 @@ Ext.define('BGT.admin.map.LengthPoint', {
 	],
 	proxy:{
 		type:'rest',
-		reader:'graphite'
+		reader:'graphite',
+		url:'http://graphite.justjakob.de/render'
 	}
 });
 
@@ -35,27 +36,24 @@ Ext.define('BGT.admin.map.Panel', {
 		var store = Ext.create('Ext.data.Store', {
 			model:'BGT.admin.map.LengthPoint'
 		});
-		store.proxy.url = 'http://graphite.justjakob.de/render?from=-2h&target=bgt.stats.' + me.event.get('id') + '.bladeNightLength&format=json';
 
 		var lengthGraph = Ext.create('Ext.chart.Chart', {
 			width:200,
 			height:200,
 			store:store,
-			axes:[
-				{
-					type:'Numeric',
-					position:'left',
-					fields:['value'],
-					minimum:0
-				},
-				{
-					type:'Time',
-					position:'bottom',
-					fields:'timestamp',
-					dateFormat:'H:i',
-					step:[Ext.Date.SECOND, 10]
-				}
-			],
+			axes:[{
+				type:'Numeric',
+				position:'left',
+				fields:['value'],
+				minimum:0
+			},
+			{
+				type:'Time',
+				position:'bottom',
+				fields:'timestamp',
+				dateFormat:'H:i',
+				step:[Ext.Date.MINUTE, 1]
+			}],
 			series:[{
 				type:'line',
 				showMarkers:false,
@@ -70,6 +68,8 @@ Ext.define('BGT.admin.map.Panel', {
 			width:200,
 			collapsible:true,
 			collapseMode:'mini',
+			split:true,
+			header:false,
 			items:[
 				lengthGraph
 			]
@@ -79,7 +79,13 @@ Ext.define('BGT.admin.map.Panel', {
 
 		Ext.TaskManager.start({
 			run:function(){
-				store.load();
+				store.load({
+					params:{
+						from:'-2h',
+						target:'bgt.stats.' + me.event.get('id') + '.bladeNightLength',
+						format:'json'
+					}
+				});
 			},
 			interval:60000
 		});
