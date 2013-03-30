@@ -27,7 +27,7 @@ BGT.messenger = {
 };
 require('./facebook');
 var express = require('express');
-
+var engine = require('ejs-locals');
 
 db.connect(function(err){
 	if (err) {
@@ -43,6 +43,7 @@ db.connect(function(err){
 
 		var startServer = function(options){
 			var app = express();
+			app.engine('ejs', engine);
 			app.set('view engine', 'ejs');
 			app.get('/', function(req, res){
 				res.render('index');
