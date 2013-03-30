@@ -1,6 +1,10 @@
 Ext.define('BGT.socket.commands.GetEventsCommand', {
 	extend:'BGT.socket.Command',
-	constructor:function(callback){
-		this.callParent(['getEvents', {}, callback]);
+	constructor:function(params, callback){
+		if (typeof(params) == 'function') {
+			callback = params;
+			params = {};
+		}
+		this.callParent(['getEvents', params, callback]);
 	}
 });

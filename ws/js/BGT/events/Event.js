@@ -19,7 +19,12 @@ Ext.define('BGT.events.Event', {
 		type:'socket',
 		socket:BGT.socket.Socket.getInstance(),
 		commands:{
-			read:'BGT.socket.commands.GetEventsCommand',
+			read:{
+				command:'BGT.socket.commands.GetEventsCommand',
+				params:{
+					all:true
+				}
+			},
 			create:'BGT.socket.commands.CreateEventCommand'
 		},
 		reader:{

@@ -1,3 +1,3 @@
 module.exports = function(data){
-	return BGTEvent.getAll();
+	return BGTEvent.getAll(data.all);
 };

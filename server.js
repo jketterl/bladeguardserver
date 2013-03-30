@@ -49,7 +49,7 @@ db.connect(function(err){
 			});
 			app.use('/static', express.static(__dirname + '/ws'));
 			app.get('/event.html', function(req, res){
-				res.render('event/list', {events:BGTEvent.getAll()});
+				res.render('event/list', {events:BGTEvent.getAll(true)});
 			});
 			app.get('/event/:id.html', function(req, res){
 				res.render('event/event', {

@@ -3,7 +3,8 @@ Ext.define('BGT.data.proxy.Socket', {
 	alias:'proxy.socket',
 	read:function(operation, callback, scope){
 		var me = this,
-		    command = Ext.create(me.commands.read, function(command){
+		    command = me.commands.read,
+		    cb = function(command){
 			operation.setCompleted();
 			if (command.wasSuccessful()){
 				var result = operation.resultSet = me.getReader().read(command.getResult());
@@ -12,7 +13,12 @@ Ext.define('BGT.data.proxy.Socket', {
 				me.fireEvent('exception', me, null, operation);
 			}
 			Ext.callback(callback, scope || me, [operation]);
-		});
+		    };
+		if (typeof(command) == 'object') {
+			command = Ext.create(command.command, command.params, cb);
+		} else {
+			command = Ext.create(command, cb);
+		}
 		me.socket.sendCommand(command);
 	},
 	create:function(operation, callback, scope){

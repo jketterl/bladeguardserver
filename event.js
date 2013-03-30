@@ -55,7 +55,6 @@ BGTEvent.loadAll = function(callback) {
 		.select('event.id as id, event.title, start, end, map, weather, map.title as mapName, actual_start as actualStart, actual_end as actualEnd')
 		.from('event')
 		.join({table:'map', type:'left', conditions:'event.map = map.id'})
-		.where('end >= ?', [new Date()])
 		.execute(function(err, results){
 			if (err) return callback(err);
 			results.forEach(function(event){
@@ -74,9 +73,13 @@ BGTEvent.get = function(id) {
 	throw new Error("Event not found");
 };
 
-BGTEvent.getAll = function() {
+BGTEvent.getAll = function(includingOld) {
 	var result = [];
-	for (var a in this.events) result.push(this.events[a]);
+	var now = new Date();
+	for (var a in this.events) {
+		var event = this.events[a];
+		if (includingOld || event.end >= now) result.push(this.events[a]);
+	}
 	return result;
 };
 
