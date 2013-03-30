@@ -16,12 +16,16 @@
 		var format = function(d) {
 			return pad(d.getHours(), 2) + ':' + pad(d.getMinutes(), 2) + '_' + d.getFullYear() + pad(d.getMonth() + 1, 2) + pad(d.getDate(), 2);
 		};
-		var getGraphiteUrl = function(targets) {
+		var getGraphiteUrl = function(targets, extraParams) {
 			var url = 'http://graphite.justjakob.de/render?';
 			var p = [];
+			extraParams = extraParams || {};
 			targets.forEach(function(target){
-				p.push('target=bgt.stats.' + event.id + '.' + target);
+				p.push('target=' + target.replace(/%eid%/g, event.id));
 			});
+			for (var a in extraParams) {
+				p.push(a + '=' + extraParams[a]);
+			}
 			url += p.join('&');
 			url += '&format=svg&width=400&height=300&hideLegend=true&from=' + start + '&until=' + end;
 			return url;
@@ -32,10 +36,10 @@
 	<div class=stats>
 		<H2>Blade Night Statistiken</H2>
 		<p>Zuglänge</p>
-		<embed src="<%= getGraphiteUrl(['bladeNightLength']) %>" type="image/svg+xml" />
+		<embed src="<%= getGraphiteUrl(['bgt.stats.%eid%.bladeNightLength'], {yMin:0}) %>" type="image/svg+xml" />
 		<p>Geschwindigkeit</p>
-		<embed src="<%= getGraphiteUrl(['bladeNightSpeed']) %>" type="image/svg+xml" />
+		<embed src="<%= getGraphiteUrl(['scale(bgt.stats.%eid%.bladeNightSpeed,3.6)'], {yMin:0}) %>" type="image/svg+xml" />
 		<p>Benutzer</p>
-		<embed src="<%= getGraphiteUrl(['users']) %>" type="image/svg+xml" />
+		<embed src="<%= getGraphiteUrl(['bgt.stats.%eid%.users'], {yMin:0}) %>" type="image/svg+xml" />
 	</div>
 <% } %>
