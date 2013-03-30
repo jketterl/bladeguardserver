@@ -1,44 +1,41 @@
 <% layout('../web') -%>
-<HTML><HEAD prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# de-justjakob-bgt: http://ogp.me/ns/fb/de-justjakob-bgt#">
-	<meta property="fb:app_id" content="514215418600631" /> 
-	<meta property="og:type"   content="de-justjakob-bgt:blade_night" /> 
-	<meta property="og:url"    content="<%= url %>" /> 
-	<meta property="og:title"  content="<%= event.title %>" /> 
-	<meta property="og:image"  content="https://fbstatic-a.akamaihd.net/images/devsite/attachment_blank.png" />
-	<TITLE><%= event.title %></TITLE>
-</HEAD><BODY>
-	<H1><%= event.title %></H1>
-	<% if (event.actualStart) { %>
-		<%
-			var pad = function (n, width, z) {
-				z = z || '0';
-				n = n + '';
-				return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
-			};
-			var format = function(d) {
-				return pad(d.getHours(), 2) + ':' + pad(d.getMinutes(), 2) + '_' + d.getFullYear() + pad(d.getMonth() + 1, 2) + pad(d.getDate(), 2);
-			};
-			var getGraphiteUrl = function(targets) {
-				var url = 'http://graphite.justjakob.de/render?';
-				var p = [];
-				targets.forEach(function(target){
-					p.push('target=bgt.stats.' + event.id + '.' + target);
-				});
-				url += p.join('&');
-				url += '&format=svg&width=400&height=300&hideLegend=true&from=' + start + '&until=' + end;
-				return url;
-			};
-			var start = format(event.actualStart),
-			    end   = format(event.actualEnd);
-		%>
-		<div class=stats>
-			<H2>Blade Night Statistiken</H2>
-			<p>Zuglänge</p>
-			<embed src="<%= getGraphiteUrl(['bladeNightLength']) %>" type="image/svg+xml" />
-			<p>Geschwindigkeit</p>
-			<embed src="<%= getGraphiteUrl(['bladeNightSpeed']) %>" type="image/svg+xml" />
-			<p>Benutzer</p>
-			<embed src="<%= getGraphiteUrl(['users']) %>" type="image/svg+xml" />
-		</div>
-	<% } %>
-</BODY></HTML>
+<% block('meta', '<meta property="fb:app_id" content="514215418600631" />') -%>
+<% block('meta', '<meta property="og:type"   content="de-justjakob-bgt:blade_night" />') -%> 
+<% block('meta', '<meta property="og:url"    content="' + url +'" />') -%> 
+<% block('meta', '<meta property="og:title"  content="' + event.title + '" />') -%> 
+<% block('meta', '<meta property="og:image"  content="https://fbstatic-a.akamaihd.net/images/devsite/attachment_blank.png" />') -%>
+<% block('title', event.title) -%>
+<H1><%= event.title %></H1>
+<% if (event.actualStart) { %>
+	<%
+		var pad = function (n, width, z) {
+			z = z || '0';
+			n = n + '';
+			return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+		};
+		var format = function(d) {
+			return pad(d.getHours(), 2) + ':' + pad(d.getMinutes(), 2) + '_' + d.getFullYear() + pad(d.getMonth() + 1, 2) + pad(d.getDate(), 2);
+		};
+		var getGraphiteUrl = function(targets) {
+			var url = 'http://graphite.justjakob.de/render?';
+			var p = [];
+			targets.forEach(function(target){
+				p.push('target=bgt.stats.' + event.id + '.' + target);
+			});
+			url += p.join('&');
+			url += '&format=svg&width=400&height=300&hideLegend=true&from=' + start + '&until=' + end;
+			return url;
+		};
+		var start = format(event.actualStart),
+		    end   = format(event.actualEnd);
+	%>
+	<div class=stats>
+		<H2>Blade Night Statistiken</H2>
+		<p>Zuglänge</p>
+		<embed src="<%= getGraphiteUrl(['bladeNightLength']) %>" type="image/svg+xml" />
+		<p>Geschwindigkeit</p>
+		<embed src="<%= getGraphiteUrl(['bladeNightSpeed']) %>" type="image/svg+xml" />
+		<p>Benutzer</p>
+		<embed src="<%= getGraphiteUrl(['users']) %>" type="image/svg+xml" />
+	</div>
+<% } %>

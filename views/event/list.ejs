@@ -1,7 +1,5 @@
-<HTML><HEAD>
-	<TITLE>Event List</TITLE>
-</HEAD><BODY>
-	<% for (var i = 0; i < events.length; i++) { %>
-		<div><a href="event/<%= events[i].id %>.html"><%= events[i].title %></a></div>
-	<% } %>
-</BODY></HTML>
+<% layout('../web') -%>
+<% block('title', 'Event List') -%>
+<% for (var i = 0; i < events.length; i++) { %>
+	<div><a href="event/<%= events[i].id %>.html"><%= events[i].title %></a></div>
+<% } %>
