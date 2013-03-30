@@ -9,7 +9,10 @@ Ext.define('BGT.data.reader.Graphite', {
 Ext.define('BGT.admin.map.LengthPoint', {
 	extend:'Ext.data.Model',
 	fields:[
-		'value',
+		{name:'value', convert:function(v){
+			if (v === null) return false;
+			return v;
+		}},
 		{name:'timestamp', type:'date', dateFormat:'timestamp'}
 	],
 	proxy:{
