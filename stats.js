@@ -4,22 +4,11 @@ var util = require('util'),
 BGTStatsEngine = function(engine) {
 	this.engine = engine;
 	this.stats = {};
-	var me = this;
-	setInterval(function(){
-		me.engine.getMap(function(map){
-			try {
-				me.updateStats(map);
-			} catch (e) {
-				util.log(e.stack);
-				me.setStats({});
-			}
-		});
-	}, 10000);
 	this.graphite = graphite.createClient('plaintext://localhost:2003');
 }
 
 var EventEmitter = require('events').EventEmitter;
-BGTStatsEngine.prototype = new EventEmitter;
+util.inherits(BGTStatsEngine, EventEmitter);
 
 BGTStatsEngine.prototype.updateStats = function(map) {
 	var stats = {
@@ -84,7 +73,7 @@ BGTStatsEngine.prototype.updateStats = function(map) {
 	this.graphite.write(obj, function(err){
 		if (err) util.log('error sending graphite data:\n' + err.stack);
 	});
-}
+};
 
 BGTStatsEngine.prototype.setStats = function(stats) {
 	this.stats = stats;
@@ -93,4 +82,27 @@ BGTStatsEngine.prototype.setStats = function(stats) {
 
 BGTStatsEngine.prototype.getLatestStats = function() {
 	return this.stats;
-}
+};
+
+BGTStatsEngine.prototype.start = function() {
+	var me = this;
+	if (me.interval) return;
+	me.interval = setInterval(function(){
+		me.engine.getMap(function(map){
+			try {
+				me.updateStats(map);
+			} catch (e) {
+				util.log(e.stack);
+				me.setStats({});
+			}
+		});
+	}, 10000);
+};
+
+BGTStatsEngine.prototype.stop = function() {
+	var me = this;
+	if (!me.interval) return;
+	clearInterval(me.interval);
+	delete me.interval;
+	me.setStats({});
+};

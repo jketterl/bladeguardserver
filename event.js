@@ -52,7 +52,7 @@ BGTEvent.events = [];
 BGTEvent.loadAll = function(callback) {
 	var me = this;
 	db.query()
-		.select('event.id as id, event.title, start, end, map, weather, map.title as mapName')
+		.select('event.id as id, event.title, start, end, map, weather, map.title as mapName, actual_start as actualStart, actual_end as actualEnd')
 		.from('event')
 		.join({table:'map', type:'left', conditions:'event.map = map.id'})
 		.where('end >= ?', [new Date()])
@@ -96,7 +96,9 @@ BGTEvent.prototype.store = function(callback){
 			start:me.start,
 			end:me.end,
 			map:me.map,
-			weather:me.weather
+			weather:me.weather,
+			actual_start:me.actualStart,
+			actual_end:me.actualEnd
 		}).where('id = ?', [me.id]);
 	} else {
 		query.insert('event',
@@ -127,6 +129,9 @@ BGTEvent.prototype.doStart = function(){
 	this.started = true;
 	this.emit('start');
 	var me = this;
+	me.getEngine().stats.start();
+	me.actualStart = new Date();
+	me.store();
 	var date = new Date();
 	var wait = this.end - date;
 	// setTimeout will only work with 32bit integers. this is a very unlikely case, i'm only handling it
@@ -139,9 +144,13 @@ BGTEvent.prototype.doStart = function(){
 };
 
 BGTEvent.prototype.doEnd = function(){
+	var me = this;
 	if (!this.isActive()) throw new Error('Event is not active yet.');
 	if (!this.started) return;
 	this.started = false;
+	me.actualEnd = new Date();
+	me.store();
+	this.getEngine().stats.stop();
 	this.emit('end');
 	util.log('Event ended: ' + this.title);
 };
