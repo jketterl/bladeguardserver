@@ -1,0 +1,22 @@
+body {
+	font-family:Tahoma;
+}
+
+.body {
+	width:800px;
+	margin: 0 auto;
+}
+
+.navigation {
+	width:200px;
+	float:left;
+}
+
+.content {
+	width:600px;
+	float:left;
+}
+
+.clear {
+	clear:both;
+}

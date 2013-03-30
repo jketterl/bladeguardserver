@@ -2,6 +2,17 @@
 <HTML><HEAD>
 	<TITLE><%- blocks.title %> - Bladeguard Tracker</TITLE>
 	<%- blocks.meta %>
+	<link rel="stylesheet" href="/static/css/reset.css" />
+	<link rel="stylesheet" href="/static/css/web.css" />
 </HEAD><BODY>
-	<%- body %>
+	<div class="body">
+		<div class="navigation">
+			<ul
+				<li><a href="/">Home</a></li>
+				<li><a href="/event.html">Events</a></li>
+			</ul>
+		</div>
+		<div class="content"><%- body %></div>
+		<div class="clear"></div>
+	</div>
 </BODY></HTML>
