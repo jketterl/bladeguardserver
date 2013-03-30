@@ -249,7 +249,7 @@ BGTEvent.prototype.emit = function(name){
 
 BGTEvent.prototype.toJSON = function(){
 	var res = {}, me = this;
-	(['id', 'title', 'start', 'end', 'map', 'weather', 'mapName']).forEach(function(idx){
+	(['id', 'title', 'start', 'end', 'map', 'weather', 'mapName', 'actualStart', 'actualEnd']).forEach(function(idx){
 		res[idx] = me[idx];
 	});
 	return res;

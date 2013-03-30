@@ -23,7 +23,9 @@ Ext.define('BGT.admin.events.Grid', {
 				default:
 					return v;
 			}
-		}}
+		}},
+		{header:'Echter Start', dataIndex:'actualStart', xtype:'datecolumn', format:'d.m.Y H:i:s', width:150},
+		{header:'Echtes Ende', dataIndex:'actualEnd', xtype:'datecolumn', format:'d.m.Y H:i:s', width:150}
 	],
 	store:{
 		model:'BGT.events.Event',

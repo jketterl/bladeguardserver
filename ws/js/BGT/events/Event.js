@@ -11,7 +11,9 @@ Ext.define('BGT.events.Event', {
 		{name:'end', type:'date'},
 		{name:'map', type:'integer'},
 		{name:'mapName', type:'string'},
-		{name:'weather', defaultValue:null}
+		{name:'weather', defaultValue:null},
+		{name:'actualStart', type:'date'},
+		{name:'actualEnd', type:'date'}
 	],
 	proxy:{
 		type:'socket',
