@@ -28,6 +28,7 @@ BGT.messenger = {
 require('./facebook');
 var express = require('express');
 var engine = require('ejs-locals');
+var time = require('time')(Date);
 
 db.connect(function(err){
 	if (err) {

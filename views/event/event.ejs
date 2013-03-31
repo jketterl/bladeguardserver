@@ -23,15 +23,27 @@
 			targets.forEach(function(target){
 				p.push('target=' + target.replace(/%eid%/g, event.id));
 			});
-			for (var a in extraParams) {
-				p.push(a + '=' + extraParams[a]);
+			var start = new Date(event.actualStart.getTime());
+			start.setTimezone('Europe/Berlin');
+			params = {
+				format:'svg',
+				width:400,
+				heigh:300,
+				hideLegend:true,
+				from:format(start)
+			};
+			if (event.actualEnd) {
+				var until = new Date(event.actualEnd.getTime());
+				until.setTimezone('Europe/Berlin');
+				params.until = format(until);
+			}
+			for (var a in extraParams) params[a] = extraParams[a];
+			for (var a in params) {
+				p.push(a + '=' + params[a]);
 			}
 			url += p.join('&');
-			url += '&format=svg&width=400&height=300&hideLegend=true&from=' + start + '&until=' + end;
 			return url;
 		};
-		var start = format(event.actualStart),
-		    end   = format(event.actualEnd);
 	%>
 	<div class=stats>
 		<H2>Blade Night Statistiken</H2>
