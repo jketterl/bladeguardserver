@@ -1,3 +1,13 @@
+@font-face {
+	font-family: 'DINLight';
+	src: url('../fonts/dinlight.ttf');
+}
+
+@font-face {
+	font-family: 'Tahoma';
+	src: url("../fonts/tahoma.ttf");
+}
+
 body {
 	font-family:Tahoma;
 }
@@ -29,4 +39,15 @@ body {
 
 .clear {
 	clear:both;
+}
+
+.header .body div,
+.header .body img {
+	float:left;
+}
+
+.header .body .headline {
+	font-size: 32pt;
+	margin-left:20px;
+	margin-top:20px;
 }
