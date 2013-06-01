@@ -59,9 +59,6 @@ BGTEvent.loadAll = function(callback) {
 			if (err) return callback(err);
 			results.forEach(function(event){
 				event = new BGTEvent(event);
-				event.once('end', function(){
-					delete me.events[event.id];
-				});
 				me.events[event.id] = event;
 			});
 			callback(me.events);
@@ -78,7 +75,7 @@ BGTEvent.getAll = function(includingOld) {
 	var now = new Date();
 	for (var a in this.events) {
 		var event = this.events[a];
-		if (includingOld || event.end >= now) result.push(this.events[a]);
+		if (includingOld || (event.actualEnd == null && event.end >= now)) result.push(this.events[a]);
 	}
 	return result;
 };
