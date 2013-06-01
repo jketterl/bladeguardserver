@@ -1,5 +1,11 @@
 <% layout('../web') -%>
 <% block('title', 'Event List') -%>
-<% for (var i = 0; i < events.length; i++) { %>
-	<div><a href="event/<%= events[i].id %>.html"><%= events[i].title %></a></div>
-<% } %>
+<%
+	var year = new Date().getFullYear();
+	events.forEach(function(event){
+		if (event.start.getFullYear() < year) return;
+		%>
+			<div><a href="event/<%= event.id %>.html"><%= event.title %></a></div>
+		<%
+	});
+%>
