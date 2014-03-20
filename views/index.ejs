@@ -1,3 +1,43 @@
 <% layout('web') -%>
 <% block('title', 'Home') -%>
-<p>here be content</p>
+<p>Willkommen auf der Seite des Bladeguard Trackers, der App für alle Münchner Bladeguards.</p>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">Nächste Blade Night</h3>
+    </div>
+    <div class="panel-body">
+        <%
+            if (nextEvent) {
+                var now = new Date();
+                if (nextEvent.start.getFullYear() == now.getFullYear() &&
+                    nextEvent.start.getMonth() == now.getMonth() &&
+                    nextEvent.start.getDate() == now.getDate()) {
+                    switch (nextEvent.weather) {
+                        case 1:
+                            %>
+                                <img src="/static/img/ampel_gruen_gross.png" class="ampel"><div>Wetterentscheidung für heute Abend: Ja, wir fahren!</div>
+                            <%
+                            break;
+                        case 0:
+                            %>
+                                <img src="/static/img/ampel_rot_gross.png" class="ampel"><div>Wetterentscheidung für heute Abend: Leider abgesagt.</div>
+                            <%
+                            break;
+                        default:
+                            %>
+                                <div>Die Wetterentscheidung für heute Abend wurde noch nicht gefällt.</div>
+                            <%
+                            break;
+                    }
+                } else { %>
+                    Die nächste Blade Night findet bei gutem Wetter am <%= dateformat(nextEvent.start, "d.m.yyyy") %> statt.
+                <% }
+            } else { %>
+                Die nächste Blade Night steht leider noch nicht fest.
+            <% }
+        %>
+    </div>
+</div>
+
+<p>Mit dem Bladeguard Tracker erhältst du die Wetterentscheidung direkt auf dein Handy! <a href="/download.html">Jetzt kostenlos downloaden!</a></p>

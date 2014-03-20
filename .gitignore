@@ -1,4 +1,5 @@
 ws/js/ext*
+ws/bootstrap-*
 /node_modules
 config/keys/*
 config/facebook.json
