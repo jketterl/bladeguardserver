@@ -8,46 +8,39 @@
 	src: url("../fonts/tahoma.ttf");
 }
 
-body {
-	font-family:Tahoma;
-}
-
-.header {
-	height:90px;
-	border-bottom: 1px solid #ddd
-}
-
-.header img.logo {
-	height:80px;
-	margin:5px;
-}
-
-.body {
-	width:800px;
-	margin: 0 auto;
-}
-
-.navigation {
-	width:200px;
-	float:left;
-}
-
-.content {
-	width:600px;
-	float:left;
+.navbar img.logo {
+	height:32px;
+	margin-top:-7px;
+    margin-right:10px;
 }
 
 .clear {
 	clear:both;
 }
 
-.header .body div,
-.header .body img {
-	float:left;
+body {
+    padding-top: 70px;
 }
 
-.header .body .headline {
-	font-size: 32pt;
-	margin-left:20px;
-	margin-top:20px;
+img.ampel {
+    padding-right: 20px;
+    float: left;
+}
+
+.events td.icon {
+    width: 20px;
+}
+
+.past-years {
+    display: inline;
+    margin-left: 5px;
+}
+
+.stats .panel img {
+    width: 100% !important;
+    height: auto !important;
+}
+
+.panel img.panel-body {
+    padding: 5px;
 }
