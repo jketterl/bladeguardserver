@@ -28,6 +28,7 @@ BGT.messenger = {
 require('./facebook');
 var express = require('express');
 var engine = require('ejs-locals');
+var BGTController = require('./controller');
 
 db.connect(function(err){
     if (err) {
@@ -46,28 +47,8 @@ db.connect(function(err){
             app.engine('ejs', engine);
             app.locals.dateformat = require('dateformat');
             app.set('view engine', 'ejs');
-            app.get('/', function(req, res){
-                var events = BGTEvent.getAll();
-                res.render('index', { nextEvent: events[0] });
-            });
-            app.use('/static', express.static(__dirname + '/ws'));
-            app.get('/event.html', function(req, res){
-                res.render('event/list', {
-                    events:BGTEvent.getAll(true),
-                    year:parseInt(req.query.year) || new Date().getFullYear()
-                });
-            });
-            app.get('/download.html', function(req, res){ res.render('download'); });
-            app.get('/event/:id.html', function(req, res){
-                res.render('event/event', {
-                    event:BGTEvent.get(req.params.id),
-                    url:'https://' + req.headers.host + '/event/' + req.params.id + '.html'
-                });
-            });
-            app.get('/admin', function(req, res){
-                res.render('admin/index');
-            });
-            app.get('/impressum.html', function(req, res) { res.render('impressum'); } );
+            var controller = new BGTController(app);
+
 
             var httpServer = http.createServer(app).listen(3000)
 
