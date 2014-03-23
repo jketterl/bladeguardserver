@@ -1,4 +1,5 @@
-var express = require('express');
+var express = require('express'),
+    weather = new (require('./weather/yahoo'))();
 
 var BGTController = function(app){
     app.use('/static', express.static(__dirname + '/ws'));
@@ -12,8 +13,11 @@ var BGTController = function(app){
 }
 
 BGTController.prototype.index = function(req, res){
-    var events = BGTEvent.getAll();
-    res.render('index', { nextEvent: events[0] });
+    var events = BGTEvent.getAll(),
+        nextEvent = events[0];
+    weather.getPrognosis(nextEvent.start, function(w){
+        res.render('index', { nextEvent: nextEvent, weather: w });
+    });
 };
 
 BGTController.prototype.eventList = function(req, res){

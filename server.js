@@ -45,7 +45,7 @@ db.connect(function(err){
         var startServer = function(options){
             var app = express();
             app.engine('ejs', engine);
-            app.locals.dateformat = require('dateformat');
+            app.locals.moment = require('moment');
             app.set('view engine', 'ejs');
             var controller = new BGTController(app);
 

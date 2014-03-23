@@ -44,3 +44,7 @@ img.ampel {
 .panel img.panel-body {
     padding: 5px;
 }
+
+.weather img {
+    float: left;
+}

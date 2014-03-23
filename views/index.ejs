@@ -26,12 +26,14 @@
                             break;
                         default:
                             %>
-                                <div>Die Wetterentscheidung für heute Abend wurde noch nicht gefällt.</div>
+                                <p>Die Wetterentscheidung für heute Abend wurde noch nicht gefällt.</p>
+                                <% include weather %>
                             <%
                             break;
                     }
                 } else { %>
-                    Die nächste Blade Night findet bei gutem Wetter am <%= dateformat(nextEvent.start, "d.m.yyyy") %> statt.
+                    <p>Die nächste Blade Night findet bei gutem Wetter am <%= moment(nextEvent.start).format("D.M.YYYY") %> statt.</p>
+                    <% include weather %>
                 <% }
             } else { %>
                 Die nächste Blade Night steht leider noch nicht fest.
