@@ -42,39 +42,22 @@ db.connect(function(err){
             return;
         }
 
-        var startServer = function(options){
-            var app = express();
-            app.engine('ejs', engine);
-            app.locals.moment = require('moment');
-            app.set('view engine', 'ejs');
-            var controller = new BGTController(app);
+        var app = express();
+        app.engine('ejs', engine);
+        app.locals.moment = require('moment');
+        app.set('view engine', 'ejs');
+        var controller = new BGTController(app);
 
+        var httpServer = http.createServer(app).listen(3000)
 
-            var httpServer = http.createServer(app).listen(3000)
+        var wsServer = new WebSocketServer({
+            httpServer:httpServer,
+            maxReceivedFrameSize:1024*1024
+        });
 
-            var wsServer = new WebSocketServer({
-                httpServer:httpServer,
-                maxReceivedFrameSize:1024*1024
-            });
-
-            wsServer.on('request', function(request){
-                var connection = new BGTSocketConnection(request.accept());
-            });
-        };
-
-        var options = require('./config/keys.json');
-        var callbacks = 0;
-        for (var a in options) {
-            callbacks ++;
-            (function(a){
-                fs.readFile(options[a], function(err, data){
-                    if (err) throw err;
-                    callbacks--;
-                    options[a] = data.toString();
-                    if (callbacks == 0) startServer(options);
-                });
-            })(a);
-        }
+        wsServer.on('request', function(request){
+            var connection = new BGTSocketConnection(request.accept());
+        });
 
     });
 });
