@@ -10,9 +10,7 @@
         <%
             if (nextEvent) {
                 var now = new Date();
-                if (nextEvent.start.getFullYear() == now.getFullYear() &&
-                    nextEvent.start.getMonth() == now.getMonth() &&
-                    nextEvent.start.getDate() == now.getDate()) {
+                if (moment(nextEvent.start).isSame(moment(), 'day')) {
                     switch (nextEvent.weather) {
                         case 1:
                             %>
