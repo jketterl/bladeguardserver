@@ -1,3 +1,3 @@
 module.exports = function(data){
-	this.processQuit(data);
+	require('./quit').apply(this, arguments);
 };
