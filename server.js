@@ -1,8 +1,6 @@
 var http = require('http');
 var fs = require('fs');
 require('./engine');
-require('./router');
-var router = new BGTRouter();
 require('./location');
 var util = require('util');
 require('./session');
