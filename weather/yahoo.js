@@ -1,4 +1,6 @@
-var YahooWeatherProvider = function(){}
+var YahooWeatherProvider = function(){
+    this.cache = {};
+};
 
 var http = require('http'),
     xml2js = require('xml2js'),
@@ -6,6 +8,12 @@ var http = require('http'),
     codes = require('./codes-de.json');
 
 YahooWeatherProvider.prototype.getPrognosis = function(d, c) {
+    var me = this,
+        now = moment(),
+        ck = now.format('YYYYMMDD'),
+        fromCache = me.cache[ck];
+    if (fromCache && fromCache.validUntil.isAfter(now)) return c(fromCache.value);
+
     http.get('http://weather.yahooapis.com/forecastrss?w=676757&u=c', function(res) {
         if (res.statusCode != 200) {
             console.warn('weather provider returned status code: ' + res.statusCode);
@@ -24,7 +32,12 @@ YahooWeatherProvider.prototype.getPrognosis = function(d, c) {
                         w.text = codes[w.code];
                         w.image = "http://l.yimg.com/us.yimg.com/i/us/we/52/" + w.code + ".gif";
                     }
+
                 });
+                if (w != null) me.cache[ck] = {
+                    validUntil:moment(now).add(1, 'hours'),
+                    value:w
+                };
                 c(w);
             });
         })

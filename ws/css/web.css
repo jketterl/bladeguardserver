@@ -48,3 +48,8 @@ img.ampel {
 .weather img {
     float: left;
 }
+
+.weather .text {
+    float: left;
+    padding-left: 15px;
+}
