@@ -126,8 +126,8 @@ BGTSocketConnection.prototype.getUser = function(){
 };
 
 BGTSocketConnection.prototype.getEvent = function(data){
-	if (data.eventId) try {
-		return BGTEvent.get(data.eventId);
+	if (data.eventId || data.id) try {
+		return BGTEvent.get(data.eventId || data.id);
 	} catch (e) {}
 	if (this._event) return this._event;
 	throw new Error("Unable to execute command: an event must be selected!")

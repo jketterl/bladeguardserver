@@ -43,7 +43,8 @@ BGTEvent = function(data){
 	this.on('resume', sendCommand('enableGPS'));
 };
 
-var util = require('util');
+var util = require('util'),
+    async = require('async');
 
 util.inherits(BGTEvent, require('events').EventEmitter);
 
@@ -192,16 +193,31 @@ BGTEvent.prototype.setWeatherDecision = function(decision, callback){
 };
 
 BGTEvent.prototype.update = function(data, callback){
-	console.info(data);
+    var me = this,
+        fns = [],
+        identity = function(val) { return val; },
+        toDate = function(val) { return new Date(val); },
+        mappings = {
+            weather: function(val) {
+				fns.push(function(callback) { me.setWeatherDecision(val, callback); } );
+            },
+            map: function(val) {
+				fns.push(function(callback) { me.setMap(val, callback); } );
+            },
+            start: toDate,
+            end: toDate,
+            title: identity
+        };
 	for (var a in data) {
 		var val = data[a];
-		switch (a) {
-			case "weather":
-				return this.setWeatherDecision(val, callback);
-			case "map":
-				return this.setMap(val, callback);
-		}
+        if (mappings[a]) {
+            var mapped = mappings[a](val);
+            if (typeof(mapped) != 'undefined') me[a] = mapped;
+        }
 	}
+    async.parallel(fns, function(){
+        me.store(callback);
+    });
 };
 
 BGTEvent.prototype.getEngine = function(){
@@ -228,7 +244,7 @@ BGTEvent.prototype.setMap = function(mapId, callback){
 	var me = this;
 	BGTMap.getMap(mapId, function(map){
 		if (util.isError(map)) return callback(map);
-		me._engine.setMap(map);
+		me.getEngine().setMap(map);
 		if (me.map == mapId) return callback();
 
 		me.map = mapId;

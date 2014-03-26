@@ -25,7 +25,8 @@ Ext.define('BGT.events.Event', {
 					all:true
 				}
 			},
-			create:'BGT.socket.commands.CreateEventCommand'
+			create:'BGT.socket.commands.CreateEventCommand',
+            update:'BGT.socket.commands.UpdateEventCommand'
 		},
 		reader:{
 			type:'json'
