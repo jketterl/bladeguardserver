@@ -10,7 +10,8 @@ var http = require('http'),
 YahooWeatherProvider.prototype.getPrognosis = function(d, c) {
     var me = this,
         now = moment(),
-        ck = now.format('YYYYMMDD'),
+        d = moment(d),
+        ck = d.format('YYYYMMDD'),
         fromCache = me.cache[ck];
     if (fromCache && fromCache.validUntil.isAfter(now)) return c(fromCache.value);
 
