@@ -41,6 +41,9 @@ db.connect(function(err){
         }
 
         var app = express();
+        app.use(express.logger({
+            stream:fs.createWriteStream('/var/log/bgt/access.log')
+        }));
         app.engine('ejs', engine);
         app.locals.moment = require('moment');
         app.set('view engine', 'ejs');
