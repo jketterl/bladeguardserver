@@ -12,8 +12,14 @@ BGTEvent = function(data){
 	
 	var connections = [];
 
-	me.registerConnection = function(conn){
-		if (!this.isActive) throw new Error('Event is not open for control connections yet.');
+	me.registerConnection = function(conn, allowEarly){
+        // allowEarly is set on android versions up to build #15 and indicates that the client is not able to be activated via push message.
+        // isActive() will be set 2 hours before the planned start whereas started will only be set when the event has been actually started by an admin.
+        if (allowEarly) {
+            if (!me.isActive()) throw new Error('Event is not open for control connections yet.');
+        } else {
+            if (!me.started) throw new Error('Event has not been started yet.');
+        }
 		if (connections.indexOf(conn) >= 0) return;
 		connections.push(conn);
 		conn.on('close', function(){
@@ -37,7 +43,15 @@ BGTEvent = function(data){
 		};
 	};
 
-	this.on('start', sendCommand('enableGPS'));
+	this.on('start', function(){
+        sendCommand('enableGPS')();
+        BGT.messenger.sendBroadcastMessage({
+            type:'eventstart',
+            eventId:me.id
+        }, function(err) {
+            if (util.isError(err)) console.error('push message failed:\n' + err.stack);
+        });
+    });
 	this.on('end', sendCommand('shutdown'));
 	this.on('pause', sendCommand('disableGPS'));
 	this.on('resume', sendCommand('enableGPS'));
