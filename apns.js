@@ -29,20 +29,33 @@ BGT.APNS.Service.prototype = {
 			me.sendBroadcastMessage.apply(me, message);
 		});
 	},
+    translateMessage:function(message){
+        if (!message.type) throw new Error('message without type not supported');
+        switch (message.type) {
+            case 'weather':
+                return {
+                    aps:{
+                        'badge':1,
+                        'sound':'default',
+                        'alert':{
+                            'loc-key':message.weather == 1 ? 'yes_rolling' : 'no_cancelled',
+                            'loc-args':[message.title]
+                        }
+                    },
+                    bgt:message
+                };
+            default:
+                throw new Error('message type "' + message.type + '" not supported');
+        }
+    },
 	sendBroadcastMessage:function(message, callback){
 		var me = this;
 		if (this.queue) return this.queue.append(arguments);
-		var apnMessage = {
-			aps:{
-				'badge':1,
-				'sound':'default',
-				'alert':{
-					'loc-key':message.weather == 1 ? 'yes_rolling' : 'no_cancelled',
-					'loc-args':[message.title]
-				}
-			},
-			bgt:message
-		};
+        try {
+            var apnMessage = me.translateMessage(message);
+        } catch (e) {
+            return callback(e);
+        }
 
 		function hextobin(hexstr) {
 			buf = new Buffer(hexstr.length / 2);

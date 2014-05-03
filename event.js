@@ -49,7 +49,7 @@ BGTEvent = function(data){
             type:'eventstart',
             eventId:me.id
         }, function(err) {
-            if (util.isError(err)) console.error('push message failed:\n' + err.stack);
+            if (util.isError(err)) util.log('push message failed:\n' + err.stack);
         });
     });
 	this.on('end', sendCommand('shutdown'));
