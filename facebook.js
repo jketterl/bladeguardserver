@@ -128,16 +128,18 @@ BGT.Facebook.Service.prototype = {
     postStory:function(user, event, callback){
         var me = this;
         me.getAccessToken(function(token){
+            var data = {
+                "method":'POST',
+                "blade_night":'https://bgt.justjakob.de/event/' + event.id + '.html',
+                "end_time":moment(event.end).toISOString(),
+                "access_token":token
+            };
+            if (event.actualStart) data.start_time = moment(event.actualStart).toISOString();
+
             var req = https.request({
                 method:'POST',
                 host:'graph.facebook.com',
-                path:'/v2.0/' + user.id + '/de-justjakob-bgt:participate?' + querystring.stringify({
-                    "method":'POST',
-                    "blade_night":'https://bgt.justjakob.de/event/' + event.id + '.html',
-                    //"start_time":moment(event.start).toISOString(),
-                    "end_time":moment(event.end).toISOString(),
-                    "access_token":token
-                })
+                path:'/v2.0/' + user.id + '/de-justjakob-bgt:participate?' + querystring.stringify(data)
             }, function(res){
                 var data = '';
                 res.on('data', function(chunk) { data += chunk; } );
@@ -168,6 +170,30 @@ BGT.Facebook.Service.prototype = {
                 res.on('end', function(){
                     data = JSON.parse(data);
                     if (data.error) return callback(new Error(data.error.message));
+                    callback();
+                });
+            });
+
+            req.end();
+        });
+    },
+    updateStory: function(storyId, data, callback){
+        var me = this;
+
+        me.getAccessToken(function(token){
+            data.method = 'POST';
+            data.access_token = token;
+
+             var req = https.request({
+                method:'POST',
+                host:'graph.facebook.com',
+                path:'/v2.0/' + storyId + '?' + querystring.stringify(data)
+            }, function(res){
+                var data = '';
+                res.on('data', function(chunk) { data += chunk; } );
+                res.on('end', function(){
+                    data = JSON.parse(data);
+                    if (data.error) return callback(new Error(data.error.messaage));
                     callback();
                 });
             });

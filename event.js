@@ -156,6 +156,18 @@ BGTEvent.prototype.doStart = function(){
 	setTimeout(function(){
 		me.doEnd();
 	}, wait);
+
+    db.query().select(['fb_post_id'])
+        .from('participation')
+        .where('event_id = ?', [ me.id ])
+        .execute(function(error, rows){
+            if (error) return util.log('error querying participations:\n' + error);
+            rows.forEach(function(row){
+                BGT.Facebook.updateStory(row.fb_post_id, { start_time: moment(me.actualStart).toISOString }, function(err){
+                    if (err) util.log('error updating story:\n' + err.stack);
+                });
+            });
+        });
 };
 
 BGTEvent.prototype.doEnd = function(){
