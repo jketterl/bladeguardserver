@@ -184,7 +184,7 @@ BGT.Facebook.Service.prototype = {
             data.method = 'POST';
             data.access_token = token;
 
-             var req = https.request({
+            var req = https.request({
                 method:'POST',
                 host:'graph.facebook.com',
                 path:'/v2.0/' + storyId + '?' + querystring.stringify(data)
