@@ -58,19 +58,19 @@ BGTSocketConnection.prototype.close = function(){};
 BGTSocketConnection.prototype.parseMessage = function(message){
 	var me = this,
 	    callback = function(success){
-		var response = {success:true};
-		if (typeof(success) == 'boolean') response.success = success;
-		if (util.isError(success)) {
-			response.success = false;
-			response.data = {
-				message:success.message
-			};
-		} else {
-			response.data = success;
-		}
-		if (data && typeof(data.requestId) != 'undefined') response.requestId = data.requestId;
-		me.socket.sendUTF(JSON.stringify(response));
-	};
+            var response = {success:true};
+            if (typeof(success) == 'boolean') response.success = success;
+            if (util.isError(success)) {
+                response.success = false;
+                response.data = {
+                    message:success.message
+                };
+            } else {
+                response.data = success;
+            }
+            if (data && typeof(data.requestId) != 'undefined') response.requestId = data.requestId;
+            me.socket.sendUTF(JSON.stringify(response));
+        };
 	if (message.type != 'utf8') {
 		util.log('unsupported message type: "' + message.type + '"');
 		console.info(message);
@@ -102,7 +102,10 @@ BGTSocketConnection.prototype.parseMessage = function(message){
 		return callback(new Error('unknown command: "' + data.command + '"'));
 	}
 	var params = [data.data || {}];
-	if (fn.length > 1) params.push(callback);
+	if (fn.length > 1) params.push(function(err){
+        if (util.isError(err)) util.log('error processing user command "' + data.command + '":\n' + err.stack);
+        callback.apply(this, arguments);
+    });
 	try {
 		var res = fn.apply(this, params);
 		if (fn.length <= 1) callback(res);
@@ -123,6 +126,11 @@ BGTSocketConnection.prototype.getUser = function(){
 		util.log('new anonymous user: ' + this.user);
 	}
 	return this.user;
+};
+
+BGTSocketConnection.prototype.getUserType = function(user){
+    if (user instanceof BGTFacebookUser) return 'fb';
+    return 'bgt';
 };
 
 BGTSocketConnection.prototype.getEvent = function(data){

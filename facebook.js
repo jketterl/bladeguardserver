@@ -1,7 +1,8 @@
 var util = require('util'),
     https = require('https'),
     url = require('url')
-    querystring = require('querystring');
+    querystring = require('querystring'),
+    moment = require('moment');
 
 BGT.Facebook = {
 	Service:function(config){
@@ -123,7 +124,57 @@ BGT.Facebook.Service.prototype = {
 		me.getRoles(function(roles){
 			callback(roles.administrators && roles.administrators.indexOf(userId) >= 0);
 		});
-	}
+	},
+    postStory:function(user, event, callback){
+        var me = this;
+        me.getAccessToken(function(token){
+            var req = https.request({
+                method:'POST',
+                host:'graph.facebook.com',
+                path:'/v2.0/' + user.id + '/de-justjakob-bgt:participate?' + querystring.stringify({
+                    "method":'POST',
+                    "blade_night":'https://bgt.justjakob.de/event/' + event.id + '.html',
+                    //"start_time":moment(event.start).toISOString(),
+                    "end_time":moment(event.end).toISOString(),
+                    "access_token":token
+                })
+            }, function(res){
+                var data = '';
+                res.on('data', function(chunk) { data += chunk; } );
+                res.on('end', function(){
+                    //{"error":{"message":"The global ID 1798576571 is not allowed. Please use the application specific ID instead.","type":"OAuthException","code":2500}}
+                    data = JSON.parse(data);
+                    if (data.error) return callback(new Error(data.error.message));
+                    callback(data.id);
+                });
+            })
+            
+            req.end();
+        });
+    },
+    deleteStory: function(storyId, callback){
+        var me = this;
+        me.getAccessToken(function(token){
+            var req = https.request({
+                method:'DELETE',
+                host:'graph.facebook.com',
+                path:'/v2.0/' + storyId + '?' + querystring.stringify({
+                    "method":'DELETE',
+                    "access_token":token
+                })
+            }, function(res){
+                var data = '';
+                res.on('data', function(chunk) { data += chunk; } );
+                res.on('end', function(){
+                    data = JSON.parse(data);
+                    if (data.error) return callback(new Error(data.error.message));
+                    callback();
+                });
+            });
+
+            req.end();
+        });
+    }
 };
 
 BGT.Facebook = new BGT.Facebook.Service(require('./config/facebook.json'));
