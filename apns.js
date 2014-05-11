@@ -11,6 +11,7 @@ BGT.APNS.Service = function(config){
 
 	var callbacks = 0;
 	['key', 'cert'].forEach(function(type){
+        if (typeof(config[type]) != 'string') return;
 		callbacks++;
 		fs.readFile(config[type], function(err, data){
 			if (err) throw err;
@@ -18,6 +19,8 @@ BGT.APNS.Service = function(config){
 			if (--callbacks == 0) me.processQueue();
 		});
 	});
+
+    if (callbacks == 0) me.processQueue();
 };
 
 BGT.APNS.Service.prototype = {
