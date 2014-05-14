@@ -176,6 +176,7 @@ BGTEvent.prototype.doEnd = function(){
 	if (!this.isActive()) throw new Error('Event is not active yet.');
 	if (!this.started) return;
 	this.started = false;
+    this.active = false;
 	me.actualEnd = new Date();
 	me.store();
 	this.getEngine().stats.stop();
