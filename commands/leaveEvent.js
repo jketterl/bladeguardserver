@@ -5,7 +5,7 @@ module.exports = function(data, callback) {
         event = me.getEvent(data),
         user = me.getUser(),
         type = me.getUserType(user);
-    if (user.anonymous) return;
+    if (user.anonymous) return callback();
     var query = db.query().select(['id', 'fb_post_id'])
               .from('participation')
               .where('user_type = ?', [ type ] )
