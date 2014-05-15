@@ -3,12 +3,13 @@ var util = require('util');
 module.exports = function(data, callback) {
     var me = this,
         event = me.getEvent(data),
-        type = me.getUserType(me.user);
-    if (me.user.anonymous) return;
+        user = me.getUser(),
+        type = me.getUserType(user);
+    if (user.anonymous) return;
     var query = db.query().select(['id', 'fb_post_id'])
               .from('participation')
               .where('user_type = ?', [ type ] )
-              .and('user_id = ?', [ me.user.id ] )
+              .and('user_id = ?', [ user.id ] )
               .and('event_id = ?', [ event.id ] );
 
     query.execute(function(error, rows){
