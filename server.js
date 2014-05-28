@@ -28,6 +28,10 @@ var express = require('express');
 var engine = require('ejs-locals');
 var BGTController = require('./controller');
 
+var IconSet = require('./weather/iconset'),
+    path = require('path'),
+    set = new IconSet(path.resolve('.') + '/weather/icons/Realll_Night');
+
 db.connect(function(err){
     if (err) {
         util.log('could not connect to database; exiting.');
@@ -48,6 +52,7 @@ db.connect(function(err){
         app.locals.moment = require('moment');
         app.set('view engine', 'ejs');
         var controller = new BGTController(app);
+        set.registerWith(app);
 
         var httpServer = http.createServer(app).listen(3000)
 

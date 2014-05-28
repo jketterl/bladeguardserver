@@ -47,6 +47,7 @@ img.ampel {
 
 .weather img {
     float: left;
+    height: 64px;
 }
 
 .weather .text {

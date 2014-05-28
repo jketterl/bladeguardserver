@@ -31,7 +31,7 @@ YahooWeatherProvider.prototype.getPrognosis = function(d, c) {
                     if (moment(props.date).isSame(d, 'day')) {
                         w = props;
                         w.text = codes[w.code];
-                        w.image = "http://l.yimg.com/us.yimg.com/i/us/we/52/" + w.code + ".gif";
+                        w.image = "/weather/icons/" + w.code + ".png";
                     }
 
                 });
