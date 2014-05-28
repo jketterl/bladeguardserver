@@ -149,13 +149,6 @@ BGTEvent.prototype.doStart = function(){
 	me.store();
 	var date = new Date();
 	var wait = this.end - date;
-	// setTimeout will only work with 32bit integers. this is a very unlikely case, i'm only handling it
-	// since i stumbled across it in development.
-	if (wait >= Math.pow(2, 31)) return;
-
-	setTimeout(function(){
-		me.doEnd();
-	}, wait);
 
     db.query().select(['fb_post_id'])
         .from('participation')
@@ -169,6 +162,17 @@ BGTEvent.prototype.doStart = function(){
                 });
             });
         });
+
+	// setTimeout will only work with 32bit integers. this is a very unlikely case, i'm only handling it
+	// since i stumbled across it in development.
+	if (wait >= Math.pow(2, 31)) return;
+
+    var autoEnd = setTimeout(function(){
+		me.doEnd();
+	}, wait);
+    me.on('end', function(){
+        clearTimeout(autoEnd);
+    });
 };
 
 BGTEvent.prototype.doEnd = function(){
