@@ -30,7 +30,7 @@ var BGTController = require('./controller');
 
 var IconSet = require('./weather/iconset'),
     path = require('path'),
-    set = new IconSet(path.resolve('.') + '/weather/icons/Realll_Night');
+    set = new IconSet(path.resolve('.') + '/weather/icons/Realll_Day');
 
 db.connect(function(err){
     if (err) {

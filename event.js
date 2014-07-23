@@ -58,7 +58,8 @@ BGTEvent = function(data){
 };
 
 var util = require('util'),
-    async = require('async');
+    async = require('async'),
+    weather = new (require('./weather/yahoo'))();
 
 util.inherits(BGTEvent, require('events').EventEmitter);
 
@@ -85,14 +86,21 @@ BGTEvent.get = function(id) {
 	throw new Error("Event not found");
 };
 
-BGTEvent.getAll = function(includingOld) {
+BGTEvent.getAll = function(includingOld, callback) {
 	var result = [];
 	var now = new Date();
 	for (var a in this.events) {
 		var event = this.events[a];
 		if (includingOld || (event.actualEnd == null && event.end >= now)) result.push(this.events[a]);
 	}
-	return result;
+    async.each(result, function(event, callback){
+        weather.getPrognosis(event.start, function(w){
+            event.prognosis = w;
+            callback();
+        });
+    }, function(r){
+        callback(result);
+    });
 };
 
 BGTEvent.addEvent = function(event, callback) {
@@ -298,7 +306,7 @@ BGTEvent.prototype.emit = function(name){
 
 BGTEvent.prototype.toJSON = function(){
 	var res = {}, me = this;
-	(['id', 'title', 'start', 'end', 'map', 'weather', 'mapName', 'actualStart', 'actualEnd']).forEach(function(idx){
+	(['id', 'title', 'start', 'end', 'map', 'weather', 'mapName', 'actualStart', 'actualEnd', 'prognosis']).forEach(function(idx){
 		res[idx] = me[idx];
 	});
 	return res;

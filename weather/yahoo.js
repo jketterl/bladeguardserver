@@ -10,9 +10,14 @@ var http = require('http'),
 YahooWeatherProvider.prototype.getPrognosis = function(d, c) {
     var me = this,
         now = moment(),
+        limit = moment().add('d', 7);
         d = moment(d),
         ck = d.format('YYYYMMDD'),
         fromCache = me.cache[ck];
+
+    // don't query if the event is too far in the future (7days +)
+    if (d.isAfter(limit)) return c(null);
+
     if (fromCache && fromCache.validUntil.isAfter(now)) return c(fromCache.value);
 
     http.get('http://weather.yahooapis.com/forecastrss?w=676757&u=c', function(res) {

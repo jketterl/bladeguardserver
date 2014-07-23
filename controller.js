@@ -13,17 +13,20 @@ var BGTController = function(app){
 }
 
 BGTController.prototype.index = function(req, res){
-    var events = BGTEvent.getAll(),
-        nextEvent = events[0];
-    weather.getPrognosis(nextEvent.start, function(w){
-        res.render('index', { nextEvent: nextEvent, weather: w });
+    BGTEvent.getAll(false, function(events){
+        var nextEvent = events[0];
+        weather.getPrognosis(nextEvent.start, function(w){
+            res.render('index', { nextEvent: nextEvent, weather: w });
+        });
     });
 };
 
 BGTController.prototype.eventList = function(req, res){
-    res.render('event/list', {
-        events:BGTEvent.getAll(true),
-        year:parseInt(req.query.year) || new Date().getFullYear()
+    BGTEvent.getAll(true, function(events){
+        res.render('event/list', {
+            events:events,
+            year:parseInt(req.query.year) || new Date().getFullYear()
+        });
     });
 };
 
